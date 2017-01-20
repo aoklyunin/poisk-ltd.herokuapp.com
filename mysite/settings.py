@@ -37,7 +37,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'sworks',
+    'plan',
     'bootstrap3'
 )
 
@@ -85,7 +85,7 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
 DATABASES = {
-    'default':dj_database_url.config(default='postgres://dhcxkmpzbifqeo:SQAaiBoCsUfxFYUvc9OoXmKN-J@ec2-54-217-214-53.eu-west-1.compute.amazonaws.com:5432/diqbf71cvhca5')
+    'default':dj_database_url.config(default='postgres://ckmsmmexjashsf:d42161bcadc20191924b14d8e488ff3a8bda248f863272aa100d20e448d721b0@ec2-54-247-92-185.eu-west-1.compute.amazonaws.com:5432/d7dgmt75e8sqcm')
 }
 
 # Password validation

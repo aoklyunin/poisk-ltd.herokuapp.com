@@ -6,8 +6,7 @@ from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
-from sworks.forms import RegisterForm, LoginForm
-from sworks.models import Student
+from plan.forms import RegisterForm, LoginForm
 
 
 # метод регистрации
@@ -23,22 +22,20 @@ def register(request):
                 # выводим сообщение и перезаполняем форму
                 messages.error(request, "пароли не совпадают")
                 data = {'username': form.cleaned_data["username"],
-                        'schooler_class': form.cleaned_data["schooler_class"],
-                        'schooler_group': form.cleaned_data["schooler_group"],
+
                         'mail': form.cleaned_data["mail"],
                         'name': form.cleaned_data["name"],
                         'second_name': form.cleaned_data["second_name"],
                         }
                 # перерисовываем окно
-                return render(request, "sworks/register.html", {
+                return render(request, "plan/register.html", {
                     'form': RegisterForm(initial=data),
                     'ins_form': LoginForm()
                 })
             else:
                 # получаем данные из формы
                 musername = form.cleaned_data["username"]
-                schooler_class = form.cleaned_data["schooler_class"]
-                schooler_group = form.cleaned_data["schooler_group"]
+
                 mmail = form.cleaned_data["mail"]
                 name = form.cleaned_data["name"]
                 second_name = form.cleaned_data["second_name"]
@@ -55,24 +52,18 @@ def register(request):
                         user.last_name = second_name
                         # созраняем пользователя
                         user.save()
-                        # создаём студента
-                        s = Student.objects.create(user=user, st_klass=schooler_class, st_group=schooler_group)
-                        # сохраняем студента
-                        s.save()
                     return HttpResponseRedirect("/")
                 except:
                     # если не получилось создать пользователя, то выводим сообщение
                     messages.error(request, "Такой пользователь уже есть")
                     # заполняем дату формы
                     data = {'username': form.cleaned_data["username"],
-                            'schooler_class': form.cleaned_data["schooler_class"],
-                            'schooler_group': form.cleaned_data["schooler_group"],
                             'mail': form.cleaned_data["mail"],
                             'name': form.cleaned_data["name"],
                             'second_name': form.cleaned_data["second_name"],
                             }
                     # рисуем окно регистрации
-                    return render(request, "sworks/register.html", {
+                    return render(request, "plan/register.html", {
                         'form': RegisterForm(initial=data),
                         'ins_form': LoginForm()
                     })
@@ -81,7 +72,7 @@ def register(request):
             return HttpResponseRedirect("/")
     else:
         # возвращаем простое окно регистрации
-        return render(request, "sworks/register.html", {
+        return render(request, "plan/register.html", {
             'form': RegisterForm(),
             'login_form': LoginForm()
         })
@@ -112,7 +103,7 @@ def index(request):
                 messages.success(request, "успешный вход")
             else:
                 messages.error(request, "пара логин-пароль не найдена")
-    template = 'sworks/index.html'
+    template = 'plan/index.html'
     context = {
         "user": request.user,
         "login_form": LoginForm(),
