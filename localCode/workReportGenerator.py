@@ -10,7 +10,8 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT, WD_BREAK
 
 
 # valign: "top","center","bottom"
-def setCellStyle(cell, text, fontSize, isBold, isItalic, isUnderlined, valign="center", align=WD_PARAGRAPH_ALIGNMENT.CENTER):
+def setCellStyle(cell, text, fontSize, isBold, isItalic, isUnderlined, valign="center",
+                 align=WD_PARAGRAPH_ALIGNMENT.CENTER):
     p = cell.paragraphs[0]
     p.paragraph_format.alignment = align
     run = p.add_run(text)
@@ -25,6 +26,21 @@ def setCellStyle(cell, text, fontSize, isBold, isItalic, isUnderlined, valign="c
     tcPr.append(tcVAlign)
 
 
+def generateDocument():
+    # создаём документ
+    document = Document()
+    # задаём отступы
+    document.sections[0].top_margin = 200000
+    document.sections[0].left_margin = 650000
+    document.sections[0].right_margin = 200000
+
+    style = document.styles['Normal']
+    font = style.font
+    font.name = 'Times New Roman'
+
+    return document
+
+
 # генерировать документ
 # supervisorShort - инициалы руководителя
 # workerNumber - табельный номер работника
@@ -36,15 +52,9 @@ def setCellStyle(cell, text, fontSize, isBold, isItalic, isUnderlined, valign="c
 # reportChecker - принял отчёт
 # reportVIKer - ВИК
 # attestation - аттестация
-def generateWorkReport(supervisorShort, workerNumber, date, workerPosition,
-                       rationales, works, factWorks, reportMaker, reportChecker,
-                       reportVIKer, note, attestation):
-    # создаём документ
-    document = Document()
-    # задаём отступы
-    document.sections[0].top_margin = 200000
-    document.sections[0].left_margin = 650000
-    document.sections[0].right_margin = 200000
+def generateWorkReportPage1(document, supervisorShort,workerName, workerNumber, date, workerPosition,
+                            rationales, works, factWorks, reportMaker, reportChecker,
+                            reportVIKer, note, attestation):
     # создаём таблицу
     table = document.add_table(rows=4, cols=0, style=document.styles['TableGrid'])
 
@@ -54,10 +64,6 @@ def generateWorkReport(supervisorShort, workerNumber, date, workerPosition,
     table.add_column(width=Inches(5))
     table.add_column(width=Inches(1))
     table.add_column(width=Inches(0.5))
-
-    style = document.styles['Normal']
-    font = style.font
-    font.name = 'Times New Roman'
 
 
     cell = table.cell(0, 0).merge(table.cell(0, 1)).merge(table.cell(0, 2)).merge(table.cell(0, 3))
@@ -74,7 +80,7 @@ def generateWorkReport(supervisorShort, workerNumber, date, workerPosition,
 
     setCellStyle(table.cell(1, 2), workerPosition, 10, False, False, False)
     cell = table.cell(1, 3).merge(table.cell(2, 3))
-    setCellStyle(table.cell(1, 3), 'Бука А.В.', 16, False, False, False)
+    setCellStyle(table.cell(1, 3),workerName , 16, False, False, False)
     table.cell(1, 4).merge(table.cell(1, 5))
     table.cell(2, 4).merge(table.cell(2, 5))
     setCellStyle(table.cell(1, 4), 'Сведения об аттестации', 10, False, False, False)
@@ -172,13 +178,23 @@ def generateWorkReport(supervisorShort, workerNumber, date, workerPosition,
     table.cell(pos, 0).merge(table.cell(pos, 5))
     setCellStyle(table.cell(pos, 0), note, 16, True, False, False, align=WD_PARAGRAPH_ALIGNMENT.LEFT)
     table.cell(pos, 0).add_paragraph().add_run().add_break(WD_BREAK.PAGE)
-
     table.columns[0].width = 350
 
 
-    document.add_page_break()
-    return document
+def generateWorkReportPage2(document, supervisorShort,workerName, workerNumber, date):
+    # создаём таблицу
+    table = document.add_table(rows=4, cols=0, style=document.styles['TableGrid'])
 
+    table.add_column(width=Inches(0.3))
+    table.add_column(width=Inches(0.4))
+    table.add_column(width=Inches(1.5))
+    table.add_column(width=Inches(5))
+    table.add_column(width=Inches(1))
+    table.add_column(width=Inches(0.5))
+
+    cell = table.cell(0, 0).merge(table.cell(0, 1)).merge(table.cell(0, 2)).merge(table.cell(0, 3))
+    setCellStyle(cell, 'Сменный наряд ' + supervisorShort + '-' + workerNumber + '-' + str(date), 20, True, False,
+                 False)
 
 if __name__ == "__main__":
     rationales = [
@@ -206,7 +222,12 @@ if __name__ == "__main__":
     note = '''Примечание 1 (обязательное):
 Максимальный срок проведения ВИК (входного контроля) до конца рабочего дня 16.01.2017 г.'''
 
-    document = generateWorkReport('ШАВ', '124', datetime.date.today(), 'Токарь', rationales,
-                                  works, factWorks, 'Шанин А.В.', 'Шанин А.В.', 'Хионин Б.Г.', note,
-                                  'аттестация отутствует')
+    document = generateDocument()
+    generateWorkReportPage1(document, 'ШАВ', 'Бука А.В', '124', datetime.date.today(), 'Токарь', rationales,
+                            works, factWorks, 'Шанин А.В.', 'Шанин А.В.', 'Хионин Б.Г.', note,
+                            'аттестация отутствует')
+    document.add_page_break()
+
+    generateWorkReportPage2(document, 'ШАВ', 'Бука А.В', '124', datetime.date.today(),)
+
     document.save('out/demo.docx')
