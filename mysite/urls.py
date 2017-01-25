@@ -16,6 +16,6 @@ urlpatterns = [
     url(r'^logout/$', plan.auth.logout_view),
     # регистрация на сайте
     url(r'^register/$', plan.auth.register),
+    url(r'^generateWorkReport/$', plan.views.generateWorkReport, name='index'),
     url(r'^', plan.auth.index, name='index'),
-    url(r'^generateWorkReport/(?P<work_report_id>[0-9]+)/$', plan.views.generateWorkReport, name='index'),
 ]
