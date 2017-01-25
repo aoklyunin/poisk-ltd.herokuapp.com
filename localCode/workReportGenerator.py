@@ -2,7 +2,6 @@
 import datetime
 
 from docx import Document
-from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Inches, Pt
@@ -41,7 +40,7 @@ def generateDocument():
     return document
 
 
-# генерировать документ
+# генерировать первую страницу документа
 # supervisorShort - инициалы руководителя
 # workerNumber - табельный номер работника
 # workerPosition - должность работника
@@ -52,7 +51,7 @@ def generateDocument():
 # reportChecker - принял отчёт
 # reportVIKer - ВИК
 # attestation - аттестация
-def generateWorkReportPage1(document, supervisorShort,workerName, workerNumber, date, workerPosition,
+def generateWorkReportPage1(document, supervisorShort, workerName, workerNumber, date, workerPosition,
                             rationales, works, factWorks, reportMaker, reportChecker,
                             reportVIKer, note, attestation):
     # создаём таблицу
@@ -64,7 +63,6 @@ def generateWorkReportPage1(document, supervisorShort,workerName, workerNumber, 
     table.add_column(width=Inches(5))
     table.add_column(width=Inches(1))
     table.add_column(width=Inches(0.5))
-
 
     cell = table.cell(0, 0).merge(table.cell(0, 1)).merge(table.cell(0, 2)).merge(table.cell(0, 3))
     setCellStyle(cell, 'Сменный наряд ' + supervisorShort + '-' + workerNumber + '-' + str(date), 20, True, False,
@@ -80,7 +78,7 @@ def generateWorkReportPage1(document, supervisorShort,workerName, workerNumber, 
 
     setCellStyle(table.cell(1, 2), workerPosition, 10, False, False, False)
     cell = table.cell(1, 3).merge(table.cell(2, 3))
-    setCellStyle(table.cell(1, 3),workerName , 16, False, False, False)
+    setCellStyle(table.cell(1, 3), workerName, 16, False, False, False)
     table.cell(1, 4).merge(table.cell(1, 5))
     table.cell(2, 4).merge(table.cell(2, 5))
     setCellStyle(table.cell(1, 4), 'Сведения об аттестации', 10, False, False, False)
@@ -181,53 +179,191 @@ def generateWorkReportPage1(document, supervisorShort,workerName, workerNumber, 
     table.columns[0].width = 350
 
 
-def generateWorkReportPage2(document, supervisorShort,workerName, workerNumber, date):
+# генерировать вторую страницу документа
+# supervisorShort - инициалы руководителя
+# workerNumber - табельный номер работника
+# date  - дата
+# planEquipment - плановая выдача оборудования
+# nonPlanEquipment - внеплановая выдача оборудования
+# dust - направлено в изолятор брака
+# supervisorName - имя руководителя
+# stockManName - имя кладовщика
+def generateWorkReportPage2(document, supervisorShort, workerName, workerNumber, date, planEquipment, nonPlanEquipment,
+                            dust, supervisorName, stockManName):
     # создаём таблицу
-    table = document.add_table(rows=4, cols=0, style=document.styles['TableGrid'])
+    table = document.add_table(rows=5, cols=0, style=document.styles['TableGrid'])
 
-    table.add_column(width=Inches(0.3))
     table.add_column(width=Inches(0.4))
     table.add_column(width=Inches(1.5))
-    table.add_column(width=Inches(5))
-    table.add_column(width=Inches(1))
+    table.add_column(width=Inches(1.5))
     table.add_column(width=Inches(0.5))
+    table.add_column(width=Inches(0.8))
+    table.add_column(width=Inches(0.8))
+    table.add_column(width=Inches(0.8))
+    table.add_column(width=Inches(0.8))
+    table.add_column(width=Inches(0.8))
 
-    cell = table.cell(0, 0).merge(table.cell(0, 1)).merge(table.cell(0, 2)).merge(table.cell(0, 3))
+    cell = table.cell(0, 0).merge(table.cell(0, 6))
     setCellStyle(cell, 'Сменный наряд ' + supervisorShort + '-' + workerNumber + '-' + str(date), 20, True, False,
                  False)
 
-if __name__ == "__main__":
-    rationales = [
-        ['2,3', 'Я так захотел'],
-        ['3,4,5', 'А это заставили']
-    ]
+    cell = table.cell(0, 7).merge(table.cell(0, 8))
+    setCellStyle(cell, '2/2', 20, True, False,
+                 False)
 
-    works = [
-        ['1', '-', 'Получение наряда и ТМЦ для выполнения работ', '08:30', '08:45'],
-        ['2', '1.2.3', 'Изготовление деталей оснастки для сушки лейнеров по прилагаемому чертежу в кол-ве одного '
-                       'комплекта', '13:15', '16:15'],
-        ['3', '-', 'Отчет о выполненных работах перед РП и ознакомление со сменным нарядом на следующий рабочий день,'
-                   'проверка инструмента, сдача ТМЦ', '16:15', '16:45'],
-        ['4', '1.2.3', 'Уборка рабочего места', '16:45', '17:00'],
-    ]
+    cell = table.cell(1, 0).merge(table.cell(1, 8))
+    setCellStyle(cell, workerName, 16, False, False,
+                 False)
 
-    factWorks = [
-        ['1', '-', 'Получение наряда и ТМЦ для выполнения работ', '08:30', '08:45'],
-        ['2', '1.2.3', 'Изготовление деталей оснастки для сушки лейнеров по прилагаемому чертежу в кол-ве одного '
-                       'комплекта', '13:15', '16:15'],
-        ['3', '-', 'Отчет о выполненных работах перед РП и ознакомление со сменным нарядом на следующий рабочий'
-                   'день, проверка инструмента, сдача ТМЦ ', '16:15', '16:45'],
-        ['4', '1.2.3', 'Уборка рабочего места', '16:45', '17:00'],
-    ]
-    note = '''Примечание 1 (обязательное):
-Максимальный срок проведения ВИК (входного контроля) до конца рабочего дня 16.01.2017 г.'''
+    cell = table.cell(2, 0).merge(table.cell(2, 8))
+    setCellStyle(cell, 'Выдача комплектующих и оснастки плановая', 11, True, False,
+                 False)
 
+    cell = table.cell(3, 0).merge(table.cell(4, 0))
+    setCellStyle(cell, '№п/п', 10, True, False,
+                 False)
+
+    cell = table.cell(3, 1).merge(table.cell(4, 1))
+    setCellStyle(cell, 'Наименование', 10, True, False,
+                 False)
+
+    cell = table.cell(3, 2).merge(table.cell(4, 2))
+    setCellStyle(cell, 'Шифр', 10, True, False,
+                 False)
+
+    cell = table.cell(3, 3).merge(table.cell(3, 4))
+    setCellStyle(cell, 'Передано для выполнения работ', 10, True, False,
+                 False)
+
+    setCellStyle(table.cell(4, 3), 'Ед. изм.', 10, True, False,
+                 False)
+
+    setCellStyle(table.cell(4, 4), 'Кол-во', 10, True, False,
+                 False)
+
+    cell = table.cell(3, 5).merge(table.cell(4, 5))
+    setCellStyle(cell, 'Использовано', 10, True, False,
+                 False)
+
+    cell = table.cell(3, 6).merge(table.cell(4, 6))
+    setCellStyle(cell, 'Брак', 10, True, False,
+                 False)
+
+    cell = table.cell(3, 7).merge(table.cell(3, 8))
+    setCellStyle(cell, 'Передано на склад', 10, True, False,
+                 False)
+
+    setCellStyle(table.cell(4, 7), 'Утиль', 10, True, False,
+                 False)
+
+    setCellStyle(table.cell(4, 8), 'Остаток', 10, True, False,
+                 False)
+    pos = 4
+    for pl in planEquipment:
+        pos += 1
+        table.add_row()
+        setCellStyle(table.cell(pos, 0), str(pos - 4), 10, False, False, False)
+        for i in range(1, 9):
+            setCellStyle(table.cell(pos, i), pl[i - 1], 10, False, False, False)
+
+    pos += 1
+    table.add_row()
+
+    cell = table.cell(pos, 0).merge(table.cell(pos, 8))
+    setCellStyle(cell, 'Выдача комплектующих и оснастки внеплановая', 11, True, False,
+                 False)
+    j = 1
+    for pl in nonPlanEquipment:
+        pos += 1
+        table.add_row()
+        setCellStyle(table.cell(pos, 0), str(j), 10, False, False, False)
+        j += 1
+        for i in range(1, 9):
+            setCellStyle(table.cell(pos, i), pl[i - 1], 10, False, False, False)
+
+    pos += 1
+    table.add_row()
+    cell = table.cell(pos, 0).merge(table.cell(pos, 2))
+    setCellStyle(cell, supervisorName, 10, True, False, False, align=WD_PARAGRAPH_ALIGNMENT.LEFT)
+
+    setCellStyle(table.cell(pos, 3), 'Утв.', 10, True, False, False)
+    setCellStyle(table.cell(pos, 5), 'Утв.', 10, True, False, False)
+
+    pos += 1
+    table.add_row()
+    cell = table.cell(pos, 0).merge(table.cell(pos, 2))
+    setCellStyle(cell, workerName, 10, True, False, False, align=WD_PARAGRAPH_ALIGNMENT.LEFT)
+    setCellStyle(table.cell(pos, 3), 'Согл.', 10, True, False, False)
+    setCellStyle(table.cell(pos, 5), 'Согл.', 10, True, False, False)
+
+    table.cell(pos - 1, 7).merge(table.cell(pos, 8))
+
+    pos += 1
+    table.add_row()
+    cell = table.cell(pos, 0).merge(table.cell(pos, 2))
+    setCellStyle(cell, workerName, 10, True, False, False, align=WD_PARAGRAPH_ALIGNMENT.LEFT)
+    setCellStyle(table.cell(pos, 3), 'Получ.', 10, True, False, False)
+    setCellStyle(table.cell(pos, 7), 'Получ.', 10, True, False, False)
+
+    pos += 1
+    table.add_row()
+    cell = table.cell(pos, 0).merge(table.cell(pos, 2))
+    setCellStyle(cell, stockManName, 10, True, False, False, align=WD_PARAGRAPH_ALIGNMENT.LEFT)
+    setCellStyle(table.cell(pos, 3), 'Выдал', 10, True, False, False)
+    setCellStyle(table.cell(pos, 7), 'Перед.', 10, True, False, False)
+
+    table.cell(pos - 1, 5).merge(table.cell(pos, 6))
+
+    pos += 1
+    table.add_row()
+    cell = table.cell(pos, 0).merge(table.cell(pos, 8))
+    setCellStyle(cell, 'Направлено в изолятор брака', 11, True, False,
+                 False)
+
+    pos += 1
+    table.add_row()
+    cell = table.cell(pos, 1).merge(table.cell(pos, 6))
+    setCellStyle(cell, 'Наименование', 11, True, False,
+                 False)
+    cell = table.cell(pos, 7).merge(table.cell(pos, 8))
+    setCellStyle(cell, 'Кол-во', 11, True, False,
+                 False)
+
+    setCellStyle(table.cell(pos, 0), '№п/п', 10, True, False,
+                 False)
+    j = 1
+    for pl in dust:
+        pos += 1
+        table.add_row()
+        setCellStyle(table.cell(pos, 0), str(j), 10, False, False, False)
+        j += 1
+        setCellStyle(table.cell(pos, 1).merge(table.cell(pos, 6)), pl[0], 10, False, False, False)
+        setCellStyle(table.cell(pos, 7).merge(table.cell(pos, 8)), pl[1], 10, False, False, False)
+
+    pos += 1
+    table.add_row()
+    setCellStyle(table.cell(pos, 1), 'Передал:', 11, True, False,
+                 False, align=WD_PARAGRAPH_ALIGNMENT.LEFT)
+    setCellStyle(table.cell(pos, 3).merge(table.cell(pos, 4)), supervisorName, 11, True, False,
+                 False, align=WD_PARAGRAPH_ALIGNMENT.LEFT)
+
+    pos += 1
+    table.add_row()
+    setCellStyle(table.cell(pos, 1), 'Принял:', 11, True, False,
+                 False, align=WD_PARAGRAPH_ALIGNMENT.LEFT)
+    setCellStyle(table.cell(pos, 3).merge(table.cell(pos, 4)), stockManName, 11, True, False,
+                 False, align=WD_PARAGRAPH_ALIGNMENT.LEFT)
+    table.cell(pos - 1, 5).merge(table.cell(pos, 8))
+
+
+def generateReport(supervisorShort, supervisorName, workerName, workerNumber, stockManName, date, workerPosition,
+                   rationales, works, factWorks, reportMaker, reportChecker,
+                   reportVIKer, note, attestation, dust, planEquipment, nonPlanEquipment):
     document = generateDocument()
-    generateWorkReportPage1(document, 'ШАВ', 'Бука А.В', '124', datetime.date.today(), 'Токарь', rationales,
-                            works, factWorks, 'Шанин А.В.', 'Шанин А.В.', 'Хионин Б.Г.', note,
-                            'аттестация отутствует')
+    generateWorkReportPage1(document, supervisorShort, workerName, workerNumber, date, workerPosition,
+                            rationales, works, factWorks, reportMaker, reportChecker,
+                            reportVIKer, note, attestation)
     document.add_page_break()
-
-    generateWorkReportPage2(document, 'ШАВ', 'Бука А.В', '124', datetime.date.today(),)
-
-    document.save('out/demo.docx')
+    generateWorkReportPage2(document, supervisorShort, workerName, workerNumber, date, planEquipment, nonPlanEquipment,
+                            dust, supervisorName, stockManName)
+    return document
