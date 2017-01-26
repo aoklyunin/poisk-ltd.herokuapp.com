@@ -26,33 +26,27 @@ width: 300px; /* Ширина списка в пикселах */
 
 <br>
 <br>
-<form method="post">
+<form action="" method="post">
     {% csrf_token %}
-    {{ form.as_p }}
-    {{ formset.management_form }}
-
-      <table>
+    <table>
         <thead>
         {% for form in formset.forms %}
-            {% if forloop.first %}
-                {% for field in form.as_p %}
-                    <th>{{ field.label_tag }}</th>
-                {% endfor %}
-            {% endif %}
+        {% if forloop.first %}
+        {% for field in form.as_p %}
+        <th>{{ field.label_tag }}</th>
         {% endfor %}
-            </thead>
-            <tbody>
-            {% for form in formset.forms %}
-            <tr>
+        {% endif %}
+        </thead>
+        <tbody>
+        <tr>
             {% for field in form %}
-                <td >{{ field }}</td>
+            <td >{{ field }}</td>
             {% endfor %}
-            </tr>
-            {% endfor %}
+        </tr>
+        {% endfor %}
         </tbody>
     </table>
-
-<div align="center">
+    <div align="center">
         {% buttons %}
         <button type="submit" class="btn btn-primary">
             Дальше

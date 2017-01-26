@@ -97,7 +97,6 @@ class ReportForm(forms.Form):
 
 
 class WorkPartForm(forms.Form):
-
     comment = forms.CharField(widget=forms.Textarea(attrs={'rows': 4, 'cols': 20, 'placeholder': 'Комментарий'}),
                               label="Комментарий", required=False)
     startTime = forms.TimeField(label='Время начала', initial=datetime.time(12, 30), required=False)
@@ -105,3 +104,6 @@ class WorkPartForm(forms.Form):
     standartWork = forms.ModelChoiceField(queryset=StandartWork.objects.all(), label='Работа', required=False)
     workPlace = forms.ModelChoiceField(queryset=WorkPlace.objects.all(), label='Рабочее место', required=False)
 
+
+class ReportFormPage2(forms.Form):
+    pass

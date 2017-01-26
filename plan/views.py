@@ -6,7 +6,7 @@ from io import StringIO
 
 from django.db import IntegrityError
 from django.db import transaction
-from django.forms import formset_factory
+from django.forms import formset_factory, modelformset_factory
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, render_to_response, redirect
@@ -16,8 +16,8 @@ from document import Document
 
 from localCode.workReportGenerator import generateReport
 from mysite import settings
-from plan.forms import ReportForm, LoginForm, WorkPartForm
-from plan.models import Worker, WorkReport
+from plan.forms import ReportForm, LoginForm, WorkPartForm, ReportFormPage2
+from plan.models import Worker, WorkReport, WorkPart
 
 
 def generateWorkReport(request):
@@ -108,24 +108,28 @@ def workReport(request):
         })
 
 
+
 def workReportPage2(request, workReport_id):
     wRep = WorkReport.objects.get(pk=workReport_id)
 
-    ArticleFormSet = formset_factory(WorkPartForm)
-    if request.method == 'POST':
-        formset = ArticleFormSet(request.POST, request.FILES)
-        if formset.is_valid():
-            print('It works')
-            #return HttpResponseRedirect(str(workReport_id) + '/page3/')
-    else:
-        data = {
-        'form-TOTAL_FORMS': u'4',
-        'form-INITIAL_FORMS': u'4',
-        'form-MAX_NUM_FORMS': u'10',
-        }
-        formset = ArticleFormSet(data)
+    form = ReportFormPage2()
+    RelatedFormset = modelformset_factory(WorkPart, extra=5, fields=("comment", "startTime", "endTime","standartWork",
+                                                                     "workPlace"))
+    formset = RelatedFormset(queryset=WorkPart.objects.none())
+    if request.method == "POST":
+        form = ReportFormPage2(request.POST)
+        formset = RelatedFormset(request.POST)
 
-    return render_to_response('plan/workReportPage2.html', {'formset': formset})
+        if form.is_valid() and formset.is_valid():
+            # do something with the form data here
+            for f_form in formset:
+                if f_form.is_valid() and f_form.has_changed():
+                    print(f_form.cleaned_data['comment'])
+            return HttpResponseRedirect('../page3/')
+            # do something with the formset data
+
+    return render(request, "plan/workReportPage2.html",
+                  {'form': form, 'formset': formset})
 
 
 def workReportPage3(request, workReport_id):
