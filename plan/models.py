@@ -102,6 +102,9 @@ class WorkerPosition(models.Model):
     # название
     name = models.CharField(max_length=200)
 
+    def __str__(self):
+        return self.name
+
 
 # рабочее место
 class WorkPlace(models.Model):
@@ -109,18 +112,31 @@ class WorkPlace(models.Model):
     name = models.CharField(max_length=200)
 
 
+# аттестация
+class Attestation(models.Model):
+    # название
+    name = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.name
+
 # работник
 class Worker(models.Model):
-    # имя/фамилия
-    name = models.CharField(max_length=200)
     # должность
     position = models.ManyToManyField(WorkerPosition)
+    # аттестация
+    attestation = models.ManyToManyField(Attestation)
     # привилегии
-    privilege = models.IntegerField()
+    privilege = models.IntegerField(default=0)
     # пользователь
     user = models.OneToOneField(User)
     # табельный номер
-    number = models.IntegerField()
+    tnumber = models.IntegerField()
+    # отчество
+    patronymic = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.user.first_name+" "+self.user.last_name
 
 
 # выполняемая работа
@@ -178,9 +194,11 @@ class WorkReport(models.Model):
     # плановая выдача комплектующих
     planHardware = models.ManyToManyField(HardwareEquipment, verbose_name='Плановая', related_name="planHardware_name")
     # внеплановая выдача комплектующих
-    noPlanHardware = models.ManyToManyField(HardwareEquipment, verbose_name='Внеплановая', related_name="no_PlanHardware_name")
+    noPlanHardware = models.ManyToManyField(HardwareEquipment, verbose_name='Внеплановая',
+                                            related_name="no_PlanHardware_name")
     # брак
     rejected = models.ManyToManyField(Reject)
+
 
 
 # класс заказов

@@ -8,8 +8,10 @@ from django.shortcuts import render
 
 from plan.forms import RegisterForm, LoginForm
 
-
 # метод регистрации
+from plan.models import Worker
+
+
 def register(request):
     # если post запрос
     if request.method == 'POST':
@@ -17,56 +19,53 @@ def register(request):
         form = RegisterForm(request.POST)
         # если форма заполнена корректно
         if form.is_valid():
+            data = {'username': form.cleaned_data["username"],
+                    'patronymic': form.cleaned_data["patronymic"],
+                    'position': form.cleaned_data["position"],
+                    'attestation': form.cleaned_data["attestation"],
+                    'mail': form.cleaned_data["mail"],
+                    'name': form.cleaned_data["name"],
+                    'second_name': form.cleaned_data["second_name"],
+                    'tnumber': form.cleaned_data["tnumber"],
+                    }
             # проверяем, что пароли совпадают
             if form.cleaned_data["password"] != form.cleaned_data["rep_password"]:
                 # выводим сообщение и перезаполняем форму
                 messages.error(request, "пароли не совпадают")
-                data = {'username': form.cleaned_data["username"],
-
-                        'mail': form.cleaned_data["mail"],
-                        'name': form.cleaned_data["name"],
-                        'second_name': form.cleaned_data["second_name"],
-                        }
                 # перерисовываем окно
                 return render(request, "plan/register.html", {
                     'form': RegisterForm(initial=data),
-                    'ins_form': LoginForm()
+                    'login_form': LoginForm()
                 })
             else:
-                # получаем данные из формы
-                musername = form.cleaned_data["username"]
-
-                mmail = form.cleaned_data["mail"]
-                name = form.cleaned_data["name"]
-                second_name = form.cleaned_data["second_name"]
-                mpassword = form.cleaned_data["password"]
                 try:
                     # создаём пользователя
-                    user = User.objects.create_user(username=musername,
-                                                    email=mmail,
-                                                    password=mpassword)
-                    # если получилось создать пользователя
-                    if user:
-                        # задаём ему имя и фамилию
-                        user.first_name = name
-                        user.last_name = second_name
-                        # созраняем пользователя
-                        user.save()
-                    return HttpResponseRedirect("/")
+                    user = User.objects.create_user(username=form.cleaned_data["username"],
+                                                    email=form.cleaned_data["mail"],
+                                                    password=form.cleaned_data["password"])
                 except:
-                    # если не получилось создать пользователя, то выводим сообщение
                     messages.error(request, "Такой пользователь уже есть")
-                    # заполняем дату формы
-                    data = {'username': form.cleaned_data["username"],
-                            'mail': form.cleaned_data["mail"],
-                            'name': form.cleaned_data["name"],
-                            'second_name': form.cleaned_data["second_name"],
-                            }
-                    # рисуем окно регистрации
                     return render(request, "plan/register.html", {
                         'form': RegisterForm(initial=data),
-                        'ins_form': LoginForm()
+                        'login_form': LoginForm()
                     })
+
+                # задаём ему имя и фамилию
+                user.first_name = form.cleaned_data["name"]
+                user.last_name = form.cleaned_data["second_name"]
+                # созраняем пользователя
+                user.save()
+
+                # создаём студента
+                w = Worker.objects.create(user=user, patronymic=form.cleaned_data["patronymic"],
+                                          tnumber=form.cleaned_data["tnumber"])
+                for pos in form.cleaned_data["position"]:
+                    w.position.add(pos)
+                for at in form.cleaned_data["attestation"]:
+                    w.attestation.add(at)
+                # сохраняем студента
+                w.save()
+                return HttpResponseRedirect("/")
         else:
             # перезагружаем страницу
             return HttpResponseRedirect("/")

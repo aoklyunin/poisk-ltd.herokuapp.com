@@ -60,3 +60,17 @@ def generateWorkReport(request):
 
     return response
 
+
+def workReport(request):
+    return None
+
+def workersView(request):
+    return None
+
+
+def workerView(request,worker_id):
+    return None
+
+
+def addWorker(request):
+    return None

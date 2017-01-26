@@ -2,8 +2,10 @@
 # модуль с формами
 from django import forms
 
-
 # форма логина
+from plan.models import WorkerPosition, Attestation
+
+
 class LoginForm(forms.Form):
     # имя пользователя
     username = forms.CharField(widget=forms.Textarea(attrs={'rows': 1, 'cols': 20, 'placeholder': 'Логин'}),
@@ -36,4 +38,16 @@ class RegisterForm(forms.Form):
     # фамилия
     second_name = forms.CharField(widget=forms.Textarea(attrs={'rows': 1, 'cols': 20, 'placeholder': 'Иванов'}),
                                   label="Фамилия")
+    # отчество
+    patronymic = forms.CharField(widget=forms.Textarea(attrs={'rows': 1, 'cols': 20, 'placeholder': 'Иванович'}),
+                                 label="Отчество")
 
+    # должность
+    position = forms.ModelMultipleChoiceField(queryset=WorkerPosition.objects.all())
+
+    # аттестации
+    attestation = forms.ModelMultipleChoiceField(queryset=Attestation.objects.all(), required=False)
+
+    # фамилия
+    tnumber = forms.IntegerField(widget=forms.Textarea(attrs={'rows': 1, 'cols': 20, 'placeholder': '112'}),
+                                 label="Табельный номер")
