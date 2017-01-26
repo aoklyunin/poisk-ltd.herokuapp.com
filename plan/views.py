@@ -1,16 +1,23 @@
 # -*- coding: utf-8 -*-
 import datetime
 import os
+from audioop import reverse
 from io import StringIO
 
+from django.db import IntegrityError
+from django.db import transaction
+from django.forms import formset_factory
 from django.http import HttpResponse
-from django.shortcuts import render
-
+from django.http import HttpResponseRedirect
+from django.shortcuts import render, render_to_response, redirect
+from django.contrib import messages
 # Create your views here.
 from document import Document
 
 from localCode.workReportGenerator import generateReport
 from mysite import settings
+from plan.forms import ReportForm, LoginForm, WorkPartForm
+from plan.models import Worker, WorkReport
 
 
 def generateWorkReport(request):
@@ -62,15 +69,95 @@ def generateWorkReport(request):
 
 
 def workReport(request):
-    return None
+    # если post запрос
+    if request.method == 'POST':
+        # строим форму на основе запроса
+        form = ReportForm(request.POST)
+        # если форма заполнена корректно
+        if form.is_valid():
+            work_report = WorkReport.objects.create(supervisor=form.cleaned_data["supervisor"],
+                                                    VIKer=form.cleaned_data["VIKer"],
+                                                    reportMaker=form.cleaned_data["reportMaker"],
+                                                    reportChecker=form.cleaned_data["reportChecker"],
+                                                    worker=form.cleaned_data["worker"],
+                                                    stockMan=form.cleaned_data["stockMan"],
+                                                    adate=form.cleaned_data["adate"],
+                                                    VIKDate=form.cleaned_data["VIKDate"])
+            work_report.save()
+
+            # возвращаем простое окно регистрации
+            return HttpResponseRedirect(str(work_report.pk) + '/page2/')
+        else:
+            data = {'supervisor': form.cleaned_data["supervisor"],
+                    'VIKer': form.cleaned_data["VIKer"],
+                    'reportMaker': form.cleaned_data["reportMaker"],
+                    'reportChecker': form.cleaned_data["reportChecker"],
+                    'worker': form.cleaned_data["worker"],
+                    'stockMan': form.cleaned_data["stockMan"],
+                    'date': form.cleaned_data["date"],
+                    }
+            return render(request, "plan/workReport.html", {
+                'form': ReportForm(data),
+                'login_form': LoginForm()
+            })
+    else:
+        # возвращаем простое окно регистрации
+        return render(request, "plan/workReport.html", {
+            'form': ReportForm(),
+            'login_form': LoginForm()
+        })
+
+
+def workReportPage2(request, workReport_id):
+    wRep = WorkReport.objects.get(pk=workReport_id)
+
+    ArticleFormSet = formset_factory(WorkPartForm)
+    if request.method == 'POST':
+        formset = ArticleFormSet(request.POST, request.FILES)
+        if formset.is_valid():
+            print('It works')
+            #return HttpResponseRedirect(str(workReport_id) + '/page3/')
+    else:
+        data = {
+        'form-TOTAL_FORMS': u'4',
+        'form-INITIAL_FORMS': u'4',
+        'form-MAX_NUM_FORMS': u'10',
+        }
+        formset = ArticleFormSet(data)
+
+    return render_to_response('plan/workReportPage2.html', {'formset': formset})
+
+
+def workReportPage3(request, workReport_id):
+    wRep = WorkReport.objects.get(pk=workReport_id)
+
+    ArticleFormSet = formset_factory(WorkPartForm)
+    if request.method == 'POST':
+        formset = ArticleFormSet(request.POST, request.FILES)
+        if formset.is_valid():
+            # do something with the formset.cleaned_data
+            pass
+    else:
+        data = {
+        'form-TOTAL_FORMS': u'4',
+        'form-INITIAL_FORMS': u'4',
+        'form-MAX_NUM_FORMS': u'10',
+        }
+        formset = ArticleFormSet(data)
+
+    return render_to_response('plan/workReportPage2.html', {'formset': formset})
+
+
 
 def workersView(request):
     return None
 
 
-def workerView(request,worker_id):
+def workerView(request, worker_id):
     return None
 
 
 def addWorker(request):
     return None
+
+

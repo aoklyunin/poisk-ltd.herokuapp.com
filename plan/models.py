@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import datetime
+
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -120,12 +122,13 @@ class Attestation(models.Model):
     def __str__(self):
         return self.name
 
+
 # работник
 class Worker(models.Model):
     # должность
     position = models.ManyToManyField(WorkerPosition)
     # аттестация
-    attestation = models.ManyToManyField(Attestation)
+    attestation = models.ManyToManyField(Attestation, blank=True)
     # привилегии
     privilege = models.IntegerField(default=0)
     # пользователь
@@ -136,19 +139,7 @@ class Worker(models.Model):
     patronymic = models.CharField(max_length=200)
 
     def __str__(self):
-        return self.user.first_name+" "+self.user.last_name
-
-
-# выполняемая работа
-class DailyWork(models.Model):
-    # рабочее место
-    workPlace = models.ForeignKey(WorkPlace)
-    # описание работы
-    workDefinition = models.CharField(max_length=2000)
-    # вроемя начала работы
-    starTime = models.TimeField()
-    # время конца работы
-    endTime = models.TimeField()
+        return self.user.first_name + " " + self.user.last_name
 
 
 # инструмент
@@ -177,6 +168,27 @@ class Reject(models.Model):
     cnt = models.IntegerField()
 
 
+# стандартная работа
+class StandartWork(models.Model):
+    text = models.CharField(max_length=2000)
+    positionsEnable = models.ManyToManyField(WorkerPosition)
+
+    def __str__(self):
+        return self.text
+
+
+# Часть наряда
+class WorkPart(models.Model):
+    comment = models.CharField(max_length=2000)
+    startTime = models.TimeField()
+    endTime = models.TimeField()
+    standartWork = models.ForeignKey(StandartWork)
+    workPlace = models.ForeignKey(WorkPlace, blank=True, default=None)
+
+    def __str__(self):
+        return self.name
+
+
 # наряд
 class WorkReport(models.Model):
     # руководитель
@@ -187,10 +199,14 @@ class WorkReport(models.Model):
     worker = models.ForeignKey(Worker, verbose_name='Иcполнитель', related_name="worker_name")
     # кладовщик
     stockMan = models.ForeignKey(Worker, verbose_name='Кладовщик', related_name="stockMan_name")
+    # составитель отчёта
+    reportMaker = models.ForeignKey(Worker, verbose_name='Cоставитель отчёта', related_name="reportMaker_name")
+    # проверяющий отчёт
+    reportChecker = models.ForeignKey(Worker, verbose_name='Проверяющий отчёт', related_name="reportChecker_name")
     # дата
-    date = models.DateField()
+    adate = models.DateField(default=datetime.date.today)
     # дата ВИК
-    VIKDate = models.DateField()
+    VIKDate = models.DateField(default=datetime.date.today)
     # плановая выдача комплектующих
     planHardware = models.ManyToManyField(HardwareEquipment, verbose_name='Плановая', related_name="planHardware_name")
     # внеплановая выдача комплектующих
@@ -198,7 +214,8 @@ class WorkReport(models.Model):
                                             related_name="no_PlanHardware_name")
     # брак
     rejected = models.ManyToManyField(Reject)
-
+    workPart = models.ManyToManyField(WorkPart, related_name="work_Part")
+    factWorkPart = models.ManyToManyField(WorkPart, related_name="fact_WorkPart")
 
 
 # класс заказов

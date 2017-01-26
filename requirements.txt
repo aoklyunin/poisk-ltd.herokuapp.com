@@ -9,3 +9,4 @@ django-tables2==1.2.6
 setuptools==20.10.1
 lxml==3.4.2
 python-docx==0.8.6
+django-crispy-forms==1.6.1

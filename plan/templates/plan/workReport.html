@@ -1,0 +1,45 @@
+{% extends "plan/base.html" %}
+{# Load the tag library #}
+{% load bootstrap3 %}
+
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{# Display django.contrib.messages as Bootstrap alerts #}
+{% bootstrap_messages %}
+{% block title %}Наряд{% endblock %}
+
+{% block style_block %}
+    .register_form {
+    width: 500px;
+    margin: 0 auto;
+    }
+{% endblock %}
+
+{% block content %}
+    <form method="post" action="." class="register_form">
+            {% csrf_token %}
+            <br><br>
+
+            {% bootstrap_field form.supervisor %}
+            {% bootstrap_field form.VIKer %}
+            {% bootstrap_field form.reportMaker %}
+            {% bootstrap_field form.reportChecker %}
+            {% bootstrap_field form.worker %}
+            {% bootstrap_field form.stockMan %}
+            {% bootstrap_field form.adate %}
+            {% bootstrap_field form.VIKDate %}
+
+            <div align="center">
+                {% buttons %}
+                    <button type="submit" class="btn btn-primary">
+                        Дальше
+                    </button>
+                    <button type="reset" class="btn">
+                        Отмена
+                    </button>
+                {% endbuttons %}
+            </div>
+        </form>
+{% endblock %}

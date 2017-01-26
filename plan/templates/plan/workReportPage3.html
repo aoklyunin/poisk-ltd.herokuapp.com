@@ -1,0 +1,35 @@
+{% extends "plan/base.html" %}
+{# Load the tag library #}
+{% load bootstrap3 %}
+
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{# Display django.contrib.messages as Bootstrap alerts #}
+{% bootstrap_messages %}
+{% block title %}Наряд{% endblock %}
+
+{% block style_block %}
+.register_form {
+width: 500px;
+margin: 0 auto;
+}
+{% endblock %}
+
+{% block content %}
+
+<form class="form form-horizontal" method="post" action="">
+    {% csrf_token %}
+    {% bootstrap_formset formset %}
+    {% buttons %}
+
+    <button type="submit" class="btn btn-primary">
+        Submit
+    </button>
+    <button class="bt ">Cancel</button>
+    {% endbuttons %}
+
+</form>
+
+{% endblock %}
