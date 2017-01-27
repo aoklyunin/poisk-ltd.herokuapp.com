@@ -113,8 +113,8 @@ class WorkPartForm(ModelForm):
             'startTime': 'Время начала работы',
             'endTime': 'Время конца работы',
             'standartWork': 'Работа',
-            'workPlace': 'Рабочее место',
-            'rationale': 'Обоснование',
+           # 'workPlace': 'Рабочее место',
+            #'rationale': 'Обоснование',
         }
 
         error_messages = {

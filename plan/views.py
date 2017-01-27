@@ -119,12 +119,19 @@ def workReportPage2(request, workReport_id):
             super(RequiredFormSet, self).__init__(*args, **kwargs)
             for form in self.forms:
                 form.empty_permitted = False
+    wr = WorkReport.objects.get(pk=workReport_id)
+
+  #  if wr.workPart.all().exists():
 
     ReportFormset = formset_factory(WorkPartForm, max_num=10, formset=RequiredFormSet)
     if request.method == 'POST':
         report_formset = ReportFormset(request.POST, request.FILES)
         if report_formset.is_valid():
+            wr.workPart.all().delete()
             for form in report_formset.forms:
+                w = WorkPart.create(form.cleaned_data)
+                w.save()
+                wr.workPart.add(w)
                 print (form.cleaned_data)
             return HttpResponseRedirect('/workReport/page3/' + str(workReport_id) + '/')
     else:

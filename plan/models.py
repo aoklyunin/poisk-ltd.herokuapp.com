@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
 from urlparse import urlsplit
-
 import generic as generic
 from django.contrib.auth.models import User
 from django.db import models
@@ -255,16 +254,17 @@ class WorkPart(models.Model):
     rationale = models.ForeignKey(Rationale, blank=True, default=None)
 
     def __str__(self):
-        return self.name
+        return self.comment
 
     def __unicode__(self):
-        return self.name
+        return self.comment
 
 
 # наряд
 class WorkReport(models.Model):
     # руководитель
-    supervisor = models.ForeignKey(Worker, verbose_name='Руководитель', related_name="supervisor_name", blank=True, null=True)
+    supervisor = models.ForeignKey(Worker, verbose_name='Руководитель', related_name="supervisor_name", blank=True,
+                                   null=True)
     # ответственный за ВИК
     VIKer = models.ForeignKey(Worker, verbose_name='ВИК', related_name="VIKER_name", blank=True, null=True)
     # исполнитель
@@ -272,15 +272,18 @@ class WorkReport(models.Model):
     # кладовщик
     stockMan = models.ForeignKey(Worker, verbose_name='Кладовщик', related_name="stockMan_name", blank=True, null=True)
     # составитель отчёта
-    reportMaker = models.ForeignKey(Worker, verbose_name='Cоставитель отчёта', related_name="reportMaker_name", blank=True, null=True)
+    reportMaker = models.ForeignKey(Worker, verbose_name='Cоставитель отчёта', related_name="reportMaker_name",
+                                    blank=True, null=True)
     # проверяющий отчёт
-    reportChecker = models.ForeignKey(Worker, verbose_name='Проверяющий отчёт', related_name="reportChecker_name", blank=True, null=True)
+    reportChecker = models.ForeignKey(Worker, verbose_name='Проверяющий отчёт', related_name="reportChecker_name",
+                                      blank=True, null=True)
     # дата
     adate = models.DateField(default=datetime.date.today)
     # дата ВИК
     VIKDate = models.DateField(default=datetime.date.today)
     # плановая выдача комплектующих
-    planHardware = models.ManyToManyField(HardwareEquipment, verbose_name='Плановая', related_name="planHardware_name", blank=True, null=True)
+    planHardware = models.ManyToManyField(HardwareEquipment, verbose_name='Плановая', related_name="planHardware_name",
+                                          blank=True, null=True)
     # внеплановая выдача комплектующих
     noPlanHardware = models.ManyToManyField(HardwareEquipment, verbose_name='Внеплановая',
                                             related_name="no_PlanHardware_name", blank=True, null=True)
@@ -290,11 +293,11 @@ class WorkReport(models.Model):
     factWorkPart = models.ManyToManyField(WorkPart, related_name="fact_WorkPart", blank=True, null=True)
 
     def __str__(self):
-        #return "sad"
+        # return "sad"
         return self.supervisor.getInitials() + "-" + str(self.worker.tnumber) + '-' + str(self.adate)
 
     def __unicode__(self):
-        #return "sad"
+        # return "sad"
         return self.supervisor.getInitials() + "-" + str(self.worker.tnumber) + '-' + str(self.adate)
 
 
