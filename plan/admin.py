@@ -4,7 +4,7 @@ from django.contrib import admin
 # Register your models here.
 
 from .models import Scheme, Agreement, Customer, Material, Equipment, AssemblyUnits, WorkerPosition, WorkPlace, Worker, \
-     Instrument, HardwareEquipment, Reject, WorkReport, Orders, Attestation, StandartWork, WorkPart
+     Instrument, HardwareEquipment, Reject, WorkReport, Orders, Attestation, StandartWork, WorkPart, Rationale
 
 admin.site.register(Scheme)
 admin.site.register(Agreement)
@@ -23,4 +23,5 @@ admin.site.register(Orders)
 admin.site.register(Attestation)
 admin.site.register(WorkPart)
 admin.site.register(StandartWork)
+admin.site.register(Rationale)
 

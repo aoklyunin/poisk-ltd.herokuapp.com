@@ -1,8 +1,20 @@
 # -*- coding: utf-8 -*-
 import datetime
+from urlparse import urlsplit
 
+import generic as generic
 from django.contrib.auth.models import User
 from django.db import models
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import (
+    AbstractBaseUser, BaseUserManager, PermissionsMixin
+)
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+
+from django.db import models
+from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
 
 
 # чертёж
@@ -11,6 +23,12 @@ class Scheme(models.Model):
     author = models.CharField(max_length=200)
     # ссылка
     link = models.CharField(max_length=100)
+
+    def __unicode__(self):
+        return self.author
+
+    def __str__(self):
+        return self.author
 
 
 # договор
@@ -107,11 +125,20 @@ class WorkerPosition(models.Model):
     def __str__(self):
         return self.name
 
+    def __unicode__(self):
+        return self.name
+
 
 # рабочее место
 class WorkPlace(models.Model):
     # название
     name = models.CharField(max_length=200)
+
+    def __unicode__(self):
+        return self.name
+
+    def __str__(self):
+        return self.name
 
 
 # аттестация
@@ -120,6 +147,9 @@ class Attestation(models.Model):
     name = models.CharField(max_length=200)
 
     def __str__(self):
+        return self.name
+
+    def __unicode__(self):
         return self.name
 
 
@@ -141,11 +171,20 @@ class Worker(models.Model):
     def __str__(self):
         return self.user.first_name + " " + self.user.last_name
 
+    def __unicode__(self):
+        return self.user.first_name + " " + self.user.last_name
+
 
 # инструмент
 class Instrument(models.Model):
     # название
     name = models.CharField(max_length=200)
+
+    def __unicode__(self):
+        return self.name
+
+    def __str__(self):
+        return self.name
 
 
 # оснаска и комплектующие
@@ -159,6 +198,12 @@ class HardwareEquipment(models.Model):
     # материал
     material = models.ForeignKey(Material)
 
+    def __unicode__(self):
+        return self.equipment.name
+
+    def __str__(self):
+        return self.equipment.name
+
 
 # брак
 class Reject(models.Model):
@@ -167,6 +212,20 @@ class Reject(models.Model):
     # кол-во
     cnt = models.IntegerField()
 
+    def __str__(self):
+        return self.equipment.name
+
+    def __unicode__(self):
+        return self.equipment.name
+
+# обоснование для работы
+class Rationale(models.Model):
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
+    def __unicode__(self):
+        return self.name
 
 # стандартная работа
 class StandartWork(models.Model):
@@ -175,7 +234,8 @@ class StandartWork(models.Model):
 
     def __str__(self):
         return self.text
-
+    def __unicode__(self):
+        return self.text
 
 # Часть наряда
 class WorkPart(models.Model):
@@ -184,10 +244,12 @@ class WorkPart(models.Model):
     endTime = models.TimeField()
     standartWork = models.ForeignKey(StandartWork)
     workPlace = models.ForeignKey(WorkPlace, blank=True, default=None)
+    rationale = models.ForeignKey(Rationale, blank=True, default=None)
 
     def __str__(self):
         return self.name
-
+    def __unicode__(self):
+        return self.name
 
 # наряд
 class WorkReport(models.Model):
@@ -217,6 +279,10 @@ class WorkReport(models.Model):
     workPart = models.ManyToManyField(WorkPart, related_name="work_Part")
     factWorkPart = models.ManyToManyField(WorkPart, related_name="fact_WorkPart")
 
+    def __str__(self):
+        return self.name
+    def __unicode__(self):
+        return self.name
 
 # класс заказов
 class Orders(models.Model):

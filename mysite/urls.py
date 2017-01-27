@@ -19,7 +19,7 @@ urlpatterns = [
     url(r'^generateWorkReport/$', plan.views.generateWorkReport),
     url(r'^workReport/(?P<workReport_id>[0-9]+)/page2/$', plan.views.workReportPage2),
     url(r'^workReport/(?P<workReport_id>[0-9]+)/page3/$', plan.views.workReportPage3),
-    url(r'^workReport/$', plan.views.workReport),
+    url(r'^test/$', plan.views.test),
     url(r'^workersView/$', plan.views.workersView),
     url(r'^workerView/(?P<worker_id>[0-9]+)/$', plan.views.workerView),
     url(r'^', plan.auth.index, name='index'),

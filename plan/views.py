@@ -4,19 +4,23 @@ import os
 from audioop import reverse
 from io import StringIO
 
+from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.db import transaction
-from django.forms import formset_factory, modelformset_factory
+from django.forms import formset_factory, modelformset_factory, BaseFormSet
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, render_to_response, redirect
 from django.contrib import messages
 # Create your views here.
+from django import forms;
+from django.template import RequestContext
+from django.template.context_processors import csrf
 
-from localCode.workReportGenerator import generateReport
 from mysite import settings
 from plan.forms import ReportForm, LoginForm, WorkPartForm, ReportFormPage2
 from plan.models import Worker, WorkReport, WorkPart
+from plan.workReportGenerator import generateReport
 
 
 def generateWorkReport(request):
@@ -56,6 +60,7 @@ def generateWorkReport(request):
         ['хлам 1', '100'],
         ['хлам 2', '500']
     ]
+
     document = generateReport('ШАВ', 'Шанин А.В.', 'Бука А.В', '124', "Головнёв А.К.", datetime.date.today(), 'Токарь',
                               rationales, works, factWorks, 'Шанин А.В.', 'Шанин А.В.', 'Хионин Б.Г.', note,
                               'аттестация отутствует', dust, planEquipment, nonPlanEquipment)
@@ -108,26 +113,25 @@ def workReport(request):
 
 
 def workReportPage2(request, workReport_id):
-    wRep = WorkReport.objects.get(pk=workReport_id)
+    class RequiredFormSet(BaseFormSet):
+        def __init__(self, *args, **kwargs):
+            super(RequiredFormSet, self).__init__(*args, **kwargs)
+            for form in self.forms:
+                form.empty_permitted = False
 
-    form = ReportFormPage2()
-    RelatedFormset = modelformset_factory(WorkPart, extra=5, fields=("comment", "startTime", "endTime", "standartWork",
-                                                                     "workPlace"))
-    formset = RelatedFormset(queryset=WorkPart.objects.none())
-    if request.method == "POST":
-        form = ReportFormPage2(request.POST)
-        formset = RelatedFormset(request.POST)
-
-        if form.is_valid() and formset.is_valid():
-            # do something with the form data here
-            for f_form in formset:
-                if f_form.is_valid() and f_form.has_changed():
-                    print(f_form.cleaned_data['comment'])
-            return HttpResponseRedirect('../page3/')
-            # do something with the formset data
-
-    return render(request, "plan/workReportPage2.html",
-                  {'form': form, 'formset': formset})
+    BookFormset = formset_factory(WorkPartForm, max_num=10, formset=RequiredFormSet)
+    if request.method == 'POST':
+        book_formset = BookFormset(request.POST, request.FILES)
+        if book_formset.is_valid():
+            for form in book_formset.forms:
+                print (form.cleaned_data)
+            return HttpResponseRedirect('/workReport/'+str(workReport_id) + '/page3/')
+    else:
+        book_formset = BookFormset()
+    c = {'book_formset': book_formset,
+         }
+  #  c.update(csrf(request))
+    return render(request,'plan/workReportPage2.html', c)
 
 
 def workReportPage3(request, workReport_id):
@@ -141,8 +145,8 @@ def workReportPage3(request, workReport_id):
             pass
     else:
         data = {
-            'form-TOTAL_FORMS': u'4',
-            'form-INITIAL_FORMS': u'4',
+            'form-TOTAL_FORMS': u'6',
+            'form-INITIAL_FORMS': u'1',
             'form-MAX_NUM_FORMS': u'10',
         }
         formset = ArticleFormSet(data)
@@ -160,3 +164,7 @@ def workerView(request, worker_id):
 
 def addWorker(request):
     return None
+
+
+def test(request):
+    return render_to_response('plan/test.html',{})

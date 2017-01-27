@@ -3,9 +3,7 @@
 import datetime
 
 from django import forms
-
-# форма логина
-from django.forms import formset_factory, BaseFormSet
+from django.forms import ModelForm, Textarea
 
 from plan.models import WorkerPosition, Attestation, Worker, WorkPart, StandartWork, WorkPlace
 
@@ -86,8 +84,6 @@ class ReportForm(forms.Form):
     VIKDate = forms.DateField(initial=datetime.date.today, label='Дата ВИК')
 
 
-
-
     # document = generateReport('ШАВ', 'Шанин А.В.', 'Бука А.В', '124', "Головнёв А.К.",
     #                           datetime.date.today(), 'Токарь',
     #                          rationales, works, factWorks,
@@ -96,13 +92,44 @@ class ReportForm(forms.Form):
     #                           'аттестация отутствует', dust, planEquipment, nonPlanEquipment)
 
 
-class WorkPartForm(forms.Form):
-    comment = forms.CharField(widget=forms.Textarea(attrs={'rows': 4, 'cols': 20, 'placeholder': 'Комментарий'}),
-                              label="Комментарий", required=False)
-    startTime = forms.TimeField(label='Время начала', initial=datetime.time(12, 30), required=False)
-    endTime = forms.TimeField(label='Время конца', required=False)
-    standartWork = forms.ModelChoiceField(queryset=StandartWork.objects.all(), label='Работа', required=False)
-    workPlace = forms.ModelChoiceField(queryset=WorkPlace.objects.all(), label='Рабочее место', required=False)
+class WorkPartForm(ModelForm):
+    class Meta:
+        model = WorkPart
+        fields = '__all__'
+        # comment = forms.CharField(widget=forms.Textarea(attrs={'rows': 4, 'cols': 20, 'placeholder': 'Комментарий'}),
+        #                         label="Комментарий", required=False)
+        # startTime = forms.TimeField(label='Время начала', initial=datetime.time(12, 30), required=False)
+        # endTime = forms.TimeField(label='Время конца', required=False)
+        # standartWork = forms.ModelChoiceField(queryset=StandartWork.objects.all(), label='Работа', required=False)
+        # workPlace = forms.ModelChoiceField(queryset=WorkPlace.objects.all(), label='Рабочее место', required=False)
+        widgets = {
+            'comment': forms.Textarea(attrs={'cols': 80, 'rows': 3}),
+            'startTime': forms.TimeInput(format='%H:%M'),
+            'endTime': forms.TimeInput(format='%H:%M'),
+        }
+
+        labels = {
+            'comment': 'Комментарий',
+            'startTime': 'Время начала работы',
+            'endTime': 'Время конца работы',
+            'standartWork': 'Работа',
+            'workPlace': 'Рабочее место',
+            'rationale': 'Обоснование',
+        }
+
+        error_messages = {
+            'startTime': {'invalid': 'Укажите корректное время'},
+            'endTime': {'invalid': 'Укажите корректное время'},
+            'standartWork': {'required': 'Это поле необходимо для заполнения'}
+        }
+
+    def __init__(self, *args, **kwargs):
+        # first call parent's constructor
+        super(WorkPartForm, self).__init__(*args, **kwargs)
+        # there's a `fields` property now
+        self.fields['comment'].required = False
+        self.fields['workPlace'].required = False
+        self.fields['rationale'].required = False
 
 
 class ReportFormPage2(forms.Form):
