@@ -12,7 +12,6 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, render_to_response, redirect
 from django.contrib import messages
 # Create your views here.
-from document import Document
 
 from localCode.workReportGenerator import generateReport
 from mysite import settings
@@ -108,12 +107,11 @@ def workReport(request):
         })
 
 
-
 def workReportPage2(request, workReport_id):
     wRep = WorkReport.objects.get(pk=workReport_id)
 
     form = ReportFormPage2()
-    RelatedFormset = modelformset_factory(WorkPart, extra=5, fields=("comment", "startTime", "endTime","standartWork",
+    RelatedFormset = modelformset_factory(WorkPart, extra=5, fields=("comment", "startTime", "endTime", "standartWork",
                                                                      "workPlace"))
     formset = RelatedFormset(queryset=WorkPart.objects.none())
     if request.method == "POST":
@@ -143,14 +141,13 @@ def workReportPage3(request, workReport_id):
             pass
     else:
         data = {
-        'form-TOTAL_FORMS': u'4',
-        'form-INITIAL_FORMS': u'4',
-        'form-MAX_NUM_FORMS': u'10',
+            'form-TOTAL_FORMS': u'4',
+            'form-INITIAL_FORMS': u'4',
+            'form-MAX_NUM_FORMS': u'10',
         }
         formset = ArticleFormSet(data)
 
     return render_to_response('plan/workReportPage2.html', {'formset': formset})
-
 
 
 def workersView(request):
@@ -163,5 +160,3 @@ def workerView(request, worker_id):
 
 def addWorker(request):
     return None
-
-
