@@ -23,7 +23,7 @@ width: 300px; /* Ширина списка в пикселах */
 
 {% block content %}
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
-
+<script type="text/javascript" src="scripts/moment-2.4.0.js"></script>
 <script type="text/javascript">
 $(document).ready(function() {
   // Code adapted from http://djangosnippets.org/snippets/1389/
@@ -118,18 +118,21 @@ $(document).ready(function() {
 <br>
 <form action="" method="POST">{% csrf_token %}
 
-    <h2>Работы по наряду</h2>
-        {{ book_formset.management_form }}
-        {% for form in book_formset.forms %}
+    <h2>{{caption}}</h2>
+        {{ report_formset.management_form }}
+        {% for form in report_formset.forms %}
     <div class="item">
         {% bootstrap_form form %}
-      <p style=""><a class="delete" href="#">Delete</a></p>
+
+      <p style=""><a class="btn btn-danger" href="#" >Удалить </a></p>
     </div>
+     <hr>
     {% endfor %}
 
-    <p><a id="add" href="#">Add another item</a></p>
+    <a id="add" href="#" class="btn btn-success" >Добавить ещё</a>
+    <input type="submit" value="Дальше" class="btn btn-primary" />
 
-    <input type="submit" value=" Submit " />
+
 </form>
 
 {% endblock %}

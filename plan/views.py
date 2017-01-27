@@ -19,7 +19,7 @@ from django.template.context_processors import csrf
 
 from mysite import settings
 from plan.forms import ReportForm, LoginForm, WorkPartForm, ReportFormPage2
-from plan.models import Worker, WorkReport, WorkPart
+from plan.models import Worker, WorkReport, WorkPart, StandartWork
 from plan.workReportGenerator import generateReport
 
 
@@ -72,25 +72,26 @@ def generateWorkReport(request):
     return response
 
 
-def workReport(request):
+def workReportPage1(request, workReport_id):
     # если post запрос
     if request.method == 'POST':
         # строим форму на основе запроса
         form = ReportForm(request.POST)
         # если форма заполнена корректно
         if form.is_valid():
-            work_report = WorkReport.objects.create(supervisor=form.cleaned_data["supervisor"],
-                                                    VIKer=form.cleaned_data["VIKer"],
-                                                    reportMaker=form.cleaned_data["reportMaker"],
-                                                    reportChecker=form.cleaned_data["reportChecker"],
-                                                    worker=form.cleaned_data["worker"],
-                                                    stockMan=form.cleaned_data["stockMan"],
-                                                    adate=form.cleaned_data["adate"],
-                                                    VIKDate=form.cleaned_data["VIKDate"])
+            work_report = WorkReport.objects.get(pk=workReport_id)
+            work_report.supervisor = form.cleaned_data["supervisor"]
+            work_report.VIKer = form.cleaned_data["VIKer"]
+            work_report.reportMaker = form.cleaned_data["reportMaker"]
+            work_report.reportChecker = form.cleaned_data["reportChecker"]
+            work_report.worker = form.cleaned_data["worker"]
+            work_report.stockMan = form.cleaned_data["stockMan"]
+            work_report.adate = form.cleaned_data["adate"]
+            work_report.VIKDate = form.cleaned_data["VIKDate"]
             work_report.save()
 
             # возвращаем простое окно регистрации
-            return HttpResponseRedirect(str(work_report.pk) + '/page2/')
+            return HttpResponseRedirect('/workReport/page2/' + str(work_report.pk) + '/')
         else:
             data = {'supervisor': form.cleaned_data["supervisor"],
                     'VIKer': form.cleaned_data["VIKer"],
@@ -100,13 +101,13 @@ def workReport(request):
                     'stockMan': form.cleaned_data["stockMan"],
                     'date': form.cleaned_data["date"],
                     }
-            return render(request, "plan/workReport.html", {
+            return render(request, "plan/workReportPage1.html", {
                 'form': ReportForm(data),
                 'login_form': LoginForm()
             })
     else:
         # возвращаем простое окно регистрации
-        return render(request, "plan/workReport.html", {
+        return render(request, "plan/workReportPage1.html", {
             'form': ReportForm(),
             'login_form': LoginForm()
         })
@@ -119,19 +120,31 @@ def workReportPage2(request, workReport_id):
             for form in self.forms:
                 form.empty_permitted = False
 
-    BookFormset = formset_factory(WorkPartForm, max_num=10, formset=RequiredFormSet)
+    ReportFormset = formset_factory(WorkPartForm, max_num=10, formset=RequiredFormSet)
     if request.method == 'POST':
-        book_formset = BookFormset(request.POST, request.FILES)
-        if book_formset.is_valid():
-            for form in book_formset.forms:
+        report_formset = ReportFormset(request.POST, request.FILES)
+        if report_formset.is_valid():
+            for form in report_formset.forms:
                 print (form.cleaned_data)
-            return HttpResponseRedirect('/workReport/'+str(workReport_id) + '/page3/')
+            return HttpResponseRedirect('/workReport/page3/' + str(workReport_id) + '/')
     else:
-        book_formset = BookFormset()
-    c = {'book_formset': book_formset,
+        data = {
+            'form-TOTAL_FORMS': '2',
+            'form-INITIAL_FORMS': '0',
+            'form-MAX_NUM_FORMS': '',
+            'form-0-startTime': '08:30',
+            'form-0-endTime': '08:45',
+            'form-1-startTime': '16:45',
+            'form-1-endTime': '17:00',
+            'form-0-standartWork': StandartWork.objects.get(text='Получение наряда и ТМЦ для выполнения работ'),
+            'form-1-standartWork': StandartWork.objects.get(text='Уборка рабочего места')
+        }
+        report_formset = ReportFormset(data)
+    c = {'report_formset': report_formset,
+         'caption': 'Выполняемые работы'
          }
-  #  c.update(csrf(request))
-    return render(request,'plan/workReportPage2.html', c)
+    #  c.update(csrf(request))
+    return render(request, 'plan/workReportFormset.html', c)
 
 
 def workReportPage3(request, workReport_id):
@@ -151,7 +164,7 @@ def workReportPage3(request, workReport_id):
         }
         formset = ArticleFormSet(data)
 
-    return render_to_response('plan/workReportPage2.html', {'formset': formset})
+    return render_to_response('plan/workReportFormset.html', {'formset': formset})
 
 
 def workersView(request):
@@ -167,4 +180,18 @@ def addWorker(request):
 
 
 def test(request):
-    return render_to_response('plan/test.html',{})
+    return render_to_response('plan/test.html', {})
+
+
+def workReports(request):
+    return render_to_response('plan/workReportList.html', {'reports': WorkReport.objects.all()})
+
+
+def createWorkReport(request):
+    w = WorkReport()
+    w.save()
+    return HttpResponseRedirect('/workReport/page1/' + str(w.pk) + '/')
+
+
+def printReport(request):
+    return render_to_response('plan/test.html')

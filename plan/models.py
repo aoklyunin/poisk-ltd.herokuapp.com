@@ -168,6 +168,9 @@ class Worker(models.Model):
     # отчество
     patronymic = models.CharField(max_length=200)
 
+    def getInitials(self):
+        return self.user.last_name[0] + self.user.first_name[0] + self.patronymic[0]
+
     def __str__(self):
         return self.user.first_name + " " + self.user.last_name
 
@@ -218,14 +221,17 @@ class Reject(models.Model):
     def __unicode__(self):
         return self.equipment.name
 
+
 # обоснование для работы
 class Rationale(models.Model):
     name = models.CharField(max_length=255)
 
     def __str__(self):
         return self.name
+
     def __unicode__(self):
         return self.name
+
 
 # стандартная работа
 class StandartWork(models.Model):
@@ -234,8 +240,10 @@ class StandartWork(models.Model):
 
     def __str__(self):
         return self.text
+
     def __unicode__(self):
         return self.text
+
 
 # Часть наряда
 class WorkPart(models.Model):
@@ -248,41 +256,47 @@ class WorkPart(models.Model):
 
     def __str__(self):
         return self.name
+
     def __unicode__(self):
         return self.name
+
 
 # наряд
 class WorkReport(models.Model):
     # руководитель
-    supervisor = models.ForeignKey(Worker, verbose_name='Руководитель', related_name="supervisor_name")
+    supervisor = models.ForeignKey(Worker, verbose_name='Руководитель', related_name="supervisor_name", blank=True, null=True)
     # ответственный за ВИК
-    VIKer = models.ForeignKey(Worker, verbose_name='ВИК', related_name="VIKER_name")
+    VIKer = models.ForeignKey(Worker, verbose_name='ВИК', related_name="VIKER_name", blank=True, null=True)
     # исполнитель
-    worker = models.ForeignKey(Worker, verbose_name='Иcполнитель', related_name="worker_name")
+    worker = models.ForeignKey(Worker, verbose_name='Иcполнитель', related_name="worker_name", blank=True, null=True)
     # кладовщик
-    stockMan = models.ForeignKey(Worker, verbose_name='Кладовщик', related_name="stockMan_name")
+    stockMan = models.ForeignKey(Worker, verbose_name='Кладовщик', related_name="stockMan_name", blank=True, null=True)
     # составитель отчёта
-    reportMaker = models.ForeignKey(Worker, verbose_name='Cоставитель отчёта', related_name="reportMaker_name")
+    reportMaker = models.ForeignKey(Worker, verbose_name='Cоставитель отчёта', related_name="reportMaker_name", blank=True, null=True)
     # проверяющий отчёт
-    reportChecker = models.ForeignKey(Worker, verbose_name='Проверяющий отчёт', related_name="reportChecker_name")
+    reportChecker = models.ForeignKey(Worker, verbose_name='Проверяющий отчёт', related_name="reportChecker_name", blank=True, null=True)
     # дата
     adate = models.DateField(default=datetime.date.today)
     # дата ВИК
     VIKDate = models.DateField(default=datetime.date.today)
     # плановая выдача комплектующих
-    planHardware = models.ManyToManyField(HardwareEquipment, verbose_name='Плановая', related_name="planHardware_name")
+    planHardware = models.ManyToManyField(HardwareEquipment, verbose_name='Плановая', related_name="planHardware_name", blank=True, null=True)
     # внеплановая выдача комплектующих
     noPlanHardware = models.ManyToManyField(HardwareEquipment, verbose_name='Внеплановая',
-                                            related_name="no_PlanHardware_name")
+                                            related_name="no_PlanHardware_name", blank=True, null=True)
     # брак
-    rejected = models.ManyToManyField(Reject)
-    workPart = models.ManyToManyField(WorkPart, related_name="work_Part")
-    factWorkPart = models.ManyToManyField(WorkPart, related_name="fact_WorkPart")
+    rejected = models.ManyToManyField(Reject, blank=True, null=True)
+    workPart = models.ManyToManyField(WorkPart, related_name="work_Part", blank=True, null=True)
+    factWorkPart = models.ManyToManyField(WorkPart, related_name="fact_WorkPart", blank=True, null=True)
 
     def __str__(self):
-        return self.name
+        #return "sad"
+        return self.supervisor.getInitials() + "-" + str(self.worker.tnumber) + '-' + str(self.adate)
+
     def __unicode__(self):
-        return self.name
+        #return "sad"
+        return self.supervisor.getInitials() + "-" + str(self.worker.tnumber) + '-' + str(self.adate)
+
 
 # класс заказов
 class Orders(models.Model):

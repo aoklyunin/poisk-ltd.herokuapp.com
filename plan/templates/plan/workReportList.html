@@ -1,0 +1,41 @@
+{% extends "plan/base.html" %}
+{# Load the tag library #}
+{% load bootstrap3 %}
+
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{# Display django.contrib.messages as Bootstrap alerts #}
+{% bootstrap_messages %}
+
+
+{% block title %}НПО Поиск{% endblock %}
+
+{% block content %}
+   <h2>Наряды</h2>
+    {% if user.is_authenticated == False %}
+        <p>Для доступа к системе Вам надо войти или зарегистрироваться</p>
+    {% else %}
+
+    {% endif %}
+    <a href = "/createWorkReport/" class="btn btn-primary" >Сформировать наряд</a>
+
+{% endblock %}
+
+{% block sub_content %}
+
+    {% if user.is_authenticated == False %}
+
+    {% else %}
+        <table cellpadding="2">
+        {% for report in reports %}
+            <tr>
+                <td>{{ report }}</td>
+                <td> <a href="/workReport/print/+{{report.pk}}+/" class="btn">Печать</a></td>
+                <td> <a href="/workReport/page1/+{{report.pk}}+/" class="btn">Просмотр</a></td>
+            </tr>
+        {% endfor %}
+            </table>
+    {% endif %}
+{% endblock %}
