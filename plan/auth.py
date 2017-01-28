@@ -9,7 +9,7 @@ from django.shortcuts import render
 from plan.forms import RegisterForm, LoginForm
 
 # метод регистрации
-from plan.models import Worker
+from workReport.models import Worker
 
 
 def register(request):

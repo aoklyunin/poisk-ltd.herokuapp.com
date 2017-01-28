@@ -101,7 +101,8 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'plan',
     'bootstrap3',
-    'crispy_forms'
+    'crispy_forms',
+    'workReport'
 )
 
 from django.contrib.messages import constants as messages
