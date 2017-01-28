@@ -13,8 +13,10 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
-
 # чертёж
+from plan.workReportGenerator import generateReport
+
+
 class Scheme(models.Model):
     # автор
     author = models.CharField(max_length=200)
@@ -64,6 +66,7 @@ class Material(models.Model):
     dimension = models.CharField(max_length=200)
     # шифр
     code = models.CharField(max_length=100, blank=True, default="", null=True)
+
     def __str__(self):
         return self.name
 
@@ -76,7 +79,7 @@ class Equipment(models.Model):
     # название
     name = models.CharField(max_length=1000)
     # материалы
-    materials = models.ManyToManyField(Material,blank=True, null=True)
+    materials = models.ManyToManyField(Material, blank=True, null=True)
     # чертёж
     scheme = models.ManyToManyField(Scheme, blank=True, null=True)
     # шифр
@@ -169,6 +172,9 @@ class Worker(models.Model):
 
     def getInitials(self):
         return self.user.last_name[0] + self.user.first_name[0] + self.patronymic[0]
+
+    def getShort(self):
+        return self.user.last_name + " " + self.user.first_name[0] + " " + self.patronymic[0]
 
     def __str__(self):
         return self.user.first_name + " " + self.user.last_name
@@ -305,16 +311,88 @@ class WorkReport(models.Model):
     # примечание
     note = models.CharField(max_length=10000, default="")
 
+    def generateDoc(self):
+        wp = []
+        i = 0
+        for wPart in self.workPart.all().order_by('startTime'):
+            i += 1
+            print(str(wPart.workPlace))
+            if wPart.workPlace == None:
+                wpname = "-"
+            else:
+                wpname = wPart.workPlace.name
+            wp.append([str(i), wpname, wPart.comment, str(wPart.startTime), str(wPart.endTime)])
+
+        fwp = []
+        i = 0
+        for wPart in self.factWorkPart.all().order_by('startTime'):
+            i += 1
+
+            if wPart.workPlace == None:
+                wpname = "-"
+            else:
+                wpname = wPart.workPlace.name
+            fwp.append([str(i), wpname, wPart.comment, str(wPart.startTime), str(wPart.endTime)])
+
+        note = "Примечание 1 (обязательное):\nМаксимальный срок проведения ВИК (входного контроля) до " \
+               "конца рабочего дня " + str(self.VIKDate)
+        if self.note != "":
+            note += "\nПримечание 2:\n" + self.note
+
+        planEquipment = []
+        for equip in self.planHardware.all():
+            if equip.equipment == None:
+                e = [equip.material.name, equip.material.code, equip.material.dimension]
+            else:
+                e = [equip.equipment.name, equip.material.code, equip.equipment.dimension]
+            e.append(equip.getCnt, equip.usedCnt, equip.rejectCnt, equip.dustCnt, equip.remainCnt)
+            planEquipment.append(e)
+
+        nonPlanEquipment = []
+        for equip in self.noPlanHardware.all():
+            if equip.equipment == None:
+                e = [equip.material.name, equip.material.code, equip.material.dimension]
+            else:
+                e = [equip.equipment.name, equip.material.code, equip.equipment.dimension]
+            e.append(equip.getCnt, equip.usedCnt, equip.rejectCnt, equip.dustCnt, equip.remainCnt)
+            nonPlanEquipment.append(e)
+
+        dust = [
+            ['хлам 1', '100'],
+            ['хлам 2', '500']
+        ]
+        print(wp)
+        return generateReport(self.supervisor.getInitials(), self.supervisor.getShort(),
+                              self.worker.getShort(), str(self.worker.tnumber), self.stockMan.getShort(),
+                              self.adate, self.worker.position.name,
+                              self.getRationales(), wp, fwp, self.reportMaker.getShort(),
+                              self.reportChecker.getShort(), self.VIKer.getShort(), note,
+                              self.worker.attestation.name, dust, planEquipment, nonPlanEquipment)
+
+    def getRationales(self):
+        i = 0
+        d = {}
+        for part in self.workPart.order_by('startTime'):
+            i += 1
+            if part.rationle != None:
+                if d.get(part.rationle.name):
+                    d[part.rationle.name].append(i)
+                else:
+                    d[part.rationle.name] = [i]
+        rationales = []
+        for key, value in d.items():
+            rationales.append([value, key])
+        return rationales
+
     def __str__(self):
         # return "sad"
         return self.supervisor.getInitials() + "-" + str(self.worker.tnumber) + '-' + str(self.adate)
 
     def __unicode__(self):
         # return "sad"
-        return self.supervisor.getInitials() + "-" + str(self.worker.tnumber) + '-' + str(self.adate)
+        return self.supervisor.getInitials() + "-" + str(self.worker.tnumber) + '-' + str(self.adate)  # класс заказов
 
 
-# класс заказов
 class Orders(models.Model):
     # сборочные единицы
     assemblyUnits = models.ManyToManyField(AssemblyUnits)

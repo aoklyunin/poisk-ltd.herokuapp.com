@@ -58,10 +58,10 @@ def generateWorkReportPage1(document, supervisorShort, workerName, workerNumber,
     # создаём таблицу
     table = document.add_table(rows=4, cols=0, style=document.styles['TableGrid'])
 
-    table.add_column(width=Inches(0.3))
-    table.add_column(width=Inches(0.4))
-    table.add_column(width=Inches(1.5))
-    table.add_column(width=Inches(5))
+    table.add_column(width=Inches(0.9))
+    table.add_column(width=Inches(1.1))
+    table.add_column(width=Inches(1.2))
+    table.add_column(width=Inches(3.7))
     table.add_column(width=Inches(1))
     table.add_column(width=Inches(0.5))
 
@@ -90,6 +90,13 @@ def generateWorkReportPage1(document, supervisorShort, workerName, workerNumber,
     setCellStyle(table.cell(3, 1), 'Обоснование для выполнения работ:', 10, True, False, False)
 
     pos = 3
+    if len(rationales) == 0:
+        table.add_row()
+        pos += 1
+        setCellStyle(table.cell(pos, 0), "", 10, False, False, False)
+        table.cell(pos, 1).merge(table.cell(pos, 5))
+        setCellStyle(table.cell(pos, 1), "", 10, False, False, False)
+
     for rationale in rationales:
         table.add_row()
         pos += 1
@@ -107,6 +114,7 @@ def generateWorkReportPage1(document, supervisorShort, workerName, workerNumber,
     setCellStyle(table.cell(pos, 4), 'Период', 10, True, False, False)
 
     pos += 1
+
     for work in works:
         table.add_row()
         table.add_row()
