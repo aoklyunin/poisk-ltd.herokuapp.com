@@ -13,7 +13,6 @@ def setCellStyle(cell, text, fontSize, isBold, isItalic, isUnderlined, valign="c
                  align=WD_PARAGRAPH_ALIGNMENT.CENTER):
     p = cell.paragraphs[0]
     p.paragraph_format.alignment = align
-    print(text)
     run = p.add_run(text)
     run.font.size = Pt(fontSize)
     run.bold = isBold
@@ -368,6 +367,8 @@ def generateWorkReportPage2(document, supervisorShort, workerName, workerNumber,
 def generateReport(supervisorShort, supervisorName, workerName, workerNumber, stockManName, date, workerPosition,
                    rationales, works, factWorks, reportMaker, reportChecker,
                    reportVIKer, note, attestation, dust, planEquipment, nonPlanEquipment):
+   # print(workerPosition)
+    #print(attestation)
     document = generateDocument()
     generateWorkReportPage1(document, supervisorShort, workerName, workerNumber, date, workerPosition,
                             rationales, works, factWorks, reportMaker, reportChecker,

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
+
 from django.contrib.auth.models import User
 from django.db import models
 from django.conf import settings
@@ -11,6 +12,7 @@ from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 
 from django.db import models
 from django.utils import timezone
+from django.utils.datetime_safe import strftime
 from django.utils.translation import ugettext_lazy as _
 
 # чертёж
@@ -174,7 +176,7 @@ class Worker(models.Model):
         return self.user.last_name[0] + self.user.first_name[0] + self.patronymic[0]
 
     def getShort(self):
-        return self.user.last_name + " " + self.user.first_name[0] + " " + self.patronymic[0]
+        return self.user.last_name + " " + self.user.first_name[0] + ". " + self.patronymic[0] + "."
 
     def __str__(self):
         return self.user.first_name + " " + self.user.last_name
@@ -229,11 +231,17 @@ class Reject(models.Model):
     # кол-во
     cnt = models.FloatField(default=0)
 
-    def __str__(self):
-        return self.equipment.name
-
     def __unicode__(self):
-        return self.equipment.name
+        if self.equipment != None:
+            return self.equipment.name
+        else:
+            return self.material.name
+
+    def __str__(self):
+        if self.equipment != None:
+            return self.equipment.name
+        else:
+            return self.material.name
 
 
 # обоснование для работы
@@ -261,7 +269,7 @@ class StandartWork(models.Model):
 
 # Часть наряда
 class WorkPart(models.Model):
-    comment = models.CharField(max_length=2000)
+    comment = models.CharField(max_length=2000, blank=True, default="", null=True)
     startTime = models.TimeField()
     endTime = models.TimeField()
     standartWork = models.ForeignKey(StandartWork)
@@ -316,23 +324,23 @@ class WorkReport(models.Model):
         i = 0
         for wPart in self.workPart.all().order_by('startTime'):
             i += 1
-            print(str(wPart.workPlace))
-            if wPart.workPlace == None:
+            if wPart.workPlace is None:
                 wpname = "-"
             else:
                 wpname = wPart.workPlace.name
-            wp.append([str(i), wpname, wPart.comment, str(wPart.startTime), str(wPart.endTime)])
+            wp.append(
+                [str(i), wpname, wPart.standartWork.text+" "+wPart.comment, wPart.startTime.strftime("%H:%M"), wPart.endTime.strftime("%H:%M")])
 
         fwp = []
         i = 0
         for wPart in self.factWorkPart.all().order_by('startTime'):
             i += 1
-
-            if wPart.workPlace == None:
+            if wPart.workPlace is None:
                 wpname = "-"
             else:
                 wpname = wPart.workPlace.name
-            fwp.append([str(i), wpname, wPart.comment, str(wPart.startTime), str(wPart.endTime)])
+            fwp.append(
+                [str(i), wpname, wPart.standartWork.text+" "+wPart.comment, wPart.startTime.strftime("%H:%M"), wPart.endTime.strftime("%H:%M")])
 
         note = "Примечание 1 (обязательное):\nМаксимальный срок проведения ВИК (входного контроля) до " \
                "конца рабочего дня " + str(self.VIKDate)
@@ -341,40 +349,58 @@ class WorkReport(models.Model):
 
         planEquipment = []
         for equip in self.planHardware.all():
-            if equip.equipment == None:
+            e = []
+            if equip.equipment is None:
                 e = [equip.material.name, equip.material.code, equip.material.dimension]
             else:
-                e = [equip.equipment.name, equip.material.code, equip.equipment.dimension]
-            e.append(equip.getCnt, equip.usedCnt, equip.rejectCnt, equip.dustCnt, equip.remainCnt)
+                e = [equip.equipment.name, equip.equipment.code, equip.equipment.dimension]
+            for l in [str(equip.getCnt), str(equip.usedCnt), str(equip.rejectCnt), str(equip.dustCnt),
+                      str(equip.remainCnt)]:
+                e.append(l)
             planEquipment.append(e)
 
         nonPlanEquipment = []
         for equip in self.noPlanHardware.all():
-            if equip.equipment == None:
+            e = []
+            if equip.equipment is None:
                 e = [equip.material.name, equip.material.code, equip.material.dimension]
             else:
-                e = [equip.equipment.name, equip.material.code, equip.equipment.dimension]
-            e.append(equip.getCnt, equip.usedCnt, equip.rejectCnt, equip.dustCnt, equip.remainCnt)
+                e = [equip.equipment.name, equip.equipment.code, equip.equipment.dimension]
+            for l in [str(equip.getCnt), str(equip.usedCnt), str(equip.rejectCnt), str(equip.dustCnt),
+                      str(equip.remainCnt)]:
+                e.append(l)
+            #print(e)
             nonPlanEquipment.append(e)
+        dust = []
+        for equip in self.rejected.all():
+            if equip.equipment is None:
+                e = [equip.material.name]
+            else:
+                e = [equip.equipment.name]
+            for l in [str(equip.cnt)]:
+                e.append(l)
 
-        dust = [
-            ['хлам 1', '100'],
-            ['хлам 2', '500']
-        ]
-        print(wp)
+            dust.append(e)
+
+        attestation = "Аттестация отсутствует"
+        if self.worker.attestation.name is not None:
+            attestation = self.worker.attestation.name
+
+        print(attestation)
+        #print(wp)
         return generateReport(self.supervisor.getInitials(), self.supervisor.getShort(),
                               self.worker.getShort(), str(self.worker.tnumber), self.stockMan.getShort(),
-                              self.adate, self.worker.position.name,
+                              self.adate, self.worker.position.first().name,
                               self.getRationales(), wp, fwp, self.reportMaker.getShort(),
                               self.reportChecker.getShort(), self.VIKer.getShort(), note,
-                              self.worker.attestation.name, dust, planEquipment, nonPlanEquipment)
+                              attestation, dust, planEquipment, nonPlanEquipment)
 
     def getRationales(self):
         i = 0
         d = {}
         for part in self.workPart.order_by('startTime'):
             i += 1
-            if part.rationle != None:
+            if part.rationale != None:
                 if d.get(part.rationle.name):
                     d[part.rationle.name].append(i)
                 else:
