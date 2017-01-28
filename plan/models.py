@@ -62,8 +62,10 @@ class Customer(models.Model):  # название организации
 class Material(models.Model):
     # название
     name = models.CharField(max_length=1000)
+    # единица измерения
     dimension = models.CharField(max_length=200)
-
+    # шифр
+    code = models.CharField(max_length=100, blank=True, default="", null=True)
     def __str__(self):
         return self.name
 
@@ -76,13 +78,13 @@ class Equipment(models.Model):
     # название
     name = models.CharField(max_length=1000)
     # материалы
-    materials = models.ManyToManyField(Material)
+    materials = models.ManyToManyField(Material,blank=True, null=True)
     # чертёж
-    scheme = models.ManyToManyField(Scheme)
+    scheme = models.ManyToManyField(Scheme, blank=True, null=True)
     # шифр
-    code = models.CharField(max_length=100)
+    code = models.CharField(max_length=100, blank=True, default="", null=True)
     # тип
-    hardwareType = models.IntegerField()
+    hardwareType = models.IntegerField(default=0)
     # единица измерения
     dimension = models.CharField(max_length=200)
 
@@ -191,28 +193,37 @@ class Instrument(models.Model):
 
 # оснаска и комплектующие
 class HardwareEquipment(models.Model):
-    # название
-    name = models.CharField(max_length=200)
-    # кол-во
-    count = models.FloatField()
     # деталь
-    equipment = models.ForeignKey(Equipment)
+    equipment = models.ForeignKey(Equipment, blank=True, null=True)
     # материал
-    material = models.ForeignKey(Material)
+    material = models.ForeignKey(Material, blank=True, null=True)
+    usedCnt = models.FloatField(default=0)
+    getCnt = models.FloatField(default=0)
+    rejectCnt = models.FloatField(default=0)
+    dustCnt = models.FloatField(default=0)
+    remainCnt = models.FloatField(default=0)
 
     def __unicode__(self):
-        return self.equipment.name
+        if self.equipment != None:
+            return self.equipment.name
+        else:
+            return self.material.name
 
     def __str__(self):
-        return self.equipment.name
+        if self.equipment != None:
+            return self.equipment.name
+        else:
+            return self.material.name
 
 
 # брак
 class Reject(models.Model):
     # деталь
-    equipment = models.ForeignKey(Equipment)
+    equipment = models.ForeignKey(Equipment, blank=True, null=True)
+    # материал
+    material = models.ForeignKey(Material, blank=True, null=True)
     # кол-во
-    cnt = models.IntegerField()
+    cnt = models.FloatField(default=0)
 
     def __str__(self):
         return self.equipment.name
@@ -250,8 +261,8 @@ class WorkPart(models.Model):
     startTime = models.TimeField()
     endTime = models.TimeField()
     standartWork = models.ForeignKey(StandartWork)
-    workPlace = models.ForeignKey(WorkPlace, blank=True, default=None)
-    rationale = models.ForeignKey(Rationale, blank=True, default=None)
+    workPlace = models.ForeignKey(WorkPlace, blank=True, default=None, null=True)
+    rationale = models.ForeignKey(Rationale, blank=True, default=None, null=True)
 
     def __str__(self):
         return self.comment
@@ -289,8 +300,12 @@ class WorkReport(models.Model):
                                             related_name="no_PlanHardware_name", blank=True, null=True)
     # брак
     rejected = models.ManyToManyField(Reject, blank=True, null=True)
+    # выполняемые работы
     workPart = models.ManyToManyField(WorkPart, related_name="work_Part", blank=True, null=True)
+    # фактически выполненные работы
     factWorkPart = models.ManyToManyField(WorkPart, related_name="fact_WorkPart", blank=True, null=True)
+    # примечание
+    note = models.CharField(max_length=10000, default="")
 
     def __str__(self):
         # return "sad"

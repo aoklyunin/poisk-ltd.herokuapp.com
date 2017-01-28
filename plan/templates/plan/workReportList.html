@@ -32,8 +32,8 @@
         {% for report in reports %}
             <tr>
                 <td>{{ report }}</td>
-                <td> <a href="/workReport/print/+{{report.pk}}+/" class="btn">Печать</a></td>
-                <td> <a href="/workReport/page1/+{{report.pk}}+/" class="btn">Просмотр</a></td>
+                <td> <a href="/workReport/print/{{report.pk}}/" class="btn">Печать</a></td>
+                <td> <a href="/workReport/page1/{{report.pk}}/" class="btn">Просмотр</a></td>
             </tr>
         {% endfor %}
             </table>

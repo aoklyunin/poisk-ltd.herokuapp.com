@@ -13,6 +13,7 @@ def setCellStyle(cell, text, fontSize, isBold, isItalic, isUnderlined, valign="c
                  align=WD_PARAGRAPH_ALIGNMENT.CENTER):
     p = cell.paragraphs[0]
     p.paragraph_format.alignment = align
+    print(text)
     run = p.add_run(text)
     run.font.size = Pt(fontSize)
     run.bold = isBold

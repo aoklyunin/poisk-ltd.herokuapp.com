@@ -119,6 +119,7 @@ $(document).ready(function() {
 <form action="" method="POST">{% csrf_token %}
 
     <h2>{{caption}}</h2>
+     <input type="submit" value="Дальше" class="btn btn-primary" />
         {{ report_formset.management_form }}
         {% for form in report_formset.forms %}
     <div class="item">
@@ -130,7 +131,7 @@ $(document).ready(function() {
     {% endfor %}
 
     <a id="add" href="#" class="btn btn-success" >Добавить ещё</a>
-    <input type="submit" value="Дальше" class="btn btn-primary" />
+
 
 
 </form>

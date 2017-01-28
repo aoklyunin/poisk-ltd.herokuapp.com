@@ -21,7 +21,9 @@
     <form method="post" action="." class="register_form">
             {% csrf_token %}
             <br><br>
-
+  <button type="submit" class="btn btn-primary">
+                        Дальше
+                    </button>
             {% bootstrap_field form.supervisor %}
             {% bootstrap_field form.VIKer %}
             {% bootstrap_field form.reportMaker %}
@@ -30,12 +32,11 @@
             {% bootstrap_field form.stockMan %}
             {% bootstrap_field form.adate %}
             {% bootstrap_field form.VIKDate %}
+            {% bootstrap_field form.note %}
 
             <div align="center">
                 {% buttons %}
-                    <button type="submit" class="btn btn-primary">
-                        Дальше
-                    </button>
+
                     <button type="reset" class="btn">
                         Отмена
                     </button>
