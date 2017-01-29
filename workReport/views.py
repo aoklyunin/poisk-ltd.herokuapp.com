@@ -83,22 +83,32 @@ def workReportPage2(request, workReport_id):
             if wr.workPart.all().exists():
                 wr.workPart.all().delete()
             for form in report_formset.forms:
-                w, created = WorkPart.objects.get_or_create(startTime=form.cleaned_data["startTime"],
-                                                            endTime=form.cleaned_data["endTime"],
-                                                            standartWork=form.cleaned_data["standartWork"],
-                                                            workPlace=form.cleaned_data["workPlace"],
-                                                            rationale=form.cleaned_data["rationale"]
-                                                            )
-                if created:
+                if len(WorkPart.objects.filter(startTime=form.cleaned_data["startTime"],
+                                               endTime=form.cleaned_data["endTime"],
+                                               standartWork=form.cleaned_data["standartWork"],
+                                               workPlace=form.cleaned_data["workPlace"],
+                                               rationale=form.cleaned_data["rationale"]
+                                               )) > 0:
+                    w = WorkPart.objects.get(startTime=form.cleaned_data["startTime"],
+                                             endTime=form.cleaned_data["endTime"],
+                                             standartWork=form.cleaned_data["standartWork"],
+                                             workPlace=form.cleaned_data["workPlace"],
+                                             rationale=form.cleaned_data["rationale"])
+                else:
+                    w = WorkPart.objects.create(startTime=form.cleaned_data["startTime"],
+                                                endTime=form.cleaned_data["endTime"],
+                                                standartWork=form.cleaned_data["standartWork"],
+                                                workPlace=form.cleaned_data["workPlace"],
+                                                rationale=form.cleaned_data["rationale"])
                     w.save()
                 wr.workPart.add(w)
-            if len(wr.planHardware.all()) == 0:
-                for part in wr.workPart.all():
-                    for h in part.standartWork.hardwareEquipment.all():
-                        h.pk = None
-                        h.save()
-                        wr.planHardware.add(h)
-                        # print(form.cleaned_data)
+                if len(wr.planHardware.all()) == 0:
+                    for part in wr.workPart.all():
+                        for h in part.standartWork.hardwareEquipment.all():
+                            h.pk = None
+                            h.save()
+                            wr.planHardware.add(h)
+                            # print(form.cleaned_data)
             return HttpResponseRedirect('/workReport/page3/' + str(workReport_id) + '/')
     else:
         if wr.workPart.all().exists():
@@ -149,13 +159,23 @@ def workReportPage3(request, workReport_id):
             if wr.factWorkPart.all().exists():
                 wr.factWorkPart.all().delete()
             for form in report_formset.forms:
-                w, created = WorkPart.objects.get_or_create(startTime=form.cleaned_data["startTime"],
-                                                            endTime=form.cleaned_data["endTime"],
-                                                            standartWork=form.cleaned_data["standartWork"],
-                                                            workPlace=form.cleaned_data["workPlace"],
-                                                            rationale=form.cleaned_data["rationale"]
-                                                            )
-                if created:
+                if len(WorkPart.objects.filter(startTime=form.cleaned_data["startTime"],
+                                               endTime=form.cleaned_data["endTime"],
+                                               standartWork=form.cleaned_data["standartWork"],
+                                               workPlace=form.cleaned_data["workPlace"],
+                                               rationale=form.cleaned_data["rationale"]
+                                               )) > 0:
+                    w = WorkPart.objects.get(startTime=form.cleaned_data["startTime"],
+                                             endTime=form.cleaned_data["endTime"],
+                                             standartWork=form.cleaned_data["standartWork"],
+                                             workPlace=form.cleaned_data["workPlace"],
+                                             rationale=form.cleaned_data["rationale"])
+                else:
+                    w = WorkPart.objects.create(startTime=form.cleaned_data["startTime"],
+                                                endTime=form.cleaned_data["endTime"],
+                                                standartWork=form.cleaned_data["standartWork"],
+                                                workPlace=form.cleaned_data["workPlace"],
+                                                rationale=form.cleaned_data["rationale"])
                     w.save()
                 wr.factWorkPart.add(w)
                 # print(form.cleaned_data)
