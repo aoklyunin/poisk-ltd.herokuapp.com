@@ -1,4 +1,4 @@
-{% extends "plan/base.html" %}
+{% extends "workReport/base.html" %}
 {# Load the tag library #}
 {% load bootstrap3 %}
 
@@ -14,7 +14,7 @@
 
 {% block content %}
 <br><br>
-    <a href="\workReports\" class="btn btn-primary" >К нарядам</a>
+    <a href="\workReport\list\" class="btn btn-primary" >К нарядам</a>
     <a href="\workReport\print\{{id}}\" class="btn btn-primary" >Печать</a>
 {% endblock %}
 

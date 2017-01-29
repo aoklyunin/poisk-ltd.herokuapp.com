@@ -1,4 +1,4 @@
-{% extends "plan/base.html" %}
+{% extends "workReport/base.html" %}
 {# Load the tag library #}
 {% load bootstrap3 %}
 
@@ -19,7 +19,7 @@
     {% else %}
 
     {% endif %}
-    <a href = "/createWorkReport/" class="btn btn-primary" >Сформировать наряд</a>
+    <a href = "/workReport/create/" class="btn btn-primary" >Сформировать наряд</a>
 
 {% endblock %}
 
@@ -34,6 +34,7 @@
                 <td>{{ report }}</td>
                 <td> <a href="/workReport/print/{{report.pk}}/" class="btn">Печать</a></td>
                 <td> <a href="/workReport/page1/{{report.pk}}/" class="btn">Просмотр</a></td>
+                <td> <a href="/workReport/delete/{{report.pk}}/" class="btn">Удалить</a></td>
             </tr>
         {% endfor %}
             </table>

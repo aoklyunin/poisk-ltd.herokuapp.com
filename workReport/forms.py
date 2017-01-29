@@ -3,10 +3,9 @@
 import datetime
 
 from django import forms
-from django.forms import ModelForm, Textarea
+from django.forms import ModelForm
 
-from .models import WorkerPosition, Attestation, Worker, WorkPart, StandartWork, WorkPlace, HardwareEquipment, \
-    Reject
+from .models import WorkerPosition, Worker, WorkPart, HardwareEquipment, Reject
 
 
 # форма для отчёта
@@ -25,7 +24,7 @@ class ReportForm(forms.Form):
     worker = forms.ModelChoiceField(queryset=Worker.objects.all(),
                                     label="Исполнитель", initial=0)
     # начальник
-    wPos = WorkerPosition.objects.get(name='Начальник участка')
+    wPos = WorkerPosition.objects.get(name='Начальник смены')
     supervisor = forms.ModelChoiceField(queryset=Worker.objects.filter(position=wPos),
                                         label="Начальник участка", initial=0)
     # кладовщик
@@ -38,7 +37,7 @@ class ReportForm(forms.Form):
     VIKDate = forms.DateField(initial=datetime.date.today, label='Дата ВИК')
 
     note = forms.CharField(widget=forms.Textarea(attrs={'rows': 1, 'cols': 20, 'placeholder': 'Что довавить'}),
-                           label="Примечание")
+                           label="Примечание",required=False    )
 
 
 class WorkPartForm(ModelForm):

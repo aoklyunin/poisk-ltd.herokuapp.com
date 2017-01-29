@@ -13,4 +13,3 @@ admin.site.register(Equipment)
 admin.site.register(AssemblyUnits)
 admin.site.register(Orders)
 admin.site.register(Instrument)
-

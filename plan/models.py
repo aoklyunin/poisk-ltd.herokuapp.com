@@ -10,8 +10,6 @@ from workReport.models import Material
 from workReport.workReportGenerator import generateReport
 
 
-
-
 # договор
 class Agreement(models.Model):
     # ссылка на договор

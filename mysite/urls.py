@@ -17,6 +17,5 @@ urlpatterns = [
     url(r'^logout/$', plan.auth.logout_view),
     # регистрация на сайте
     url(r'^register/$', plan.auth.register),
-    url(r'^test/$', plan.views.test),
     url(r'^', plan.auth.index, name='index'),
 ]

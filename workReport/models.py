@@ -6,6 +6,7 @@ from django.db import models
 # оснаска и комплектующие
 from workReport.workReportGenerator import generateReport
 
+
 class Scheme(models.Model):
     # автор
     author = models.CharField(max_length=200)
@@ -56,6 +57,7 @@ class Equipment(models.Model):
         return self.name
 
         # класс материалов
+
 
 class WorkerPosition(models.Model):
     # название
@@ -114,10 +116,16 @@ class Worker(models.Model):
         return self.user.last_name + " " + self.user.first_name[0] + ". " + self.patronymic[0] + "."
 
     def __str__(self):
-        return self.user.first_name + " " + self.user.last_name
+        s = ""
+        for pos in self.position.all():
+            s += str(pos) + ", "
+        return str(self.tnumber) + " - " + self.getShort() + "(" + s[:-2] + ")"
 
     def __unicode__(self):
-        return self.user.first_name + " " + self.user.last_name
+        s = ""
+        for pos in self.position.all():
+            s += str(pos) + ", "
+        return str(self.tnumber) + " - " + self.getShort() + "(" + s[:-2] + ")"
 
 
 class HardwareEquipment(models.Model):
@@ -131,17 +139,18 @@ class HardwareEquipment(models.Model):
     dustCnt = models.FloatField(default=0)
     remainCnt = models.FloatField(default=0)
 
-    def __unicode__(self):
-        if self.equipment != None:
-            return self.equipment.name
-        else:
-            return self.material.name
-
     def __str__(self):
-        if self.equipment != None:
-            return self.equipment.name
+        if self.material is None:
+            print(self.equipment.name + " " + str(self.getCnt) + " " + self.equipment.dimension)
+            return self.equipment.name + " " + str(self.getCnt) + " " + self.equipment.dimension
         else:
-            return self.material.name
+            return self.material.name + " " + str(self.getCnt) + " " + self.material.dimension
+
+    def __unicode__(self):
+        if self.material is None:
+            return self.equipment.name + " " + str(self.getCnt) + " " + self.equipment.dimension
+        else:
+            return self.material.name + " " + str(self.getCnt) + " " + self.material.dimension
 
 
 # брак
@@ -181,12 +190,14 @@ class Rationale(models.Model):
 class StandartWork(models.Model):
     text = models.CharField(max_length=2000)
     positionsEnable = models.ManyToManyField(WorkerPosition)
+    hardwareEquipment = models.ManyToManyField(HardwareEquipment, blank=True, default=None, null=True)
+    duration = models.FloatField(default=0)
 
     def __str__(self):
-        return self.text
+        return self.text + "(" + str(self.duration) + ")"
 
     def __unicode__(self):
-        return self.text
+        return self.text + "(" + str(self.duration) + ")"
 
 
 # Часть наряда
@@ -198,11 +209,14 @@ class WorkPart(models.Model):
     workPlace = models.ForeignKey(WorkPlace, blank=True, default=None, null=True)
     rationale = models.ForeignKey(Rationale, blank=True, default=None, null=True)
 
+
     def __str__(self):
-        return self.comment
+        return self.startTime.strftime("%H:%M") + "-" + self.endTime.strftime("%H:%M") + " " + str(
+            self.standartWork) + " " + self.comment
 
     def __unicode__(self):
-        return self.comment
+        return self.startTime.strftime("%H:%M") + "-" + self.endTime.strftime("%H:%M") + " " + str(
+            self.standartWork) + " " + self.comment
 
 
 # наряд
@@ -239,7 +253,7 @@ class WorkReport(models.Model):
     # фактически выполненные работы
     factWorkPart = models.ManyToManyField(WorkPart, related_name="fact_WorkPart", blank=True, null=True)
     # примечание
-    note = models.CharField(max_length=10000, default="")
+    note = models.CharField(max_length=10000, default="", blank=True, null=True)
 
     def generateDoc(self):
         wp = []
@@ -251,7 +265,8 @@ class WorkReport(models.Model):
             else:
                 wpname = wPart.workPlace.name
             wp.append(
-                [str(i), wpname, wPart.standartWork.text+" "+wPart.comment, wPart.startTime.strftime("%H:%M"), wPart.endTime.strftime("%H:%M")])
+                [str(i), wpname, wPart.standartWork.text + " " + wPart.comment, wPart.startTime.strftime("%H:%M"),
+                 wPart.endTime.strftime("%H:%M")])
 
         fwp = []
         i = 0
@@ -262,7 +277,8 @@ class WorkReport(models.Model):
             else:
                 wpname = wPart.workPlace.name
             fwp.append(
-                [str(i), wpname, wPart.standartWork.text+" "+wPart.comment, wPart.startTime.strftime("%H:%M"), wPart.endTime.strftime("%H:%M")])
+                [str(i), wpname, wPart.standartWork.text + " " + wPart.comment, wPart.startTime.strftime("%H:%M"),
+                 wPart.endTime.strftime("%H:%M")])
 
         note = "Примечание 1 (обязательное):\nМаксимальный срок проведения ВИК (входного контроля) до " \
                "конца рабочего дня " + str(self.VIKDate)
@@ -291,7 +307,7 @@ class WorkReport(models.Model):
             for l in [str(equip.getCnt), str(equip.usedCnt), str(equip.rejectCnt), str(equip.dustCnt),
                       str(equip.remainCnt)]:
                 e.append(l)
-            #print(e)
+            # print(e)
             nonPlanEquipment.append(e)
         dust = []
         for equip in self.rejected.all():
@@ -308,8 +324,8 @@ class WorkReport(models.Model):
         if self.worker.attestation.name is not None:
             attestation = self.worker.attestation.name
 
-        print(attestation)
-        #print(wp)
+            # print(attestation)
+        # print(wp)
         return generateReport(self.supervisor.getInitials(), self.supervisor.getShort(),
                               self.worker.getShort(), str(self.worker.tnumber), self.stockMan.getShort(),
                               self.adate, self.worker.position.first().name,
@@ -334,10 +350,36 @@ class WorkReport(models.Model):
 
     def __str__(self):
         # return "sad"
-        return self.supervisor.getInitials() + "-" + str(self.worker.tnumber) + '-' + str(self.adate)
+        if (self.supervisor is None):
+            s = ""
+        else:
+            s = self.supervisor.getInitials()
+        s += "-"
+        if (self.worker is None):
+            s += ""
+        else:
+            s += str(self.worker.tnumber)
+        s += "-"
+        if (self.adate is None):
+            s += ""
+        else:
+            s += str(self.adate)
+        return s
 
     def __unicode__(self):
         # return "sad"
-        return self.supervisor.getInitials() + "-" + str(self.worker.tnumber) + '-' + str(self.adate)  # класс заказов
-
-
+        if (self.supervisor is None):
+            s = ""
+        else:
+            s = self.supervisor.getInitials()
+        s += "-"
+        if (self.worker is None):
+            s += ""
+        else:
+            s += str(self.worker.tnumber)
+        s += "-"
+        if (self.adate is None):
+            s += ""
+        else:
+            s += str(self.adate)
+        return s

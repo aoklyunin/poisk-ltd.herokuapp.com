@@ -2,7 +2,7 @@
 from django.conf.urls import url
 
 from workReport.views import createWorkReport, workReports, workReportPage2, workReportPage1, workReportPage3, \
-    workReportPage4, workReportPage5, workReportPage6, workReportPage7, printReport
+    workReportPage4, workReportPage5, workReportPage6, workReportPage7, printReport, deleteReport
 
 urlpatterns = [
     url(r'^create/$', createWorkReport),
@@ -15,4 +15,5 @@ urlpatterns = [
     url(r'^page6/(?P<workReport_id>[0-9]+)/$', workReportPage6),
     url(r'^page7/(?P<workReport_id>[0-9]+)/$', workReportPage7),
     url(r'^print/(?P<workReport_id>[0-9]+)/$', printReport),
+    url(r'^delete/(?P<workReport_id>[0-9]+)/$', deleteReport),
 ]
