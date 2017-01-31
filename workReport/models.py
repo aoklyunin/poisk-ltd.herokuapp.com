@@ -339,13 +339,13 @@ class WorkReport(models.Model):
         for part in self.workPart.order_by('startTime'):
             i += 1
             if part.rationale != None:
-                if d.get(part.rationle.name):
-                    d[part.rationle.name].append(i)
+                if d.get(part.rationale.name):
+                    d[part.rationale.name].append(i)
                 else:
-                    d[part.rationle.name] = [i]
+                    d[part.rationale.name] = [i]
         rationales = []
         for key, value in d.items():
-            rationales.append([value, key])
+            rationales.append([str(value), key])
         return rationales
 
     def __str__(self):
