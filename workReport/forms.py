@@ -2,6 +2,9 @@
 # модуль с формами
 import datetime
 
+from crispy_forms.bootstrap import FormActions
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, Button, MultiField, Div
 from django import forms
 from django.forms import ModelForm
 
@@ -39,6 +42,27 @@ class ReportForm(forms.Form):
     note = forms.CharField(widget=forms.Textarea(attrs={'rows': 1, 'cols': 20, 'placeholder': 'Что довавить'}),
                            label="Примечание",required=False    )
 
+    def __init__(self, *args, **kwargs):
+        super(ReportForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Div('supervisor', style="background: white;", title="Explication title", css_class="bigdivs"),
+            Div('VIKer', style="background: white;", title="Explication title", css_class="bigdivs"),
+            Div('reportMaker', style="background: white;", title="Explication title", css_class="bigdivs"),
+            Div('reportChecker', style="background: white;", title="Explication title", css_class="bigdivs"),
+            Div('worker', style="background: white;", title="Explication title", css_class="bigdivs"),
+            Div('stockMan', style="background: white;", title="Explication title", css_class="bigdivs"),
+            Div('note', style="background: white;", title="Explication title", css_class="bigdivs"),
+            Div(
+                Div('adate', css_class='col-md-6', ),
+                Div('VIKDate', css_class='col-md-6', ),
+                css_class='row',
+            ),
+            FormActions(
+                Submit('save', 'Save changes'),
+                Button('cancel', 'Cancel')
+            )
+        )
 
 class WorkPartForm(ModelForm):
     class Meta:

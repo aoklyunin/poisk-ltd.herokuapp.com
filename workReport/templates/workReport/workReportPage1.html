@@ -18,29 +18,9 @@
 {% endblock %}
 
 {% block content %}
-    <form method="post" action="." class="register_form">
-            {% csrf_token %}
-            <br><br>
-  <button type="submit" class="btn btn-primary">
-                        Дальше
-                    </button>
-            {% bootstrap_field form.supervisor %}
-            {% bootstrap_field form.VIKer %}
-            {% bootstrap_field form.reportMaker %}
-            {% bootstrap_field form.reportChecker %}
-            {% bootstrap_field form.worker %}
-            {% bootstrap_field form.stockMan %}
-            {% bootstrap_field form.adate %}
-            {% bootstrap_field form.VIKDate %}
-            {% bootstrap_field form.note %}
+<br><br>
 
-            <div align="center">
-                {% buttons %}
+{% load crispy_forms_tags %}
+{% crispy form %}
 
-                    <button type="reset" class="btn">
-                        Отмена
-                    </button>
-                {% endbuttons %}
-            </div>
-        </form>
 {% endblock %}
