@@ -22,6 +22,9 @@ width: 300px; /* Ширина списка в пикселах */
 {% endblock %}
 
 {% block content %}
+{% endblock %}
+
+{% block sub_content %}
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
 <script type="text/javascript" src="scripts/moment-2.4.0.js"></script>
 <script type="text/javascript">
@@ -103,7 +106,7 @@ $(document).ready(function() {
   }
 
   // Register the click event handlers
-  $("#add").click(function() {
+  $(".add").click(function() {
     return addForm(this, 'form');
   });
 
@@ -113,27 +116,10 @@ $(document).ready(function() {
 
 
 });
+{% load crispy_forms_tags %}
+
 </script>
-<br>
-<br>
-<form action="" method="POST">{% csrf_token %}
-
-    <h2>{{caption}}</h2>
-     <input type="submit" value="Дальше" class="btn btn-primary" />
-        {{ report_formset.management_form }}
-        {% for form in report_formset.forms %}
-    <div class="item">
-        {% bootstrap_form form %}
-
-      <p style=""><a class="btn btn-danger" href="#" >Удалить </a></p>
-    </div>
-     <hr>
-    {% endfor %}
-
-    <a id="add" href="#" class="btn btn-success" >Добавить ещё</a>
-
-
-
-</form>
+{{ formset.management_form|crispy }}
+{% crispy formset helper %}
 
 {% endblock %}

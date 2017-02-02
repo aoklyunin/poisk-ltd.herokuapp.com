@@ -4,7 +4,7 @@ import datetime
 
 from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, Button, MultiField, Div
+from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, Button, MultiField, Div, HTML
 from django import forms
 from django.forms import ModelForm
 
@@ -39,37 +39,32 @@ class ReportForm(forms.Form):
 
     VIKDate = forms.DateField(initial=datetime.date.today, label='Дата ВИК')
 
-    note = forms.CharField(widget=forms.Textarea(attrs={'rows': 1, 'cols': 20, 'placeholder': 'Что довавить'}),
-                           label="Примечание",required=False    )
+    note = forms.CharField(widget=forms.Textarea(attrs={'rows': 4, 'cols': 20, 'placeholder': 'Что довавить'}),
+                           label="Примечание", required=False)
 
     def __init__(self, *args, **kwargs):
         super(ReportForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.layout = Layout(
-            Div('supervisor', style="background: white;", title="Explication title", css_class="bigdivs"),
-            Div('VIKer', style="background: white;", title="Explication title", css_class="bigdivs"),
-            Div('reportMaker', style="background: white;", title="Explication title", css_class="bigdivs"),
-            Div('reportChecker', style="background: white;", title="Explication title", css_class="bigdivs"),
-            Div('worker', style="background: white;", title="Explication title", css_class="bigdivs"),
-            Div('stockMan', style="background: white;", title="Explication title", css_class="bigdivs"),
-            Div('note', style="background: white;", title="Explication title", css_class="bigdivs"),
-            Div(
-                Div('adate', css_class='col-md-6', ),
-                Div('VIKDate', css_class='col-md-6', ),
-                css_class='row',
-            ),
-            FormActions(
-                Submit('save', 'Save changes'),
-                Button('cancel', 'Cancel')
-            )
+            Div('supervisor', css_class='col-xs-4', ),
+            Div('VIKer', css_class='col-xs-4', ),
+            Div('reportMaker', css_class=' col-xs-4', ),
+            Div('reportChecker', css_class='col-xs-4', ),
+            Div('worker', css_class='col-xs-4', ),
+            Div('stockMan', css_class=' col-xs-4', ),
+            Div('adate', css_class='col-xs-2', ),
+            Div('VIKDate', css_class='col-xs-2', ),
+            Div('note', css_class='col-xs-8', ),
+            Submit('submit', u'Дальше', css_class='btn btn-primary center-me center-children'),
         )
+
 
 class WorkPartForm(ModelForm):
     class Meta:
         model = WorkPart
         fields = '__all__'
         widgets = {
-            'comment': forms.Textarea(attrs={'cols': 80, 'rows': 3}),
+            'comment': forms.Textarea(attrs={'cols': 80, 'rows': 1}),
             'startTime': forms.TimeInput(format='%H:%M'),
             'endTime': forms.TimeInput(format='%H:%M'),
         }
@@ -96,6 +91,21 @@ class WorkPartForm(ModelForm):
         self.fields['comment'].required = False
         self.fields['workPlace'].required = False
         self.fields['rationale'].required = False
+
+
+class ExampleFormSetHelper(FormHelper):
+    def __init__(self, *args, **kwargs):
+        super(ExampleFormSetHelper, self).__init__(*args, **kwargs)
+        self.form_method = 'post'
+        self.layout = Layout(
+            Div('standartWork', css_class='col-xs-2', ),
+            Div('workPlace', css_class=' col-xs-2', ),
+            Div('startTime', css_class='col-xs-2', ),
+            Div('endTime', css_class=' col-xs-2', ),
+            Div('comment', css_class='col-xs-2', ),
+            Div('rationale', css_class='col-xs-2', ),
+        )
+        self.render_required_fields = True
 
 
 class RejectForm(ModelForm):
@@ -119,41 +129,6 @@ class RejectForm(ModelForm):
         super(RejectForm, self).__init__(*args, **kwargs)
         # there's a `fields` property now
         self.fields['equipment'].required = False
-        self.fields['material'].required = False
-
-
-class WorkPartForm(ModelForm):
-    class Meta:
-        model = WorkPart
-        fields = '__all__'
-        widgets = {
-            'comment': forms.Textarea(attrs={'cols': 80, 'rows': 3}),
-            'startTime': forms.TimeInput(format='%H:%M'),
-            'endTime': forms.TimeInput(format='%H:%M'),
-        }
-
-        labels = {
-            'comment': 'Комментарий',
-            'startTime': 'Время начала работы',
-            'endTime': 'Время конца работы',
-            'standartWork': 'Работа',
-            # 'workPlace': 'Рабочее место',
-            # 'rationale': 'Обоснование',
-        }
-
-        error_messages = {
-            'startTime': {'invalid': 'Укажите корректное время'},
-            'endTime': {'invalid': 'Укажите корректное время'},
-            'standartWork': {'required': 'Это поле необходимо для заполнения'}
-        }
-
-    def __init__(self, *args, **kwargs):
-        # first call parent's constructor
-        super(WorkPartForm, self).__init__(*args, **kwargs)
-        # there's a `fields` property now
-        self.fields['comment'].required = False
-        self.fields['workPlace'].required = False
-        self.fields['rationale'].required = False
 
 
 class HardwareEquipmentForm(ModelForm):

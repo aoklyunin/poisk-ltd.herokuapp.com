@@ -15,12 +15,24 @@
     width: 500px;
     margin: 0 auto;
     }
+    .center-me {
+    margin: 0 auto;
+    }
+.center-children {
+  text-align: center;
+}
 {% endblock %}
 
 {% block content %}
-<br><br>
+
+{% endblock %}
+
+
+{% block sub_content %}
+
 
 {% load crispy_forms_tags %}
 {% crispy form %}
+
 
 {% endblock %}

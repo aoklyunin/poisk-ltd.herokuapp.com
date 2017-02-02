@@ -1,10 +1,11 @@
+# -*- coding: utf-8 -*-
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, render_to_response
 from django.forms import formset_factory, BaseFormSet
 
 from plan.forms import LoginForm
-from workReport.forms import ReportForm, WorkPartForm, HardwareEquipmentForm, RejectForm
+from workReport.forms import ReportForm, WorkPartForm, HardwareEquipmentForm, RejectForm, ExampleFormSetHelper
 from workReport.models import WorkReport, WorkPart, StandartWork, HardwareEquipment, Reject
 
 
@@ -66,7 +67,7 @@ def workReportPage1(request, workReport_id):
 
         # возвращаем простое окно регистрации
         return render(request, "workReport/workReportPage1.html", {
-            'form': ReportForm(data),
+            'form': ReportForm(initial=data),
             'login_form': LoginForm()
         })
 
@@ -142,9 +143,15 @@ def workReportPage2(request, workReport_id):
                 'form-1-standartWork': StandartWork.objects.get(text='Уборка рабочего места')
             }
         report_formset = ReportFormset(data)
-    c = {'report_formset': report_formset,
+        helper = ExampleFormSetHelper()
+        helper.template = 'workReport/table_inline_formset.html'
+
+    c = {'formset': report_formset,
+         'helper': helper,
+         'login_form': LoginForm(),
          'caption': 'Выполняемые работы'
          }
+
     #  c.update(csrf(request))
     return render(request, 'workReport/workReportFormset.html', c)
 
@@ -212,6 +219,7 @@ def workReportPage3(request, workReport_id):
             }
         report_formset = ReportFormset(data)
     c = {'report_formset': report_formset,
+         'login_form': LoginForm(),
          'caption': 'Фактически выполненные работы'
          }
     #  c.update(csrf(request))
@@ -269,7 +277,8 @@ def workReportPage4(request, workReport_id):
             }
         report_formset = ReportFormset(data)
     c = {'report_formset': report_formset,
-         'caption': 'Плановая выдача оборудования'
+         'caption': 'Плановая выдача оборудования',
+         'login_form': LoginForm(),
          }
     #  c.update(csrf(request))
     return render(request, 'workReport/workReportFormset.html', c)
@@ -325,7 +334,8 @@ def workReportPage5(request, workReport_id):
             }
         report_formset = ReportFormset(data)
     c = {'report_formset': report_formset,
-         'caption': 'Внеплановая выдача оборудования'
+         'caption': 'Внеплановая выдача оборудования',
+         'login_form': LoginForm(),
          }
     #  c.update(csrf(request))
     return render(request, 'workReport/workReportFormset.html', c)
@@ -359,7 +369,8 @@ def workReportPage6(request, workReport_id):
         }
         report_formset = ReportFormset(data)
     c = {'report_formset': report_formset,
-         'caption': 'Направлено в изолятор брака'
+         'caption': 'Направлено в изолятор брака',
+         'login_form': LoginForm(),
          }
     #  c.update(csrf(request))
     return render(request, 'workReport/workReportFormset.html', c)

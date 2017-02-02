@@ -19,15 +19,9 @@ margin: 0 auto;
 select {
 width: 300px; /* Ширина списка в пикселах */
 }
-
-{% load crispy_forms_tags %}
-
 {% endblock %}
 
 {% block content %}
-{% endblock %}
-{% block sub_content %}
-
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
 <script type="text/javascript" src="scripts/moment-2.4.0.js"></script>
 <script type="text/javascript">
@@ -120,24 +114,26 @@ $(document).ready(function() {
 
 });
 </script>
- <form method="post" action="{{ action }}" enctype="multipart/form-data">
-        {% csrf_token %}
-            {% crispy form %}
-            {{ formset.management_form|crispy }}
-            <input type="hidden" name="extra" value="{{extra}}">
-            <fieldset>
-                {% for form in formset %}
-                    {% crispy form %}
-                {% endfor %}
-                <input type="submit" name="action" value="+">
-            </fieldset>
-        <div style="text-align: right">
-        {% if not edit%}
-            <input type="submit" name="action" value="Create">
-        {% else %}
-            <input type="submit" name="action" value="Edit">
-        {% endif %}
-        </div>
-    </form>
+<br>
+<br>
+<form action="" method="POST">{% csrf_token %}
+
+    <h2>{{caption}}</h2>
+     <input type="submit" value="Дальше" class="btn btn-primary" />
+        {{ report_formset.management_form }}
+        {% for form in report_formset.forms %}
+    <div class="item">
+        {% bootstrap_form form %}
+
+      <p style=""><a class="btn btn-danger" href="#" >Удалить </a></p>
+    </div>
+     <hr>
+    {% endfor %}
+
+    <a id="add" href="#" class="btn btn-success" >Добавить ещё</a>
+
+
+
+</form>
 
 {% endblock %}
