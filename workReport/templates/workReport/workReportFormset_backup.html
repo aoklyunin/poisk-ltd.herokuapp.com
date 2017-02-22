@@ -120,8 +120,8 @@ $(document).ready(function() {
 
     <h2>{{caption}}</h2>
      <input type="submit" value="Дальше" class="btn btn-primary" />
-        {{ report_formset.management_form }}
-        {% for form in report_formset.forms %}
+        {{ formset.management_form }}
+        {% for form in formset.forms %}
     <div class="item">
         {% bootstrap_form form %}
 

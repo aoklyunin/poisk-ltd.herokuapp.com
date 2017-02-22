@@ -5,6 +5,7 @@ from django.db import models
 
 # Create your models here.
 # оснаска и комплектующие
+from mysite import settings
 from workReport.workReportGenerator import generateReport
 
 
@@ -210,7 +211,6 @@ class WorkPart(models.Model):
     workPlace = models.ForeignKey(WorkPlace, blank=True, default=None, null=True)
     rationale = models.ForeignKey(Rationale, blank=True, default=None, null=True)
 
-
     def __str__(self):
         return self.startTime.strftime("%H:%M") + "-" + self.endTime.strftime("%H:%M") + " " + str(
             self.standartWork) + " " + self.comment
@@ -218,6 +218,12 @@ class WorkPart(models.Model):
     def __unicode__(self):
         return self.startTime.strftime("%H:%M") + "-" + self.endTime.strftime("%H:%M") + " " + str(
             self.standartWork) + " " + self.comment
+
+
+class UserLink(models.Model):
+    user = models.OneToOneField(User)
+    anchor = models.CharField(max_length=100)
+    url = models.URLField()
 
 
 # наряд

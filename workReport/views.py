@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
+from django.core.checks import messages
+from django.db import IntegrityError
+from django.db import transaction
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render, render_to_response, redirect
 from django.forms import formset_factory, BaseFormSet
+from django.urls import reverse
 
 from plan.forms import LoginForm
-from workReport.forms import ReportForm, WorkPartForm, HardwareEquipmentForm, RejectForm, ExampleFormSetHelper
-from workReport.models import WorkReport, WorkPart, StandartWork, HardwareEquipment, Reject
+from workReport.forms import ReportForm, WorkPartForm, HardwareEquipmentForm, RejectForm, ExampleFormSetHelper, \
+    ProfileForm, LinkForm, BaseLinkFormSet
+from workReport.models import WorkReport, WorkPart, StandartWork, HardwareEquipment, Reject, UserLink
 
 
 class RequiredFormSet(BaseFormSet):
@@ -74,9 +79,7 @@ def workReportPage1(request, workReport_id):
 
 def workReportPage2(request, workReport_id):
     wr = WorkReport.objects.get(pk=workReport_id)
-
     #  if wr.workPart.all().exists():
-
     ReportFormset = formset_factory(WorkPartForm, max_num=10, formset=RequiredFormSet)
     if request.method == 'POST':
         report_formset = ReportFormset(request.POST, request.FILES)
@@ -144,16 +147,16 @@ def workReportPage2(request, workReport_id):
             }
         report_formset = ReportFormset(data)
         helper = ExampleFormSetHelper()
-        helper.template = 'workReport/table_inline_formset.html'
+        helper.template = 'workReport/workReportFormset_backup.html'
 
     c = {'formset': report_formset,
-         'helper': helper,
+         #'helper': helper,
          'login_form': LoginForm(),
          'caption': 'Выполняемые работы'
          }
 
     #  c.update(csrf(request))
-    return render(request, 'workReport/workReportFormset.html', c)
+    return render(request, 'workReport/workReportFormset_backup.html', c)
 
 
 def workReportPage3(request, workReport_id):
@@ -381,8 +384,59 @@ def workReportPage7(request, workReport_id):
 
 
 def test(request):
-    return render_to_response('workReport/test.html', {})
+    user = request.user
 
+    # Create the formset, specifying the form and formset we want to use.
+    LinkFormSet = formset_factory(LinkForm, formset=BaseLinkFormSet)
+
+    # Get our existing link data for this user.  This is used as initial data.
+    user_links = UserLink.objects.filter(user=user).order_by('anchor')
+    link_data = [{'anchor': 'a1', 'url': 'href1'},
+                 {'anchor': 'a2', 'url': 'href2'}]
+
+    if request.method == 'POST':
+        profile_form = ProfileForm(request.POST, user=user)
+        link_formset = LinkFormSet(request.POST)
+
+        if profile_form.is_valid() and link_formset.is_valid():
+            # Save user info
+            user.first_name = profile_form.cleaned_data.get('first_name')
+            user.last_name = profile_form.cleaned_data.get('last_name')
+            user.save()
+
+            # Now save the data for each form in the formset
+            new_links = []
+
+            for link_form in link_formset:
+                anchor = link_form.cleaned_data.get('anchor')
+                url = link_form.cleaned_data.get('url')
+
+                if anchor and url:
+                    new_links.append(UserLink(user=user, anchor=anchor, url=url))
+
+            try:
+                with transaction.atomic():
+                    # Replace the old with the new
+                    UserLink.objects.filter(user=user).delete()
+                    UserLink.objects.bulk_create(new_links)
+
+                    # And notify our users that it worked
+                    messages.success(request, 'You have updated your profile.')
+
+            except IntegrityError:  # If the transaction failed
+                messages.error(request, 'There was an error saving your profile.')
+                return redirect(reverse('profile-settings'))
+
+    else:
+        profile_form = ProfileForm(user=user)
+        link_formset = LinkFormSet(initial=link_data)
+
+    context = {
+        'profile_form': profile_form,
+        'link_formset': link_formset,
+    }
+
+    return render(request, 'workReport/our_template.html', context)
 
 def workReports(request):
     return render_to_response('workReport/workReportList.html', {'reports': WorkReport.objects.all()})

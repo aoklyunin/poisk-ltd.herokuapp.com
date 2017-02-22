@@ -119,7 +119,23 @@ $(document).ready(function() {
 {% load crispy_forms_tags %}
 
 </script>
-{{ formset.management_form|crispy }}
-{% crispy formset helper %}
+<form action="" method="POST">{% csrf_token %}
+
+    <h2>{{caption}}</h2>
+     <input type="submit" value="Дальше" class="btn btn-primary" />
+        {{ report_formset.management_form }}
+        {% for form in formset.forms %}
+    <div class="item">
+        {% crispy form %}
+
+      <p style=""><a class="btn btn-danger" href="#" >Удалить </a></p>
+    </div>
+     <hr>
+    {% endfor %}
+
+    <a id="add" href="#" class="btn btn-success" >Добавить ещё</a>
+
+
+</form>
 
 {% endblock %}
