@@ -148,13 +148,7 @@ def workReportPage2(request, workReport_id):
         report_formset = ReportFormset(data)
 
 
-    LinkFormSet = formset_factory(LinkForm, formset=BaseLinkFormSet)
-    link_data = [{'anchor': 'a1', 'url': 'href1'},
-                 {'anchor': 'a2', 'url': 'href2'}]
-    link_formset = LinkFormSet(initial=link_data)
-
-    c = {'link_formset': link_formset,
-         #'helper': helper,
+    c = {'link_formset': report_formset,
          'login_form': LoginForm(),
          'caption': 'Выполняемые работы'
          }

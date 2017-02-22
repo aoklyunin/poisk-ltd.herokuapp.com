@@ -71,8 +71,8 @@ class WorkPartForm(ModelForm):
 
         labels = {
             'comment': 'Комментарий',
-            'startTime': 'Время начала работы',
-            'endTime': 'Время конца работы',
+            'startTime': 'начало',
+            'endTime': 'конец',
             'standartWork': 'Работа',
             # 'workPlace': 'Рабочее место',
             # 'rationale': 'Обоснование',
@@ -91,6 +91,16 @@ class WorkPartForm(ModelForm):
         self.fields['comment'].required = False
         self.fields['workPlace'].required = False
         self.fields['rationale'].required = False
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Div('startTime', css_class='col-xs-1', ),
+            Div('endTime', css_class='col-xs-1'),
+            Div('standartWork', css_class='col-xs-2', ),
+            Div('workPlace', css_class='col-xs-2', ),
+            Div('comment', css_class='col-xs-2', ),
+            Div('rationale', css_class='col-xs-2', ),
+        )
+
 
 
 class ExampleFormSetHelper(FormHelper):

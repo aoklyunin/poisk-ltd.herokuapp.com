@@ -2,7 +2,7 @@
 {% load staticfiles %}
 {# Load the tag library #}
 {% load bootstrap3 %}
-
+{% load crispy_forms_tags %}
 {# Load CSS and JavaScript #}
 {% bootstrap_css %}
 {% bootstrap_javascript %}
@@ -39,23 +39,16 @@
 <form method="post">
     {% csrf_token %}
     {{ link_formset.management_form }}
+    <table>
     {% for link_form in link_formset %}
-        <div class="link-formset">
-                 {{ link_form.anchor }}
-            {% if link_form.anchor.errors %}
-                {% for error in link_form.anchor.errors %}
-                    {{ error|escape }}
-                {% endfor %}
-            {% endif %}
+        <tr><td>
+            <div class="link-formset">
+                {% crispy link_form %}
 
-            {{ link_form.url }}
-            {% if link_form.url.errors %}
-                {% for error in link_form.url.errors %}
-                    {{ error|escape }}
-                {% endfor %}
-            {% endif %}
-        </div>
+            </div>
+        </td></tr>
     {% endfor %}
+    </table>
 
     {% if link_formset.non_form_errors %}
         {% for error in link_formset.non_form_errors %}
@@ -74,13 +67,12 @@
     });
 </script>
 
-
     {% endif %}
-{% if messages %}
+    {% if messages %}
     {% for message in messages %}
         <p>{{ message }}</p>
     {% endfor %}
-{% endif %}
+    {% endif %}
 
 {% endblock %}
 
