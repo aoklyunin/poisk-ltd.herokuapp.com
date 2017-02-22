@@ -389,8 +389,6 @@ def test(request):
     # Create the formset, specifying the form and formset we want to use.
     LinkFormSet = formset_factory(LinkForm, formset=BaseLinkFormSet)
 
-    # Get our existing link data for this user.  This is used as initial data.
-    user_links = UserLink.objects.filter(user=user).order_by('anchor')
     link_data = [{'anchor': 'a1', 'url': 'href1'},
                  {'anchor': 'a2', 'url': 'href2'}]
 
