@@ -146,17 +146,21 @@ def workReportPage2(request, workReport_id):
                 'form-1-standartWork': StandartWork.objects.get(text='Уборка рабочего места')
             }
         report_formset = ReportFormset(data)
-        helper = ExampleFormSetHelper()
-        helper.template = 'workReport/workReportFormset_backup.html'
 
-    c = {'formset': report_formset,
+
+    LinkFormSet = formset_factory(LinkForm, formset=BaseLinkFormSet)
+    link_data = [{'anchor': 'a1', 'url': 'href1'},
+                 {'anchor': 'a2', 'url': 'href2'}]
+    link_formset = LinkFormSet(initial=link_data)
+
+    c = {'link_formset': link_formset,
          #'helper': helper,
          'login_form': LoginForm(),
          'caption': 'Выполняемые работы'
          }
 
     #  c.update(csrf(request))
-    return render(request, 'workReport/workReportFormset_backup.html', c)
+    return render(request, 'workReport/our_template.html', c)
 
 
 def workReportPage3(request, workReport_id):
