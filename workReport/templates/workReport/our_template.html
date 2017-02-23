@@ -36,17 +36,17 @@
     {% else %}
 
 
-<form method="post">
+<form method="post" class="formset_form">
     {% csrf_token %}
     {{ link_formset.management_form }}
     <table>
     {% for link_form in link_formset %}
-        <tr><td>
-            <div class="link-formset">
-                {% crispy link_form %}
+        <tr class="link-formset">
+                <td class="col-xs-1">{{ link_form.startTime }} </td>
+                <td class="col-xs-1">{{ link_form.endTime }} </td>
 
-            </div>
-        </td></tr>
+
+</tr>
     {% endfor %}
     </table>
 
@@ -58,6 +58,7 @@
 
     <input type="submit" value="Update Profile" class="button"/>
 </form>
+
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 <script src="{% static '/scripts/jquery.formset.js' %}"></script>
 <script>
