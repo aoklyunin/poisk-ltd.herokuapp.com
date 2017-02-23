@@ -172,7 +172,6 @@
             }
             // FIXME: Perhaps using $.data would be a better idea?
             options.formTemplate = template;
-
             if ($$.is('TR')) {
                 // If forms are laid out as table rows, insert the
                 // "add" button in a new table row:
@@ -184,11 +183,45 @@
                 addButton = buttonRow.find('a');
             } else {
                 // Otherwise, insert it immediately after the last form:
-                $$.filter(':last').after('<a class="' + options.addCssClass + '" href="javascript:void(0)">' + options.addText + '</a>');
+                $(':last').append('<a class="' + options.addCssClass + '" href="javascript:void(0)">' + options.addText + '</a>');
                 addButton = $$.filter(':last').next();
+
                 if (hideAddButton) addButton.hide();
             }
             addButton.click(function() {
+                var formCount = parseInt(totalForms.val()),
+                    row = options.formTemplate.clone(true).removeClass('formset-custom-template'),
+                    buttonRow = $($(this).parents('tr.' + options.formCssClass + '-add').get(0) || this)
+                    delCssSelector = $.trim(options.deleteCssClass).replace(/\s+/g, '.');
+
+                applyExtraClasses(row, formCount);
+                tmp = row.insertBefore(buttonRow);
+
+                tmp.show();
+                row.find(childElementSelector).each(function() {
+                    updateElementIndex($(this), options.prefix, formCount);
+                });
+                totalForms.val(formCount + 1);
+                // Check if we're above the minimum allowed number of forms -> show all delete link(s)
+                if (showDeleteLinks()){
+                    $('a.' + delCssSelector).each(function(){$(this).show();});
+                }
+                // Check if we've exceeded the maximum allowed number of forms:
+                if (!showAddButton()) buttonRow.hide();
+                // If a post-add callback was supplied, call it with the added form:
+                if (options.added) options.added(row);
+                return false;
+            });
+        }else{
+            // If forms are laid out as table rows, insert the
+                // "add" button in a new table row:
+                var numCols = $$.eq(0).children().length,   // This is a bit of an assumption :|
+                    buttonRow = $('<tr><td align="right" colspan="' + numCols + '"><a class="' + options.addCssClass + '" href="javascript:void(0)">' + options.addText + '</a></tr>')
+                                .addClass(options.formCssClass + '-add');
+                $('table').append(buttonRow);
+                if (hideAddButton) buttonRow.hide();
+                addButton = buttonRow.find('a');
+                addButton.click(function() {
                 var formCount = parseInt(totalForms.val()),
                     row = options.formTemplate.clone(true).removeClass('formset-custom-template'),
                     buttonRow = $($(this).parents('tr.' + options.formCssClass + '-add').get(0) || this)
