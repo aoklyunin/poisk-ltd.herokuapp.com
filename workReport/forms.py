@@ -4,7 +4,7 @@ import datetime
 
 from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, Button, MultiField, Div, HTML
+from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, Button, MultiField, Div, HTML, Field
 from django import forms
 from django.forms import ModelForm, BaseFormSet
 
@@ -70,18 +70,20 @@ class WorkPartForm(ModelForm):
         }
 
         labels = {
-            'comment': 'Комментарий',
-            'startTime': 'начало',
-            'endTime': 'конец',
-            'standartWork': 'Работа',
-            # 'workPlace': 'Рабочее место',
-            # 'rationale': 'Обоснование',
+            'comment': '',
+            'startTime': '',
+            'endTime': '',
+            'standartWork': '',
+            'workPlace': '',
+            'rationale': '',
         }
 
         error_messages = {
-            'startTime': {'invalid': 'Укажите корректное время'},
-            'endTime': {'invalid': 'Укажите корректное время'},
-            'standartWork': {'required': 'Это поле необходимо для заполнения'}
+            'startTime': {'invalid': ''},
+            'endTime': {'invalid': ''},
+            'workPlace': {'required': ''},
+            'rationale': {'invalid': ''},
+            'standartWork': {'invalid': '', 'required': ''}
         }
 
     def __init__(self, *args, **kwargs):
@@ -93,14 +95,17 @@ class WorkPartForm(ModelForm):
         self.fields['rationale'].required = False
         self.helper = FormHelper()
         self.helper.layout = Layout(
-            Div('startTime', css_class='col-xs-1', ),
-            Div('endTime', css_class='col-xs-1'),
-            Div('standartWork', css_class='col-xs-2', ),
-            Div('workPlace', css_class='col-xs-2', ),
-            Div('comment', css_class='col-xs-2', ),
-            Div('rationale', css_class='col-xs-2', ),
+            Div(
+                Div(
+                    Field('startTime', css_class='col-sm-2', ),
+                    Field('endTime', css_class='col-sm-2'),
+                    css_class='row'),
+                Field('standartWork', css_class='col-sm-2', ),
+                Field('workPlace', css_class='col-sm-2', ),
+                Field('comment', css_class='col-sm-2', ),
+                Field('rationale', css_class='col-sm-2', ),
+                css_class='row')
         )
-
 
 
 class ExampleFormSetHelper(FormHelper):
@@ -202,6 +207,7 @@ class ProfileForm(forms.Form):
             widget=forms.TextInput(attrs={
                 'placeholder': 'Last Name',
             }))
+
 
 class BaseLinkFormSet(BaseFormSet):
     def clean(self):

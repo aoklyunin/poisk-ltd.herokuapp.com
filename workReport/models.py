@@ -124,10 +124,7 @@ class Worker(models.Model):
         return str(self.tnumber) + " - " + self.getShort() + "(" + s[:-2] + ")"
 
     def __unicode__(self):
-        s = ""
-        for pos in self.position.all():
-            s += str(pos) + ", "
-        return str(self.tnumber) + " - " + self.getShort() + "(" + s[:-2] + ")"
+        return self.getShort()
 
 
 class HardwareEquipment(models.Model):

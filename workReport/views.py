@@ -17,8 +17,8 @@ from workReport.models import WorkReport, WorkPart, StandartWork, HardwareEquipm
 class RequiredFormSet(BaseFormSet):
     def __init__(self, *args, **kwargs):
         super(RequiredFormSet, self).__init__(*args, **kwargs)
-        for form in self.forms:
-            form.empty_permitted = False
+      #  for form in self.forms:
+      #      form.empty_permitted = False
 
 
 def workReportPage1(request, workReport_id):
@@ -70,11 +70,11 @@ def workReportPage1(request, workReport_id):
                 'note': work_report.note,
                 }
 
-        # возвращаем простое окно регистрации
-        return render(request, "workReport/workReportPage1.html", {
-            'form': ReportForm(initial=data),
-            'login_form': LoginForm()
-        })
+    # возвращаем простое окно регистрации
+    return render(request, "workReport/workReportPage1.html", {
+        'form': ReportForm(initial=data),
+        'login_form': LoginForm()
+    })
 
 
 def workReportPage2(request, workReport_id):
@@ -146,6 +146,9 @@ def workReportPage2(request, workReport_id):
                 'form-1-standartWork': StandartWork.objects.get(text='Уборка рабочего места')
             }
         report_formset = ReportFormset(data)
+
+    #   report_formset.errors = []
+        print (report_formset.errors)
 
 
     c = {'link_formset': report_formset,

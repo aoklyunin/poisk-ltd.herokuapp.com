@@ -5,6 +5,7 @@
 {# Load CSS and JavaScript #}
 {% bootstrap_css %}
 {% bootstrap_javascript %}
+{% load crispy_forms_tags %}
 
 {# Display django.contrib.messages as Bootstrap alerts #}
 {% bootstrap_messages %}
@@ -30,8 +31,6 @@
 
 {% block sub_content %}
 
-
-{% load crispy_forms_tags %}
 {% crispy form %}
 
 
