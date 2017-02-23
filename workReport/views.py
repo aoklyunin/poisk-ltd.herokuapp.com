@@ -84,8 +84,7 @@ def workReportPage2(request, workReport_id):
     if request.method == 'POST':
         report_formset = ReportFormset(request.POST, request.FILES)
         if report_formset.is_valid():
-            if wr.workPart.all().exists():
-                wr.workPart.all().delete()
+            wr.workPart.clear()
             for form in report_formset.forms:
                 if len(WorkPart.objects.filter(startTime=form.cleaned_data["startTime"],
                                                endTime=form.cleaned_data["endTime"],
@@ -162,31 +161,32 @@ def workReportPage2(request, workReport_id):
 
 def workReportPage3(request, workReport_id):
     wr = WorkReport.objects.get(pk=workReport_id)
-
     ReportFormset = formset_factory(WorkPartForm, max_num=10, formset=RequiredFormSet)
     if request.method == 'POST':
         report_formset = ReportFormset(request.POST, request.FILES)
         if report_formset.is_valid():
-            if wr.factWorkPart.all().exists():
-                wr.factWorkPart.all().delete()
+            wr.factWorkPart.clear()
             for form in report_formset.forms:
                 if len(WorkPart.objects.filter(startTime=form.cleaned_data["startTime"],
                                                endTime=form.cleaned_data["endTime"],
                                                standartWork=form.cleaned_data["standartWork"],
                                                workPlace=form.cleaned_data["workPlace"],
-                                               rationale=form.cleaned_data["rationale"]
+                                               rationale=form.cleaned_data["rationale"],
+                                               comment=form.cleaned_data["comment"]
                                                )) > 0:
                     w = WorkPart.objects.get(startTime=form.cleaned_data["startTime"],
                                              endTime=form.cleaned_data["endTime"],
                                              standartWork=form.cleaned_data["standartWork"],
                                              workPlace=form.cleaned_data["workPlace"],
-                                             rationale=form.cleaned_data["rationale"])
+                                             rationale=form.cleaned_data["rationale"],
+                                             comment=form.cleaned_data["comment"])
                 else:
                     w = WorkPart.objects.create(startTime=form.cleaned_data["startTime"],
                                                 endTime=form.cleaned_data["endTime"],
                                                 standartWork=form.cleaned_data["standartWork"],
                                                 workPlace=form.cleaned_data["workPlace"],
-                                                rationale=form.cleaned_data["rationale"])
+                                                rationale=form.cleaned_data["rationale"],
+                                                comment=form.cleaned_data["comment"])
                     w.save()
                 wr.factWorkPart.add(w)
                 # print(form.cleaned_data)
@@ -222,7 +222,7 @@ def workReportPage3(request, workReport_id):
                 'form-2-standartWork': StandartWork.objects.get(text='Уборка рабочего места')
             }
         report_formset = ReportFormset(data)
-    c = {'report_formset': report_formset,
+    c = {'link_formset': report_formset,
          'login_form': LoginForm(),
          'caption': 'Фактически выполненные работы'
          }
@@ -232,8 +232,6 @@ def workReportPage3(request, workReport_id):
 
 def workReportPage4(request, workReport_id):
     wr = WorkReport.objects.get(pk=workReport_id)
-
-    #  if wr.workPart.all().exists():
 
     ReportFormset = formset_factory(HardwareEquipmentForm, max_num=10, formset=RequiredFormSet)
     if request.method == 'POST':
