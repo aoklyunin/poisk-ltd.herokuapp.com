@@ -157,7 +157,7 @@ def workReportPage2(request, workReport_id):
          }
 
     #  c.update(csrf(request))
-    return render(request, 'workReport/our_template.html', c)
+    return render(request, 'workReport/workReportFormset.html', c)
 
 
 def workReportPage3(request, workReport_id):
@@ -435,7 +435,7 @@ def test(request):
         'link_formset': link_formset,
     }
 
-    return render(request, 'workReport/our_template.html', context)
+    return render(request, 'workReport/workReportFormset.html', context)
 
 def workReports(request):
     return render_to_response('workReport/workReportList.html', {'reports': WorkReport.objects.all()})

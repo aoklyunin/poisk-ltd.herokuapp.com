@@ -124,7 +124,7 @@ class Worker(models.Model):
         return str(self.tnumber) + " - " + self.getShort() + "(" + s[:-2] + ")"
 
     def __unicode__(self):
-        return self.getShort()
+        return str(self.tnumber) + " - "+self.getShort()
 
 
 class HardwareEquipment(models.Model):

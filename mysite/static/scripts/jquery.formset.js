@@ -58,7 +58,7 @@
                 if (row.is('TR')) {
                     // If the forms are laid out in table rows, insert
                     // the remove button into the last table cell:
-                    row.append('<td><a class="' + options.deleteCssClass +'" href="javascript:void(0)">' + options.deleteText + '</a></td>');
+                    row.append('<td valign = "top"><a class="' + options.deleteCssClass +'" href="javascript:void(0)">' + options.deleteText + '</a></td>');
                 } else if (row.is('UL') || row.is('OL')) {
                     // If they're laid out as an ordered/unordered list,
                     // insert an <li> after the last list item:
@@ -177,7 +177,7 @@
                 // If forms are laid out as table rows, insert the
                 // "add" button in a new table row:
                 var numCols = $$.eq(0).children().length,   // This is a bit of an assumption :|
-                    buttonRow = $('<tr><td colspan="' + numCols + '"><a class="' + options.addCssClass + '" href="javascript:void(0)">' + options.addText + '</a></tr>')
+                    buttonRow = $('<tr><td align="right" colspan="' + numCols + '"><a class="' + options.addCssClass + '" href="javascript:void(0)">' + options.addText + '</a></tr>')
                                 .addClass(options.formCssClass + '-add');
                 $$.parent().append(buttonRow);
                 if (hideAddButton) buttonRow.hide();
@@ -223,8 +223,8 @@
         formTemplate: null,              // The jQuery selection cloned to generate new form instances
         addText: 'add another',          // Text for the add link
         deleteText: 'remove',            // Text for the delete link
-        addCssClass: 'add-row',          // CSS class applied to the add link
-        deleteCssClass: 'delete-row',    // CSS class applied to the delete link
+        addCssClass: 'add-row btn btn-success',          // CSS class applied to the add link
+        deleteCssClass: 'delete-row btn btn-danger',    // CSS class applied to the delete link
         formCssClass: 'dynamic-form',    // CSS class applied to each form in a formset
         extraClasses: [],                // Additional CSS classes, which will be applied to each form in turn
         keepFieldValues: '',             // jQuery selector for fields whose values should be kept when the form is cloned
