@@ -213,7 +213,6 @@
                 return false;
             });
         }
-
         return $$;
     };
 

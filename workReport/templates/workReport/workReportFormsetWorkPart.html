@@ -44,6 +44,9 @@ ul.errorlist {display:none;}
     {% if user.is_authenticated == False %}
 
     {% else %}
+
+
+
 <H3> Наряд: {{ caption }}</H3>
 <a class="btn btn-danger" href="../../list/">Выход</a>
 <a class="btn btn-success" href="../../print/{{pk}}/">Печать</a>
@@ -63,6 +66,11 @@ ul.errorlist {display:none;}
     {% csrf_token %}
 
      {{ link_formset.management_form }}
+    {% for dict in link_formset.errors %}
+    {% for error in dict.values %}
+        {{ error }}
+    {% endfor %}
+{% endfor %}
     <table cellspacing="3" cellpadding="7" >
         <thead><tr>
                 <td align="center">Начало</td>
@@ -97,7 +105,7 @@ ul.errorlist {display:none;}
 </form>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-<script src="{% static '/scripts/jquery.formset2.js' %}"></script>
+<script src="{% static '/scripts/jquery.formset.js' %}"></script>
 <script>
     $('.link-formset').formset({
         addText: 'Добавить',

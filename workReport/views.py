@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
+import re
+
 from datetime import time
 from django.core.checks import messages
 from django.db import IntegrityError
@@ -18,6 +20,9 @@ from workReport.models import WorkReport, WorkPart, StandartWork, HardwareEquipm
 
 
 class RequiredFormSet(BaseFormSet):
+    def clean(self):
+        return
+
     def __init__(self, *args, **kwargs):
         super(RequiredFormSet, self).__init__(*args, **kwargs)
         for form in self.forms:
@@ -108,7 +113,9 @@ def workReportPage2(request, workReport_id):
                 data['form-' + str(i) + '-rationale'] = part.rationale
             data['form-' + str(i) + '-comment'] = part.comment
             i += 1
-        report_formset = ReportFormset(data)
+            report_formset = ReportFormset(data)
+            #   report_formset.full_clean()
+            # report_formset.clean()
 
     c = {'link_formset': report_formset,
          'login_form': LoginForm(),
@@ -207,26 +214,42 @@ def calculateEquipment(workReport_id):
 
 
 def workReportPage4(request, workReport_id):
-    calculateEquipment(workReport_id)
     wr = WorkReport.objects.get(pk=workReport_id)
     ReportFormset = formset_factory(HardwareEquipmentForm, max_num=10, formset=RequiredFormSet)
     if request.method == 'POST':
         report_formset = ReportFormset(request.POST, request.FILES)
         if report_formset.is_valid():
+            wr.planHardware.clear()
             for form in report_formset.forms:
-                w, created = HardwareEquipment.objects.get_or_create(equipment=form.cleaned_data["equipment"],
-                                                                     material=form.cleaned_data["material"],
-                                                                     usedCnt=form.cleaned_data["usedCnt"],
-                                                                     getCnt=form.cleaned_data["getCnt"],
-                                                                     rejectCnt=form.cleaned_data["rejectCnt"],
-                                                                     dustCnt=form.cleaned_data["dustCnt"],
-                                                                     remainCnt=form.cleaned_data["remainCnt"])
-                if created:
-                    w.save()
-
-              #  print(form.cleaned_data)
-            return HttpResponseRedirect('/workReport/page5/' + str(workReport_id) + '/')
+                if (form.cleaned_data["equipment"] is None) and (form.cleaned_data["material"] is None):
+                    # print ("empty form line")
+                    continue
+                if len(HardwareEquipment.objects.filter(equipment=form.cleaned_data["equipment"],
+                                                        material=form.cleaned_data["material"],
+                                                        usedCnt=form.cleaned_data["usedCnt"],
+                                                        getCnt=form.cleaned_data["getCnt"],
+                                                        rejectCnt=form.cleaned_data["rejectCnt"],
+                                                        dustCnt=form.cleaned_data["dustCnt"],
+                                                        remainCnt=form.cleaned_data["remainCnt"])) > 1:
+                    w = HardwareEquipment.objects.filter(equipment=form.cleaned_data["equipment"],
+                                                         material=form.cleaned_data["material"],
+                                                         usedCnt=form.cleaned_data["usedCnt"],
+                                                         getCnt=form.cleaned_data["getCnt"],
+                                                         rejectCnt=form.cleaned_data["rejectCnt"],
+                                                         dustCnt=form.cleaned_data["dustCnt"],
+                                                         remainCnt=form.cleaned_data["remainCnt"]).first()
+                else:
+                    w, created = HardwareEquipment.objects.get_or_create(equipment=form.cleaned_data["equipment"],
+                                                                         material=form.cleaned_data["material"],
+                                                                         usedCnt=form.cleaned_data["usedCnt"],
+                                                                         getCnt=form.cleaned_data["getCnt"],
+                                                                         rejectCnt=form.cleaned_data["rejectCnt"],
+                                                                         dustCnt=form.cleaned_data["dustCnt"],
+                                                                         remainCnt=form.cleaned_data["remainCnt"])
+                w.save()
+                wr.planHardware.add(w)
     else:
+        calculateEquipment(workReport_id)
         if wr.planHardware.all().exists():
             data = {
                 'form-TOTAL_FORMS': str(len(wr.planHardware.all())),
@@ -243,17 +266,23 @@ def workReportPage4(request, workReport_id):
                 data['form-' + str(i) + '-dustCnt'] = part.dustCnt
                 data['form-' + str(i) + '-remainCnt'] = part.remainCnt
                 i += 1
-         #   print(data)
         else:
             data = {
-                'form-TOTAL_FORMS': '0',
-                'form-INITIAL_FORMS': '1',
+                'form-TOTAL_FORMS': '1',
+                'form-INITIAL_FORMS': '0',
                 'form-MAX_NUM_FORMS': '',
+                'form-0-usedCnt': 0.0,
+                'form-0-getCnt': 0.0,
+                'form-0-rejectCnt': 0.0,
+                'form-0-dustCnt': 0.0,
+                'form-0-remainCnt': 0.0,
             }
-        print(data)
+            # print(data)
         report_formset = ReportFormset(data)
+        #  print (report_formset)
+
     c = {'link_formset': report_formset,
-         'caption': 'Плановая выдача оборудования',
+         'caption': 'страница 4 - Плановая выдача оборудования',
          'login_form': LoginForm(),
          'pk': workReport_id,
          }
@@ -269,22 +298,35 @@ def workReportPage5(request, workReport_id):
     if request.method == 'POST':
         report_formset = ReportFormset(request.POST, request.FILES)
         if report_formset.is_valid():
-            if wr.noPlanHardware.all().exists():
-                wr.noPlanHardware.all().delete()
+            wr.noPlanHardware.clear()
             for form in report_formset.forms:
-                w, created = HardwareEquipment.objects.get_or_create(equipment=form.cleaned_data["equipment"],
-                                                                     material=form.cleaned_data["material"],
-                                                                     usedCnt=form.cleaned_data["usedCnt"],
-                                                                     getCnt=form.cleaned_data["getCnt"],
-                                                                     rejectCnt=form.cleaned_data["rejectCnt"],
-                                                                     dustCnt=form.cleaned_data["dustCnt"],
-                                                                     remainCnt=form.cleaned_data["remainCnt"])
-                if created:
-                    w.save()
+                if (form.cleaned_data["equipment"] is None) and (form.cleaned_data["material"] is None):
+                    # print ("empty form line")
+                    continue
+                if len(HardwareEquipment.objects.filter(equipment=form.cleaned_data["equipment"],
+                                                        material=form.cleaned_data["material"],
+                                                        usedCnt=form.cleaned_data["usedCnt"],
+                                                        getCnt=form.cleaned_data["getCnt"],
+                                                        rejectCnt=form.cleaned_data["rejectCnt"],
+                                                        dustCnt=form.cleaned_data["dustCnt"],
+                                                        remainCnt=form.cleaned_data["remainCnt"])) > 1:
+                    w = HardwareEquipment.objects.filter(equipment=form.cleaned_data["equipment"],
+                                                         material=form.cleaned_data["material"],
+                                                         usedCnt=form.cleaned_data["usedCnt"],
+                                                         getCnt=form.cleaned_data["getCnt"],
+                                                         rejectCnt=form.cleaned_data["rejectCnt"],
+                                                         dustCnt=form.cleaned_data["dustCnt"],
+                                                         remainCnt=form.cleaned_data["remainCnt"]).first()
+                else:
+                    w, created = HardwareEquipment.objects.get_or_create(equipment=form.cleaned_data["equipment"],
+                                                                         material=form.cleaned_data["material"],
+                                                                         usedCnt=form.cleaned_data["usedCnt"],
+                                                                         getCnt=form.cleaned_data["getCnt"],
+                                                                         rejectCnt=form.cleaned_data["rejectCnt"],
+                                                                         dustCnt=form.cleaned_data["dustCnt"],
+                                                                         remainCnt=form.cleaned_data["remainCnt"])
                 w.save()
                 wr.noPlanHardware.add(w)
-             #   print(form.cleaned_data)
-            return HttpResponseRedirect('/workReport/page6/' + str(workReport_id) + '/')
     else:
         if wr.noPlanHardware.all().exists():
             data = {
@@ -304,13 +346,18 @@ def workReportPage5(request, workReport_id):
                 i += 1
         else:
             data = {
-                'form-TOTAL_FORMS': '0',
+                'form-TOTAL_FORMS': '1',
                 'form-INITIAL_FORMS': '0',
                 'form-MAX_NUM_FORMS': '',
+                'form-0-usedCnt': 0.0,
+                'form-0-getCnt': 0.0,
+                'form-0-rejectCnt': 0.0,
+                'form-0-dustCnt': 0.0,
+                'form-0-remainCnt': 0.0,
             }
         report_formset = ReportFormset(data)
-    c = {'report_formset': report_formset,
-         'caption': 'Внеплановая выдача оборудования',
+    c = {'link_formset': report_formset,
+         'caption': 'страница 5 - Внеплановая выдача оборудования',
          'login_form': LoginForm(),
          'pk': workReport_id,
          }
@@ -321,37 +368,56 @@ def workReportPage5(request, workReport_id):
 def workReportPage6(request, workReport_id):
     wr = WorkReport.objects.get(pk=workReport_id)
 
+    #  if wr.workPart.all().exists():
     ReportFormset = formset_factory(RejectForm, max_num=10, formset=RequiredFormSet)
     if request.method == 'POST':
         report_formset = ReportFormset(request.POST, request.FILES)
         if report_formset.is_valid():
-            if wr.rejected.all().exists():
-                wr.rejected.all().delete()
+            wr.rejected.clear()
             for form in report_formset.forms:
-                w = Reject.objects.create(
-                    # деталь
-                    equipment=form.cleaned_data["equipment"],
-                    material=form.cleaned_data["material"],
-                    cnt=form.cleaned_data["cnt"],
-                )
+                if (form.cleaned_data["equipment"] is None) and (form.cleaned_data["material"] is None):
+                    # print ("empty form line")
+                    continue
+                if len(Reject.objects.filter(equipment=form.cleaned_data["equipment"],
+                                             material=form.cleaned_data["material"],
+                                             cnt=form.cleaned_data["cnt"])) > 1:
+                    w = Reject.objects.filter(equipment=form.cleaned_data["equipment"],
+                                              material=form.cleaned_data["material"],
+                                              cnt=form.cleaned_data["cnt"]).first()
+                else:
+                    w, created = Reject.objects.get_or_create(equipment=form.cleaned_data["equipment"],
+                                                              material=form.cleaned_data["material"],
+                                                              cnt=form.cleaned_data["cnt"])
                 w.save()
                 wr.rejected.add(w)
-               # print(form.cleaned_data)
-            return HttpResponseRedirect('/workReport/page7/' + str(workReport_id) + '/')
     else:
-        data = {
-            'form-TOTAL_FORMS': '0',
-            'form-INITIAL_FORMS': '0',
-            'form-MAX_NUM_FORMS': '',
-        }
+        if wr.rejected.all().exists():
+            data = {
+                'form-TOTAL_FORMS': str(len(wr.rejected.all())),
+                'form-INITIAL_FORMS': '0',
+                'form-MAX_NUM_FORMS': ''
+            }
+            i = 0
+            for part in wr.rejected.all():
+                data['form-' + str(i) + '-equipment'] = part.equipment
+                data['form-' + str(i) + '-material'] = part.material
+                data['form-' + str(i) + '-cnt'] = part.cnt
+                i += 1
+        else:
+            data = {
+                'form-TOTAL_FORMS': '1',
+                'form-INITIAL_FORMS': '0',
+                'form-MAX_NUM_FORMS': '',
+                'form-0-cnt': 0.0,
+            }
         report_formset = ReportFormset(data)
-    c = {'report_formset': report_formset,
-         'caption': 'Направлено в изолятор брака',
+    c = {'link_formset': report_formset,
+         'caption': 'страница 6 - Брак',
          'login_form': LoginForm(),
          'pk': workReport_id,
          }
     #  c.update(csrf(request))
-    return render(request, 'workReport/workReportFormsetWorkPart.html', c)
+    return render(request, 'workReport/workReportFormsetRejected.html', c)
 
 
 def workReportPage7(request, workReport_id):

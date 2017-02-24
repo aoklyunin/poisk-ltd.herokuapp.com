@@ -65,15 +65,11 @@ ul.errorlist {display:none;}
     {% csrf_token %}
 
      {{ link_formset.management_form }}
-    <table cellspacing="3" cellpadding="7" >
+    <table align="center" cellspacing="3" cellpadding="7" >
         <thead><tr>
                 <td align="center">Оборудование</td>
                 <td align="center">Материал</td>
-                <td align="center">Использовано</td>
-                <td  align="center">Получено</td>
-                <td align="center">Брак</td>
-                <td align="center">Утиль</td>
-                <td align="center">Осталось</td>
+                <td align="center">Количество</td>
             </tr>
         </thead>
         <tr></tr>
@@ -81,11 +77,7 @@ ul.errorlist {display:none;}
         <tr class="link-formset">
             <td valign = "top">{% bootstrap_field link_form.equipment  %} </td>
             <td valign = "top">{% bootstrap_field link_form.material  %} </td>
-            <td valign = "top" >{% bootstrap_field link_form.usedCnt %} </td>
-            <td valign = "top">{% bootstrap_field link_form.getCnt  %} </td>
-            <td valign = "top">{% bootstrap_field link_form.rejectCnt %} </td>
-            <td valign = "top">{% bootstrap_field link_form.dustCnt %} </td>
-            <td valign = "top" >{% bootstrap_field link_form.remainCnt %} </td>
+            <td valign = "top" >{% bootstrap_field link_form.cnt %} </td>
         </tr>
 
     {% endfor %}

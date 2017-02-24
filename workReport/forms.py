@@ -82,8 +82,8 @@ class WorkPartForm(ModelForm):
             'startTime': {'invalid': ''},
             'endTime': {'invalid': ''},
             'workPlace': {'required': ''},
-            'rationale': {'invalid': ''},
-            'standartWork': {'invalid': '', 'required': ''}
+            'rationale': {'invalid': '', 'invalid_choice': ''},
+            'standartWork': {'invalid_choice': ''}
         }
 
     def __init__(self, *args, **kwargs):
@@ -131,12 +131,15 @@ class RejectForm(ModelForm):
         }
 
         labels = {
-            'equipment': 'оборудование',
-            'usedCnt': 'использовано',
-            'сnt': 'кол-во',
+            'cnt': '',
+            'equipment': '',
+            'material': '',
+
         }
 
         error_messages = {
+            'equipment': {'invalid_choice': ''},
+            'material': {'invalid_choice': ''},
         }
 
     def __init__(self, *args, **kwargs):
@@ -155,6 +158,7 @@ class HardwareEquipmentForm(ModelForm):
 
         labels = {
             'equipment': '',
+            'material': '',
             'usedCnt': '',
             'getCnt': '',
             'rejectCnt': '',
@@ -163,6 +167,8 @@ class HardwareEquipmentForm(ModelForm):
         }
 
         error_messages = {
+            'equipment': {'invalid_choice': ''},
+            'material': {'invalid_choice': ''},
         }
 
     def __init__(self, *args, **kwargs):
