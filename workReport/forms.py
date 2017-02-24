@@ -154,12 +154,12 @@ class HardwareEquipmentForm(ModelForm):
         }
 
         labels = {
-            'equipment': 'оборудование',
-            'usedCnt': 'использовано',
-            'getCnt': 'получено',
-            'rejectCnt': 'брак',
-            'dustCnt': 'утиль',
-            'remainCnt': 'осталось',
+            'equipment': '',
+            'usedCnt': '',
+            'getCnt': '',
+            'rejectCnt': '',
+            'dustCnt': '',
+            'remainCnt': '',
         }
 
         error_messages = {

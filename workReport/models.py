@@ -140,7 +140,7 @@ class HardwareEquipment(models.Model):
 
     def __str__(self):
         if self.material is None:
-            print(self.equipment.name + " " + str(self.getCnt) + " " + self.equipment.dimension)
+            #print(self.equipment.name + " " + str(self.getCnt) + " " + self.equipment.dimension)
             return self.equipment.name + " " + str(self.getCnt) + " " + self.equipment.dimension
         else:
             return self.material.name + " " + str(self.getCnt) + " " + self.material.dimension
@@ -258,6 +258,8 @@ class WorkReport(models.Model):
     factWorkPart = models.ManyToManyField(WorkPart, related_name="fact_WorkPart", blank=True, null=True)
     # примечание
     note = models.CharField(max_length=10000, default="", blank=True, null=True)
+
+    flgCalculateEquipment = models.BooleanField(default=False)
 
     def generateDoc(self):
         wp = []

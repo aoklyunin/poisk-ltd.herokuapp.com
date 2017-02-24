@@ -56,6 +56,7 @@ ul.errorlist {display:none;}
             <td><a href="../../page3/{{pk}}/">3</a></td>
             <td><a href="../../page4/{{pk}}/">4</a></td>
             <td><a href="../../page5/{{pk}}/">5</a></td>
+            <td><a href="../../page5/{{pk}}/">6</a></td>
         </tr>
     </table>
 <br>
@@ -65,23 +66,23 @@ ul.errorlist {display:none;}
      {{ link_formset.management_form }}
     <table cellspacing="3" cellpadding="7" >
         <thead><tr>
-                <td align="center">Начало</td>
-                <td align="center">Конец</td>
-                <td  align="center">Работа</td>
-                <td align="center">Рабочее место</td>
-                <td align="center">Обоснование</td>
-                <td align="center">Комментарий</td>
+                <td align="center">Оборудование</td>
+                <td align="center">Использовано</td>
+                <td  align="center">Получено</td>
+                <td align="center">Брак</td>
+                <td align="center">Утиль</td>
+                <td align="center">Осталось</td>
             </tr>
         </thead>
         <tr></tr>
     {% for link_form in link_formset %}
         <tr class="link-formset">
-            <td valign = "top">{% bootstrap_field link_form.startTime  %} </td>
-            <td valign = "top" >{% bootstrap_field link_form.endTime %} </td>
-            <td valign = "top">{% bootstrap_field link_form.standartWork  %} </td>
-            <td valign = "top">{% bootstrap_field link_form.workPlace %} </td>
-            <td valign = "top">{% bootstrap_field link_form.rationale %} </td>
-            <td valign = "top" >{% bootstrap_field link_form.comment %} </td>
+            <td valign = "top">{% bootstrap_field link_form.equipment  %} </td>
+            <td valign = "top" >{% bootstrap_field link_form.usedCnt %} </td>
+            <td valign = "top">{% bootstrap_field link_form.getCnt  %} </td>
+            <td valign = "top">{% bootstrap_field link_form.rejectCnt %} </td>
+            <td valign = "top">{% bootstrap_field link_form.dustCnt %} </td>
+            <td valign = "top" >{% bootstrap_field link_form.remainCnt %} </td>
         </tr>
 
     {% endfor %}
