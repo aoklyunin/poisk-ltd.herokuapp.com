@@ -45,10 +45,12 @@
             <a class="navbar-brand" href="/">НПО Поиск</a>
         </div>
 
-
         <div class="navbar-collapse collapse" id="main-menu">
             <ul class="nav navbar-nav">
-                <li><a href="/workReport/list/" class="btn">Наряды</a></li>
+                 <li><a href="/workReport/list/" class="btn">Наряды</a></li>
+                 <li><a href="/orders/list/" class="btn">Заказы</a></li>
+                 <li><a href="/assemblyUnits/list/" class="btn">Сборочные единицы</a></li>
+
                 {% if user.is_authenticated == False %}
 
                 {% else %}

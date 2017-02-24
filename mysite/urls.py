@@ -17,5 +17,9 @@ urlpatterns = [
     url(r'^logout/$', plan.auth.logout_view),
     # регистрация на сайте
     url(r'^register/$', plan.auth.register),
+    url(r'^register/$', plan.auth.register),
+    url(r'^orders/list/$', plan.views.orderList),
+    url(r'^assemblyUnits/list/$', plan.views.assemlyUnitList),
     url(r'^', plan.auth.index, name='index'),
+
 ]

@@ -3,9 +3,8 @@ import datetime
 from django.contrib.auth.models import User
 from django.db import models
 
-# Create your models here.
-# оснаска и комплектующие
-from mysite import settings
+from plan.models import Agreement
+from plan.models import Customer
 from workReport.workReportGenerator import generateReport
 
 
@@ -124,7 +123,7 @@ class Worker(models.Model):
         return str(self.tnumber) + " - " + self.getShort() + "(" + s[:-2] + ")"
 
     def __unicode__(self):
-        return str(self.tnumber) + " - "+self.getShort()
+        return str(self.tnumber) + " - " + self.getShort()
 
 
 class HardwareEquipment(models.Model):
@@ -140,7 +139,7 @@ class HardwareEquipment(models.Model):
 
     def __str__(self):
         if self.material is None:
-            #print(self.equipment.name + " " + str(self.getCnt) + " " + self.equipment.dimension)
+            # print(self.equipment.name + " " + str(self.getCnt) + " " + self.equipment.dimension)
             return self.equipment.name + " " + str(self.getCnt) + " " + self.equipment.dimension
         else:
             return self.material.name + " " + str(self.getCnt) + " " + self.material.dimension
@@ -190,6 +189,7 @@ class StandartWork(models.Model):
     text = models.CharField(max_length=2000)
     positionsEnable = models.ManyToManyField(WorkerPosition)
     hardwareEquipment = models.ManyToManyField(HardwareEquipment, blank=True, default=None, null=True)
+    #  длительность в минутах
     duration = models.FloatField(default=0)
 
     def __str__(self):
@@ -217,10 +217,117 @@ class WorkPart(models.Model):
             self.standartWork) + " " + self.comment
 
 
-class UserLink(models.Model):
-    user = models.OneToOneField(User)
-    anchor = models.CharField(max_length=100)
-    url = models.URLField()
+class FullStandartWork(models.Model):
+    standartWork = models.ForeignKey(StandartWork)
+    cnt = models.IntegerField(default=1)
+    quequepos = models.IntegerField(default=0)
+    comment = models.CharField(max_length=10000, default="")
+
+
+class Detail(models.Model):
+    # оснаска и комплектующие
+    equipment = models.ManyToManyField(Equipment)
+    # материалы
+    materials = models.ManyToManyField(Material)
+    # шифр
+    code = models.CharField(max_length=100)
+    # имя
+    name = models.CharField(max_length=1000)
+    # чертёж
+    scheme = models.ManyToManyField(Scheme)
+    # работы для изделия
+    fullWorks = models.ManyToManyField(FullStandartWork)
+    # текущее положение очереди работ
+    fullWorkPos = models.IntegerField(default=0)
+
+
+# класс сборочных единиц
+class AssemblyUnits(models.Model):
+    # сборочные единицы
+    assemblyUnits = models.ManyToManyField("self")
+    # оснастка и комплектующие
+    equipment = models.ManyToManyField(Equipment)
+    # материалы
+    materials = models.ManyToManyField(Material)
+    # имя
+    name = models.CharField(max_length=1000)
+    # чертёж
+    scheme = models.ManyToManyField(Scheme)
+    # шифр
+    code = models.CharField(max_length=100)
+    # работы для изделия
+    fullWorks = models.ManyToManyField(FullStandartWork)
+    # текущее положение очереди работ
+    fullWorkPos = models.IntegerField(default=0)
+    # деталь
+    details = models.ManyToManyField(Detail)
+
+    # сдандартные работы
+    def __str__(self):
+        return self.name
+
+    def __unicode__(self):
+        return self.name
+
+
+class TehUnit(models.Model):
+    cnt = models.IntegerField(default=1)
+    standartWork = models.ForeignKey(StandartWork)
+    equipment = models.ForeignKey(StandartWork)
+    materials = models.ForeignKey(Material)
+    equipment = models.ForeignKey(Equipment)
+    detail = models.ForeignKey(Detail)
+    assemblyUnit = models.ForeignKey(AssemblyUnits)
+    comment = models.CharField(max_length=1000)
+    nextUnits = models.ManyToManyField("self")
+
+
+class TehReview(models.Model):
+    name = models.CharField(max_length=1000)
+    firstUnit = models.ForeignKey(TehUnit)
+
+
+class Order(models.Model):
+    # сборочные единицы
+    assemblyUnits = models.ManyToManyField(AssemblyUnits)
+    # оснаска и комплектующие
+    equipment = models.ManyToManyField(Equipment)
+    # материалы
+    materials = models.ManyToManyField(Material)
+    # заказчик
+    customer = models.ForeignKey(Customer)
+    # номер заказа
+    number = models.CharField(max_length=500)
+    # название заказа
+    name = models.CharField(max_length=500)
+    # наличие военной прниёмки
+    needVP = models.BooleanField(default=False)
+    # примечание
+    note = models.CharField(max_length=10000)
+    # договор
+    agreement = models.ForeignKey(Agreement)
+    # статус
+    status = models.IntegerField(default=0)
+    # дата запуска
+    startDate = models.DateField('date start')
+    # дата по договору
+    agreementDate = models.DateField('date agreement')
+    # дата по плану
+    planDate = models.DateField('date plan')
+    # работы для изделия
+    fullWorks = models.ManyToManyField(FullStandartWork)
+    # текущее положение очереди работ
+    fullWorkPos = models.IntegerField(default=0)
+    # деталь
+    details = models.ManyToManyField(Detail)
+    # описание тех.процеса
+    tehReview = models.ForeignKey(TehReview)
+
+    def __str__(self):
+        return self.name
+
+    def __unicode__(self):
+        return self.name
 
 
 # наряд
@@ -260,6 +367,8 @@ class WorkReport(models.Model):
     note = models.CharField(max_length=10000, default="", blank=True, null=True)
 
     flgCalculateEquipment = models.BooleanField(default=False)
+
+    order = models.ForeignKey(Order, blank=True)
 
     def generateDoc(self):
         wp = []

@@ -15,7 +15,7 @@ from django.urls import reverse
 from plan.forms import LoginForm
 from workReport.forms import ReportForm, WorkPartForm, HardwareEquipmentForm, RejectForm, ExampleFormSetHelper, \
     ProfileForm, LinkForm, BaseLinkFormSet
-from workReport.models import WorkReport, WorkPart, StandartWork, HardwareEquipment, Reject, UserLink, Worker, \
+from workReport.models import WorkReport, WorkPart, StandartWork, HardwareEquipment, Reject,  Worker, \
     WorkerPosition
 
 
@@ -475,7 +475,6 @@ def test(request):
 
 
 def workReports(request):
-    print("asdas")
     return render(request, 'workReport/workReportList.html',
                   {'reports':
                        WorkReport.objects.all().order_by('-adate')
