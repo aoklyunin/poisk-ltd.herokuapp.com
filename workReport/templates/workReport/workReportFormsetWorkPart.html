@@ -45,14 +45,26 @@ ul.errorlist {display:none;}
 
     {% else %}
 
+<a class="btn btn-danger" href="../../list/">Выход</a>
+<a class="btn btn-success" href="../../print/{{pk}}/">Печать</a>
+    <table align="center">
+       <tr><td colspan="6" align="center">Страницы:</td></tr>
+        <tr>
 
+            <td><a href="../../page1/{{pk}}/">1</a></td>
+            <td><a href="../../page2/{{pk}}/">2</a></td>
+            <td><a href="../../page3/{{pk}}/">3</a></td>
+            <td><a href="../../page4/{{pk}}/">4</a></td>
+            <td><a href="../../page5/{{pk}}/">5</a></td>
+        </tr>
+    </table>
+<br>
 <form method="post" class="formset_form">
     {% csrf_token %}
-    <input class = "btn btn-primary" type="submit" value="Дальше" class="button"/>
-    {{ link_formset.management_form }}
+
+     {{ link_formset.management_form }}
     <table cellspacing="3" cellpadding="7" >
-        <thead>
-            <tr>
+        <thead><tr>
                 <td align="center">Начало</td>
                 <td align="center">Конец</td>
                 <td  align="center">Работа</td>
@@ -61,6 +73,7 @@ ul.errorlist {display:none;}
                 <td align="center">Комментарий</td>
             </tr>
         </thead>
+        <tr></tr>
     {% for link_form in link_formset %}
         <tr class="link-formset">
             <td valign = "top">{% bootstrap_field link_form.startTime  %} </td>
@@ -79,11 +92,12 @@ ul.errorlist {display:none;}
     <ul class="errorlist">
     <li>Sender is required.</li>
     </ul>
-    <input class = "btn btn-primary" type="submit" value="Дальше" class="button"/>
+    <input class = "btn btn-primary" type="submit" value="Сохранить" class="button"/>
+
 </form>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-<script src="{% static '/scripts/jquery.formset.js' %}"></script>
+<script src="{% static '/scripts/jquery.formset2.js' %}"></script>
 <script>
     $('.link-formset').formset({
         addText: 'Добавить',

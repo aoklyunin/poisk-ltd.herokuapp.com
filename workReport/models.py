@@ -209,8 +209,8 @@ class WorkPart(models.Model):
     rationale = models.ForeignKey(Rationale, blank=True, default=None, null=True)
 
     def __str__(self):
-        return self.startTime.strftime("%H:%M") + "-" + self.endTime.strftime("%H:%M") + " " + str(
-            self.standartWork) + " " + self.comment
+        return self.startTime.strftime("%H:%M") + "-" + self.endTime.strftime("%H:%M") + " " \
+               + str(self.standartWork) + " " + self.comment
 
     def __unicode__(self):
         return self.startTime.strftime("%H:%M") + "-" + self.endTime.strftime("%H:%M") + " " + str(

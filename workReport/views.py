@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import datetime
+from datetime import time
 from django.core.checks import messages
 from django.db import IntegrityError
 from django.db import transaction
@@ -11,14 +13,15 @@ from django.urls import reverse
 from plan.forms import LoginForm
 from workReport.forms import ReportForm, WorkPartForm, HardwareEquipmentForm, RejectForm, ExampleFormSetHelper, \
     ProfileForm, LinkForm, BaseLinkFormSet
-from workReport.models import WorkReport, WorkPart, StandartWork, HardwareEquipment, Reject, UserLink
+from workReport.models import WorkReport, WorkPart, StandartWork, HardwareEquipment, Reject, UserLink, Worker, \
+    WorkerPosition
 
 
 class RequiredFormSet(BaseFormSet):
     def __init__(self, *args, **kwargs):
         super(RequiredFormSet, self).__init__(*args, **kwargs)
-      #  for form in self.forms:
-      #      form.empty_permitted = False
+        for form in self.forms:
+            form.empty_permitted = False
 
 
 def workReportPage1(request, workReport_id):
@@ -29,7 +32,6 @@ def workReportPage1(request, workReport_id):
         form = ReportForm(request.POST)
         # если форма заполнена корректно
         if form.is_valid():
-
             work_report.supervisor = form.cleaned_data["supervisor"]
             work_report.VIKer = form.cleaned_data["VIKer"]
             work_report.reportMaker = form.cleaned_data["reportMaker"]
@@ -40,24 +42,7 @@ def workReportPage1(request, workReport_id):
             work_report.VIKDate = form.cleaned_data["VIKDate"]
             work_report.note = form.cleaned_data["note"]
             work_report.save()
-
-            # возвращаем простое окно регистрации
-            return HttpResponseRedirect('/workReport/page2/' + str(work_report.pk) + '/')
-        else:
-            data = {'supervisor': form.cleaned_data["supervisor"],
-                    'VIKer': form.cleaned_data["VIKer"],
-                    'reportMaker': form.cleaned_data["reportMaker"],
-                    'reportChecker': form.cleaned_data["reportChecker"],
-                    'worker': form.cleaned_data["worker"],
-                    'stockMan': form.cleaned_data["stockMan"],
-                    'adate': form.cleaned_data["date"],
-                    'VIKDate': form.cleaned_data["VIKDate"],
-                    'note': form.cleaned_data["note"],
-                    }
-            return render(request, "plan/workReportPage1.html", {
-                'form': ReportForm(data),
-                'login_form': LoginForm()
-            })
+        data = form.cleaned_data
     else:
         data = {'supervisor': work_report.supervisor,
                 'VIKer': work_report.VIKer,
@@ -69,94 +54,61 @@ def workReportPage1(request, workReport_id):
                 'VIKDate': work_report.VIKDate,
                 'note': work_report.note,
                 }
-
     # возвращаем простое окно регистрации
     return render(request, "workReport/workReportPage1.html", {
         'form': ReportForm(initial=data),
-        'login_form': LoginForm()
+        'login_form': LoginForm(),
+        'pk': workReport_id,
     })
 
 
 def workReportPage2(request, workReport_id):
     wr = WorkReport.objects.get(pk=workReport_id)
-    #  if wr.workPart.all().exists():
     ReportFormset = formset_factory(WorkPartForm, max_num=10, formset=RequiredFormSet)
     if request.method == 'POST':
         report_formset = ReportFormset(request.POST, request.FILES)
         if report_formset.is_valid():
             wr.workPart.clear()
             for form in report_formset.forms:
-                if len(WorkPart.objects.filter(startTime=form.cleaned_data["startTime"],
-                                               endTime=form.cleaned_data["endTime"],
-                                               standartWork=form.cleaned_data["standartWork"],
-                                               workPlace=form.cleaned_data["workPlace"],
-                                               rationale=form.cleaned_data["rationale"]
-                                               )) > 0:
-                    w = WorkPart.objects.get(startTime=form.cleaned_data["startTime"],
-                                             endTime=form.cleaned_data["endTime"],
-                                             standartWork=form.cleaned_data["standartWork"],
-                                             workPlace=form.cleaned_data["workPlace"],
-                                             rationale=form.cleaned_data["rationale"])
-                else:
-                    w = WorkPart.objects.create(startTime=form.cleaned_data["startTime"],
-                                                endTime=form.cleaned_data["endTime"],
-                                                standartWork=form.cleaned_data["standartWork"],
-                                                workPlace=form.cleaned_data["workPlace"],
-                                                rationale=form.cleaned_data["rationale"])
-                    w.save()
+                w, created = WorkPart.objects.get_or_create(startTime=form.cleaned_data["startTime"],
+                                                            endTime=form.cleaned_data["endTime"],
+                                                            standartWork=form.cleaned_data["standartWork"],
+                                                            workPlace=form.cleaned_data["workPlace"],
+                                                            rationale=form.cleaned_data["rationale"],
+                                                            comment=form.cleaned_data["comment"])
+                w.save()
                 wr.workPart.add(w)
-                if len(wr.planHardware.all()) == 0:
-                    for part in wr.workPart.all():
-                        for h in part.standartWork.hardwareEquipment.all():
-                            h.pk = None
-                            h.save()
-                            wr.planHardware.add(h)
-                            # print(form.cleaned_data)
-            return HttpResponseRedirect('/workReport/page3/' + str(workReport_id) + '/')
-    else:
-        if wr.workPart.all().exists():
-            data = {
-                'form-TOTAL_FORMS': str(len(wr.workPart.all())),
-                'form-INITIAL_FORMS': '0',
-                'form-MAX_NUM_FORMS': ''
-            }
-            i = 0
             for part in wr.workPart.all():
-                data['form-' + str(i) + '-startTime'] = part.startTime.strftime("%H:%M")
-                data['form-' + str(i) + '-endTime'] = part.endTime.strftime("%H:%M")
-                data['form-' + str(i) + '-standartWork'] = part.standartWork
-                if part.workPlace is not None:
-                    data['form-' + str(i) + '-workPlace'] = part.workPlace
-                if part.rationale is not None:
-                    data['form-' + str(i) + '-rationale'] = part.rationale
-                i += 1
+                for h in part.standartWork.hardwareEquipment.all():
+                    print(h)
+                    wr.planHardware.add(h)
 
-            print(data)
-        else:
-            data = {
-                'form-TOTAL_FORMS': '2',
-                'form-INITIAL_FORMS': '0',
-                'form-MAX_NUM_FORMS': '',
-                'form-0-startTime': '08:30',
-                'form-0-endTime': '08:45',
-                'form-1-startTime': '16:45',
-                'form-1-endTime': '17:00',
-                'form-0-standartWork': StandartWork.objects.get(text='Получение наряда и ТМЦ для выполнения работ'),
-                'form-1-standartWork': StandartWork.objects.get(text='Уборка рабочего места')
-            }
-        report_formset = ReportFormset(data)
+        data = report_formset.cleaned_data
+    else:
+        data = {
+            'form-TOTAL_FORMS': str(len(wr.workPart.all())),
+            'form-INITIAL_FORMS': '0',
+            'form-MAX_NUM_FORMS': ''
+        }
+        i = 0
+        for part in wr.workPart.all():
+            data['form-' + str(i) + '-startTime'] = part.startTime.strftime("%H:%M")
+            data['form-' + str(i) + '-endTime'] = part.endTime.strftime("%H:%M")
+            data['form-' + str(i) + '-standartWork'] = part.standartWork
+            if part.workPlace is not None:
+                data['form-' + str(i) + '-workPlace'] = part.workPlace
+            if part.rationale is not None:
+                data['form-' + str(i) + '-rationale'] = part.rationale
+            data['form-' + str(i) + '-comment'] = part.comment
+            i += 1
+        print(data)
 
-    #   report_formset.errors = []
-        print (report_formset.errors)
-
-
-    c = {'link_formset': report_formset,
+    c = {'link_formset': ReportFormset(data),
          'login_form': LoginForm(),
-         'caption': 'Выполняемые работы'
+         'caption': 'Выполняемые работы',
+         'pk': workReport_id,
          }
-
-    #  c.update(csrf(request))
-    return render(request, 'workReport/workReportFormset.html', c)
+    return render(request, 'workReport/workReportFormsetWorkPart.html', c)
 
 
 def workReportPage3(request, workReport_id):
@@ -167,78 +119,43 @@ def workReportPage3(request, workReport_id):
         if report_formset.is_valid():
             wr.factWorkPart.clear()
             for form in report_formset.forms:
-                if len(WorkPart.objects.filter(startTime=form.cleaned_data["startTime"],
-                                               endTime=form.cleaned_data["endTime"],
-                                               standartWork=form.cleaned_data["standartWork"],
-                                               workPlace=form.cleaned_data["workPlace"],
-                                               rationale=form.cleaned_data["rationale"],
-                                               comment=form.cleaned_data["comment"]
-                                               )) > 0:
-                    w = WorkPart.objects.get(startTime=form.cleaned_data["startTime"],
-                                             endTime=form.cleaned_data["endTime"],
-                                             standartWork=form.cleaned_data["standartWork"],
-                                             workPlace=form.cleaned_data["workPlace"],
-                                             rationale=form.cleaned_data["rationale"],
-                                             comment=form.cleaned_data["comment"])
-                else:
-                    w = WorkPart.objects.create(startTime=form.cleaned_data["startTime"],
-                                                endTime=form.cleaned_data["endTime"],
-                                                standartWork=form.cleaned_data["standartWork"],
-                                                workPlace=form.cleaned_data["workPlace"],
-                                                rationale=form.cleaned_data["rationale"],
-                                                comment=form.cleaned_data["comment"])
-                    w.save()
+                w, created = WorkPart.objects.get_or_create(startTime=form.cleaned_data["startTime"],
+                                                            endTime=form.cleaned_data["endTime"],
+                                                            standartWork=form.cleaned_data["standartWork"],
+                                                            workPlace=form.cleaned_data["workPlace"],
+                                                            rationale=form.cleaned_data["rationale"],
+                                                            comment=form.cleaned_data["comment"])
+                w.save()
                 wr.factWorkPart.add(w)
-                # print(form.cleaned_data)
-            return HttpResponseRedirect('/workReport/page4/' + str(workReport_id) + '/')
+        data = report_formset.cleaned_data
     else:
-        if wr.factWorkPart.all().exists():
-            data = {
-                'form-TOTAL_FORMS': str(len(wr.factWorkPart.all())),
-                'form-INITIAL_FORMS': '0',
-                'form-MAX_NUM_FORMS': ''
-            }
-            i = 0
-            for part in wr.factWorkPart.all():
-                data['form-' + str(i) + '-startTime'] = part.startTime.strftime("%H:%M")
-                data['form-' + str(i) + '-endTime'] = part.endTime.strftime("%H:%M")
-                data['form-' + str(i) + '-standartWork'] = part.standartWork
-                i += 1
+        data = {
+            'form-TOTAL_FORMS': str(len(wr.factWorkPart.all())),
+            'form-INITIAL_FORMS': '0',
+            'form-MAX_NUM_FORMS': ''
+        }
+        i = 0
+        for part in wr.factWorkPart.all():
+            data['form-' + str(i) + '-startTime'] = part.startTime.strftime("%H:%M")
+            data['form-' + str(i) + '-endTime'] = part.endTime.strftime("%H:%M")
+            data['form-' + str(i) + '-standartWork'] = part.standartWork
+            i += 1
 
-        else:
-            data = {
-                'form-TOTAL_FORMS': '3',
-                'form-INITIAL_FORMS': '0',
-                'form-MAX_NUM_FORMS': '',
-                'form-0-startTime': '08:30',
-                'form-0-endTime': '08:45',
-                'form-1-startTime': '16:30',
-                'form-1-endTime': '16:45',
-                'form-2-startTime': '16:45',
-                'form-2-endTime': '17:00',
-                'form-0-standartWork': StandartWork.objects.get(text='Получение наряда и ТМЦ для выполнения работ'),
-                'form-1-standartWork': StandartWork.objects.get(
-                    text='Отчет о выполненных работах перед РП и ознакомление со сменным нарядом на следующий рабочий день, проверка инструмента, сдача ТМЦ'),
-                'form-2-standartWork': StandartWork.objects.get(text='Уборка рабочего места')
-            }
-        report_formset = ReportFormset(data)
-    c = {'link_formset': report_formset,
+    c = {'link_formset': ReportFormset(data),
          'login_form': LoginForm(),
-         'caption': 'Фактически выполненные работы'
+         'caption': 'Фактически выполненные работы',
+         'pk': workReport_id,
          }
-    #  c.update(csrf(request))
-    return render(request, 'workReport/workReportFormset.html', c)
+    return render(request, 'workReport/workReportFormsetWorkPart.html', c)
 
 
 def workReportPage4(request, workReport_id):
     wr = WorkReport.objects.get(pk=workReport_id)
-
     ReportFormset = formset_factory(HardwareEquipmentForm, max_num=10, formset=RequiredFormSet)
     if request.method == 'POST':
         report_formset = ReportFormset(request.POST, request.FILES)
         if report_formset.is_valid():
-            if wr.planHardware.all().exists():
-                wr.planHardware.all().delete()
+            wr.planHardware.clear()
             for form in report_formset.forms:
                 w, created = HardwareEquipment.objects.get_or_create(equipment=form.cleaned_data["equipment"],
                                                                      material=form.cleaned_data["material"],
@@ -274,16 +191,17 @@ def workReportPage4(request, workReport_id):
         else:
             data = {
                 'form-TOTAL_FORMS': '0',
-                'form-INITIAL_FORMS': '0',
+                'form-INITIAL_FORMS': '1',
                 'form-MAX_NUM_FORMS': '',
             }
         report_formset = ReportFormset(data)
     c = {'report_formset': report_formset,
          'caption': 'Плановая выдача оборудования',
          'login_form': LoginForm(),
+         'pk': workReport_id,
          }
     #  c.update(csrf(request))
-    return render(request, 'workReport/workReportFormset.html', c)
+    return render(request, 'workReport/workReportFormsetWorkPart.html', c)
 
 
 def workReportPage5(request, workReport_id):
@@ -338,9 +256,10 @@ def workReportPage5(request, workReport_id):
     c = {'report_formset': report_formset,
          'caption': 'Внеплановая выдача оборудования',
          'login_form': LoginForm(),
+         'pk': workReport_id,
          }
     #  c.update(csrf(request))
-    return render(request, 'workReport/workReportFormset.html', c)
+    return render(request, 'workReport/workReportFormsetWorkPart.html', c)
 
 
 def workReportPage6(request, workReport_id):
@@ -373,9 +292,10 @@ def workReportPage6(request, workReport_id):
     c = {'report_formset': report_formset,
          'caption': 'Направлено в изолятор брака',
          'login_form': LoginForm(),
+         'pk': workReport_id,
          }
     #  c.update(csrf(request))
-    return render(request, 'workReport/workReportFormset.html', c)
+    return render(request, 'workReport/workReportFormsetWorkPart.html', c)
 
 
 def workReportPage7(request, workReport_id):
@@ -433,7 +353,8 @@ def test(request):
         'link_formset': link_formset,
     }
 
-    return render(request, 'workReport/workReportFormset.html', context)
+    return render(request, 'workReport/workReportFormsetWorkPart.html', context)
+
 
 def workReports(request):
     return render_to_response('workReport/workReportList.html', {'reports': WorkReport.objects.all()})
@@ -441,7 +362,49 @@ def workReports(request):
 
 def createWorkReport(request):
     w = WorkReport()
+    wPos = WorkerPosition.objects.get(name='Контролёр ОТК')
+    w.VIKer = Worker.objects.filter(position=wPos).first()
+    w.reportMaker = Worker.objects.all().first()
+    w.reportChecker = Worker.objects.all().first()
+    w.worker = Worker.objects.all().first()
+    wPos = WorkerPosition.objects.get(name='Начальник смены')
+    w.supervisor = Worker.objects.filter(position=wPos).first()
+    wPos = WorkerPosition.objects.get(name='Кладовщик')
+    w.stockMan = Worker.objects.filter(position=wPos).first()
     w.save()
+    # заявленные работы
+    wp = WorkPart.objects.create(startTime=time(hour=8, minute=30),
+                                 endTime=time(hour=8, minute=45),
+                                 standartWork=StandartWork.objects.get(
+                                     text='Получение наряда и ТМЦ для выполнения работ'),
+                                 )
+    w.workPart.add(wp)
+    wp = WorkPart.objects.create(startTime=time(hour=16, minute=45),
+                                 endTime=time(hour=17, minute=00),
+                                 standartWork=StandartWork.objects.get(text='Уборка рабочего места'),
+                                 )
+    w.workPart.add(wp)
+    # фактически выполненные работы
+    wp = WorkPart.objects.create(startTime=time(hour=8, minute=30),
+                                 endTime=time(hour=8, minute=45),
+                                 standartWork=StandartWork.objects.get(
+                                     text='Получение наряда и ТМЦ для выполнения работ'),
+                                 )
+    w.factWorkPart.add(wp)
+    wp = WorkPart.objects.create(startTime=time(hour=16, minute=30),
+                                 endTime=time(hour=16, minute=45),
+                                 standartWork=StandartWork.objects.get(
+                                     text='Отчет о выполненных работах перед РП и ознакомление со сменным нарядом на следующий рабочий день, проверка инструмента, сдача ТМЦ'),
+                                 )
+    w.factWorkPart.add(wp)
+
+    wp = WorkPart.objects.create(startTime=time(hour=16, minute=45),
+                                 endTime=time(hour=17, minute=00),
+                                 standartWork=StandartWork.objects.get(
+                                     text='Уборка рабочего места'),
+                                 )
+    w.factWorkPart.add(wp)
+
     return HttpResponseRedirect('/workReport/page1/' + str(w.pk) + '/')
 
 

@@ -55,7 +55,7 @@ class ReportForm(forms.Form):
             Div('adate', css_class='col-xs-2', ),
             Div('VIKDate', css_class='col-xs-2', ),
             Div('note', css_class='col-xs-8', ),
-            Submit('submit', u'Дальше', css_class='btn btn-primary center-me center-children'),
+            Submit('submit', u'Сохранить', css_class='btn btn-primary center-me center-children'),
         )
 
 

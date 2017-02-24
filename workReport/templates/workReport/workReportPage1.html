@@ -30,8 +30,21 @@
 
 
 {% block sub_content %}
+<a class="btn btn-danger" href="../../list/">Выход</a>
+<a class="btn btn-success" href="../../print/{{pk}}/">Печать</a>
+    <table align="center">
+        <tr><td colspan="6" align="center">Страницы:</td></tr>
+        <tr>
 
+            <td><a href="../../page1/{{pk}}/">1</a></td>
+            <td><a href="../../page2/{{pk}}/">2</a></td>
+            <td><a href="../../page3/{{pk}}/">3</a></td>
+            <td><a href="../../page4/{{pk}}/">4</a></td>
+            <td><a href="../../page5/{{pk}}/">5</a></td>
+            <td><a href="../../page6/{{pk}}/">6</a></td>
+        </tr>
+
+    </table>
 {% crispy form %}
-
 
 {% endblock %}
