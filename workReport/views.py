@@ -420,10 +420,6 @@ def workReportPage6(request, workReport_id):
     return render(request, 'workReport/workReportFormsetRejected.html', c)
 
 
-def workReportPage7(request, workReport_id):
-    return render(request, 'workReport/workReportFinal.html', {'id': workReport_id})
-
-
 def test(request):
     user = request.user
 
@@ -479,7 +475,11 @@ def test(request):
 
 
 def workReports(request):
-    return render_to_response('workReport/workReportList.html', {'reports': WorkReport.objects.all()})
+    print("asdas")
+    return render(request, 'workReport/workReportList.html',
+                  {'reports':
+                       WorkReport.objects.all().order_by('-adate')
+                   })
 
 
 def createWorkReport(request):
@@ -532,7 +532,6 @@ def createWorkReport(request):
 
 def deleteReport(request, workReport_id):
     WorkReport.objects.filter(pk=workReport_id).delete()
-
     return HttpResponseRedirect('/workReport/list/')
 
 
