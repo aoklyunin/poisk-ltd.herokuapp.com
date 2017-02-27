@@ -1,0 +1,30 @@
+{% extends "plan/base.html" %}
+{# Load the tag library #}
+{% load bootstrap3 %}
+
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{# Display django.contrib.messages as Bootstrap alerts #}
+{% bootstrap_messages %}
+
+
+{% block title %}НПО Поиск{% endblock %}
+
+{% block content %}
+   <h1>Склад</h1>
+
+{% endblock %}
+
+
+{% block navigating %}
+    <a href = "/stock/extradition/" class = "btn btn-default">Выдача</a>
+    <a href = "/stock/acceptance/"  class = "btn btn-info">Приёмка</a>
+    <a href = "/stock/addEquipment/" class = "btn btn-default">Добавить оборудование</a>
+
+    <a href = "/stock/equipment/list/"  class = "btn btn-default">Список оборудования</a>
+    <a href = "/stock/detail/list/"  class = "btn btn-default">Список деталей</a>
+    <a href = "/stock/assembly/list/"  class = "btn btn-default">Список сборочных единиц</a>
+
+{% endblock %}

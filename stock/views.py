@@ -1,34 +1,49 @@
 from django.shortcuts import render
 
 
-def addStockEquipment(request):
-    pass
+def addEquipment(request):
+    return render(request, "stock/addStockEquipment.html", {
 
-def createStockEquipment(request):
-    pass
+    })
+
+
+def extradition(request):
+    return render(request, "stock/extradition.html", {
+
+    })
+
+
+def acceptance(request):
+    return render(request, "stock/acceptance.html", {
+
+    })
+
+
+def detailStockEquipment(request,equipment_id):
+    return render(request, "stock/detailEquipment.html", {
+
+    })
+
 
 def equipmentList(request):
-    pass
+    return render(request, "stock/equipmentList.html", {
+
+    })
+
 
 def equipmentDetail(request):
-    pass
+    return render(request, "stock/detailEquipment.html", {
 
-def createStockDetail(request):
-    pass
+    })
+
 
 def detailList(request):
-    pass
+    return render(request, "stock/detailList.html", {
 
-def detailDetail(request):
-    pass
+    })
 
-def createStockAssembly(request):
-    pass
 
 def assemblyList(request):
-    pass
+    return render(request, "stock/assemblyList.html", {
 
-def assemblyDetail(request):
-    pass
-
-
+    })

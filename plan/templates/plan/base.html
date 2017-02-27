@@ -50,7 +50,7 @@
                  <li><a href="/workReport/list/" class="btn">Наряды</a></li>
                  <li><a href="/orders/list/" class="btn">Заказы</a></li>
                  <li><a href="/assemblyUnits/list/" class="btn">Сборочные единицы</a></li>
-
+                 <li><a href="/stock/extradition/" class="btn">Склад</a></li>
                 {% if user.is_authenticated == False %}
 
                 {% else %}
@@ -93,6 +93,11 @@
     </div>
 
 </div>
+
+<div class="btn-group btn-group-justified">
+    {% block navigating %}{% endblock %}
+</div>
+
 
 <div class="container">
     {% if messages %}

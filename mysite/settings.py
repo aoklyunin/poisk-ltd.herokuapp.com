@@ -102,7 +102,8 @@ INSTALLED_APPS = (
     'plan',
     'bootstrap3',
     'crispy_forms',
-    'workReport'
+    'workReport',
+    'stock'
 )
 
 from django.contrib.messages import constants as messages
