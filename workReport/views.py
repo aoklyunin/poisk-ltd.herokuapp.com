@@ -13,10 +13,10 @@ from django.forms import formset_factory, BaseFormSet
 from django.urls import reverse
 
 from plan.forms import LoginForm
-from workReport.forms import ReportForm, WorkPartForm, HardwareEquipmentForm, RejectForm, ExampleFormSetHelper, \
+from workReport.forms import ReportForm, WorkPartForm, NeedStructForm, RejectForm, ExampleFormSetHelper, \
     ProfileForm, LinkForm, BaseLinkFormSet
-from workReport.models import WorkReport, WorkPart, StandartWork, HardwareEquipment, Reject,  Worker, \
-    WorkerPosition
+from workReport.models import WorkReport, WorkPart, StandartWork, Reject,  Worker, \
+    WorkerPosition, NeedStruct
 
 
 class RequiredFormSet(BaseFormSet):
@@ -189,7 +189,7 @@ def calculateEquipment(workReport_id):
                     try:
                         eqg = hw.get(equipment=eq.equipment)
                     except:
-                        obj = HardwareEquipment.objects.get(pk=eq.pk)
+                        obj = NeedStruct.objects.get(pk=eq.pk)
                         obj.pk = None
                         obj.save()
                         hw.add(obj)
@@ -198,7 +198,7 @@ def calculateEquipment(workReport_id):
                     try:
                         mtg = hw.get(material=eq.material)
                     except:
-                        obj = HardwareEquipment.objects.get(pk=eq.pk)
+                        obj = NeedStruct.objects.get(pk=eq.pk)
                         obj.pk = None
                         obj.save()
                         hw.add(obj)
@@ -215,7 +215,7 @@ def calculateEquipment(workReport_id):
 
 def workReportPage4(request, workReport_id):
     wr = WorkReport.objects.get(pk=workReport_id)
-    ReportFormset = formset_factory(HardwareEquipmentForm, max_num=10, formset=RequiredFormSet)
+    ReportFormset = formset_factory(NeedStructForm, max_num=10, formset=RequiredFormSet)
     if request.method == 'POST':
         report_formset = ReportFormset(request.POST, request.FILES)
         if report_formset.is_valid():
@@ -224,14 +224,14 @@ def workReportPage4(request, workReport_id):
                 if (form.cleaned_data["equipment"] is None) and (form.cleaned_data["material"] is None):
                     # print ("empty form line")
                     continue
-                if len(HardwareEquipment.objects.filter(equipment=form.cleaned_data["equipment"],
+                if len(NeedStruct.objects.filter(equipment=form.cleaned_data["equipment"],
                                                         material=form.cleaned_data["material"],
                                                         usedCnt=form.cleaned_data["usedCnt"],
                                                         getCnt=form.cleaned_data["getCnt"],
                                                         rejectCnt=form.cleaned_data["rejectCnt"],
                                                         dustCnt=form.cleaned_data["dustCnt"],
                                                         remainCnt=form.cleaned_data["remainCnt"])) > 1:
-                    w = HardwareEquipment.objects.filter(equipment=form.cleaned_data["equipment"],
+                    w = NeedStruct.objects.filter(equipment=form.cleaned_data["equipment"],
                                                          material=form.cleaned_data["material"],
                                                          usedCnt=form.cleaned_data["usedCnt"],
                                                          getCnt=form.cleaned_data["getCnt"],
@@ -239,7 +239,7 @@ def workReportPage4(request, workReport_id):
                                                          dustCnt=form.cleaned_data["dustCnt"],
                                                          remainCnt=form.cleaned_data["remainCnt"]).first()
                 else:
-                    w, created = HardwareEquipment.objects.get_or_create(equipment=form.cleaned_data["equipment"],
+                    w, created = NeedStruct.objects.get_or_create(equipment=form.cleaned_data["equipment"],
                                                                          material=form.cleaned_data["material"],
                                                                          usedCnt=form.cleaned_data["usedCnt"],
                                                                          getCnt=form.cleaned_data["getCnt"],
@@ -294,7 +294,7 @@ def workReportPage5(request, workReport_id):
     wr = WorkReport.objects.get(pk=workReport_id)
 
     #  if wr.workPart.all().exists():
-    ReportFormset = formset_factory(HardwareEquipmentForm, max_num=10, formset=RequiredFormSet)
+    ReportFormset = formset_factory(NeedStructForm, max_num=10, formset=RequiredFormSet)
     if request.method == 'POST':
         report_formset = ReportFormset(request.POST, request.FILES)
         if report_formset.is_valid():
@@ -303,14 +303,14 @@ def workReportPage5(request, workReport_id):
                 if (form.cleaned_data["equipment"] is None) and (form.cleaned_data["material"] is None):
                     # print ("empty form line")
                     continue
-                if len(HardwareEquipment.objects.filter(equipment=form.cleaned_data["equipment"],
+                if len(NeedStruct.objects.filter(equipment=form.cleaned_data["equipment"],
                                                         material=form.cleaned_data["material"],
                                                         usedCnt=form.cleaned_data["usedCnt"],
                                                         getCnt=form.cleaned_data["getCnt"],
                                                         rejectCnt=form.cleaned_data["rejectCnt"],
                                                         dustCnt=form.cleaned_data["dustCnt"],
                                                         remainCnt=form.cleaned_data["remainCnt"])) > 1:
-                    w = HardwareEquipment.objects.filter(equipment=form.cleaned_data["equipment"],
+                    w = NeedStruct.objects.filter(equipment=form.cleaned_data["equipment"],
                                                          material=form.cleaned_data["material"],
                                                          usedCnt=form.cleaned_data["usedCnt"],
                                                          getCnt=form.cleaned_data["getCnt"],
@@ -318,7 +318,7 @@ def workReportPage5(request, workReport_id):
                                                          dustCnt=form.cleaned_data["dustCnt"],
                                                          remainCnt=form.cleaned_data["remainCnt"]).first()
                 else:
-                    w, created = HardwareEquipment.objects.get_or_create(equipment=form.cleaned_data["equipment"],
+                    w, created = NeedStruct.objects.get_or_create(equipment=form.cleaned_data["equipment"],
                                                                          material=form.cleaned_data["material"],
                                                                          usedCnt=form.cleaned_data["usedCnt"],
                                                                          getCnt=form.cleaned_data["getCnt"],
@@ -419,59 +419,6 @@ def workReportPage6(request, workReport_id):
     #  c.update(csrf(request))
     return render(request, 'workReport/workReportFormsetRejected.html', c)
 
-
-def test(request):
-    user = request.user
-
-    # Create the formset, specifying the form and formset we want to use.
-    LinkFormSet = formset_factory(LinkForm, formset=BaseLinkFormSet)
-
-    link_data = [{'anchor': 'a1', 'url': 'href1'},
-                 {'anchor': 'a2', 'url': 'href2'}]
-
-    if request.method == 'POST':
-        profile_form = ProfileForm(request.POST, user=user)
-        link_formset = LinkFormSet(request.POST)
-
-        if profile_form.is_valid() and link_formset.is_valid():
-            # Save user info
-            user.first_name = profile_form.cleaned_data.get('first_name')
-            user.last_name = profile_form.cleaned_data.get('last_name')
-            user.save()
-
-            # Now save the data for each form in the formset
-            new_links = []
-
-            for link_form in link_formset:
-                anchor = link_form.cleaned_data.get('anchor')
-                url = link_form.cleaned_data.get('url')
-
-                if anchor and url:
-                    new_links.append(UserLink(user=user, anchor=anchor, url=url))
-
-            try:
-                with transaction.atomic():
-                    # Replace the old with the new
-                    UserLink.objects.filter(user=user).delete()
-                    UserLink.objects.bulk_create(new_links)
-
-                    # And notify our users that it worked
-                    messages.success(request, 'You have updated your profile.')
-
-            except IntegrityError:  # If the transaction failed
-                messages.error(request, 'There was an error saving your profile.')
-                return redirect(reverse('profile-settings'))
-
-    else:
-        profile_form = ProfileForm(user=user)
-        link_formset = LinkFormSet(initial=link_data)
-
-    context = {
-        'profile_form': profile_form,
-        'link_formset': link_formset,
-    }
-
-    return render(request, 'workReport/workReportFormsetWorkPart.html', context)
 
 
 def workReports(request):

@@ -1,68 +1,50 @@
 # -*- coding: utf-8 -*-
 import datetime
-from django.contrib.auth.models import User
+
 from django.db import models
 
-from plan.models import Agreement
+from plan.models import Agreement, Scheme, WorkerPosition, WorkPlace, Rationale, Worker, Area
 from plan.models import Customer
 from workReport.workReportGenerator import generateReport
 
 
-class Scheme(models.Model):
-    # автор
-    author = models.CharField(max_length=200)
-    # ссылка
-    link = models.CharField(max_length=100)
-
-    def __unicode__(self):
-        return self.author
-
-    def __str__(self):
-        return self.author
+# Что хранится на складе
+class StockStruct(models.Model):
+    cnt = models.FloatField(default=0)
+    area = models.ForeignKey(Area)
 
 
-class Material(models.Model):
-    # название
-    name = models.CharField(max_length=1000)
-    # единица измерения
-    dimension = models.CharField(max_length=200)
-    # шифр
-    code = models.CharField(max_length=100, blank=True, default="", null=True)
+# сколько по складу
+class StockReportStruct(models.Model):
+    # оборудование
+    equipment = models.ForeignKey('Equipment', blank=True)
+    # детали
+    detail = models.ForeignKey('Detail', blank=True)
+    # сборочные единицы
+    assemblyUnit = models.ForeignKey('AssemblyUnit', blank=True)
+    # выдано
+    getCnt = models.FloatField(default=0)
+    # брак
+    rejectCnt = models.FloatField(default=0)
+    # утиль
+    dustCnt = models.FloatField(default=0)
+    # возвращено
+    returnCnt = models.FloatField(default=0)
 
-    def __str__(self):
-        return self.name
 
-    def __unicode__(self):
-        return self.name
-
-
-# класс детали
 class Equipment(models.Model):
     # название
     name = models.CharField(max_length=1000)
-    # материалы
-    materials = models.ManyToManyField(Material, blank=True, null=True)
-    # чертёж
-    scheme = models.ManyToManyField(Scheme, blank=True, null=True)
+    # единица измерения
+    dimension = models.CharField(max_length=200)
     # шифр
     code = models.CharField(max_length=100, blank=True, default="", null=True)
     # тип
-    hardwareType = models.IntegerField(default=0)
-    # единица измерения
-    dimension = models.CharField(max_length=200)
-
-    def __str__(self):
-        return self.name
-
-    def __unicode__(self):
-        return self.name
-
-        # класс материалов
-
-
-class WorkerPosition(models.Model):
-    # название
-    name = models.CharField(max_length=200)
+    equipmentType = models.IntegerField(default=0)
+    # чертёж
+    scheme = models.ManyToManyField(Scheme, blank=True, null=True)
+    # склад
+    stockStruct = models.ManyToManyField(StockStruct)
 
     def __str__(self):
         return self.name
@@ -71,124 +53,24 @@ class WorkerPosition(models.Model):
         return self.name
 
 
-# рабочее место
-class WorkPlace(models.Model):
-    # название
-    name = models.CharField(max_length=200)
-
-    def __unicode__(self):
-        return self.name
-
-    def __str__(self):
-        return self.name
-
-
-# аттестация
-class Attestation(models.Model):
-    # название
-    name = models.CharField(max_length=200)
-
-    def __str__(self):
-        return self.name
-
-    def __unicode__(self):
-        return self.name
-
-
-# работник
-class Worker(models.Model):
-    # должность
-    position = models.ManyToManyField(WorkerPosition)
-    # аттестация
-    attestation = models.ManyToManyField(Attestation, blank=True)
-    # привилегии
-    privilege = models.IntegerField(default=0)
-    # пользователь
-    user = models.OneToOneField(User)
-    # табельный номер
-    tnumber = models.IntegerField()
-    # отчество
-    patronymic = models.CharField(max_length=200)
-
-    def getInitials(self):
-        return self.user.last_name[0] + self.user.first_name[0] + self.patronymic[0]
-
-    def getShort(self):
-        return self.user.last_name + " " + self.user.first_name[0] + ". " + self.patronymic[0] + "."
-
-    def __str__(self):
-        s = ""
-        for pos in self.position.all():
-            s += str(pos) + ", "
-        return str(self.tnumber) + " - " + self.getShort() + "(" + s[:-2] + ")"
-
-    def __unicode__(self):
-        return str(self.tnumber) + " - " + self.getShort()
-
-
-class HardwareEquipment(models.Model):
-    # деталь
-    equipment = models.ForeignKey(Equipment, blank=True, null=True)
-    # материал
-    material = models.ForeignKey(Material, blank=True, null=True)
-    usedCnt = models.FloatField(default=0)
-    getCnt = models.FloatField(default=0)
-    rejectCnt = models.FloatField(default=0)
-    dustCnt = models.FloatField(default=0)
-    remainCnt = models.FloatField(default=0)
-
-    def __str__(self):
-        if self.material is None:
-            # print(self.equipment.name + " " + str(self.getCnt) + " " + self.equipment.dimension)
-            return self.equipment.name + " " + str(self.getCnt) + " " + self.equipment.dimension
-        else:
-            return self.material.name + " " + str(self.getCnt) + " " + self.material.dimension
-
-    def __unicode__(self):
-        if self.material is None:
-            return self.equipment.name + " " + str(self.getCnt) + " " + self.equipment.dimension
-        else:
-            return self.material.name + " " + str(self.getCnt) + " " + self.material.dimension
-
-
-# брак
-class Reject(models.Model):
-    # деталь
-    equipment = models.ForeignKey(Equipment, blank=True, null=True)
-    # материал
-    material = models.ForeignKey(Material, blank=True, null=True)
-    # кол-во
+# сколько чего надо по тех. процессу
+class NeedStruct(models.Model):
+    equipment = models.ForeignKey('Equipment', blank=True)
+    standartWork = models.ForeignKey('StandartWork', blank=True)
+    detail = models.ForeignKey('Detail', blank=True)
+    assemblyUnit = models.ForeignKey('AssemblyUnit', blank=True)
     cnt = models.FloatField(default=0)
-
-    def __unicode__(self):
-        if self.equipment != None:
-            return self.equipment.name
-        else:
-            return self.material.name
-
-    def __str__(self):
-        if self.equipment != None:
-            return self.equipment.name
-        else:
-            return self.material.name
-
-
-# обоснование для работы
-class Rationale(models.Model):
-    name = models.CharField(max_length=255)
-
-    def __str__(self):
-        return self.name
-
-    def __unicode__(self):
-        return self.name
 
 
 # стандартная работа
 class StandartWork(models.Model):
+    # название
     text = models.CharField(max_length=2000)
+    # должности, которые могут выполнять
     positionsEnable = models.ManyToManyField(WorkerPosition)
-    hardwareEquipment = models.ManyToManyField(HardwareEquipment, blank=True, default=None, null=True)
+    # необходимые объекты для данной работы
+    needStruct = models.ManyToManyField(NeedStruct, blank=True, default=None, null=True,
+                                        related_name="needStructStandartWork")
     #  длительность в минутах
     duration = models.FloatField(default=0)
 
@@ -217,50 +99,39 @@ class WorkPart(models.Model):
             self.standartWork) + " " + self.comment
 
 
-class FullStandartWork(models.Model):
-    standartWork = models.ForeignKey(StandartWork)
-    cnt = models.IntegerField(default=1)
-    quequepos = models.IntegerField(default=0)
-    comment = models.CharField(max_length=10000, default="")
-
-
 class Detail(models.Model):
     # оснаска и комплектующие
     equipment = models.ManyToManyField(Equipment)
-    # материалы
-    materials = models.ManyToManyField(Material)
     # шифр
     code = models.CharField(max_length=100)
     # имя
     name = models.CharField(max_length=1000)
     # чертёж
     scheme = models.ManyToManyField(Scheme)
-    # работы для изделия
-    fullWorks = models.ManyToManyField(FullStandartWork)
-    # текущее положение очереди работ
-    fullWorkPos = models.IntegerField(default=0)
+    # необходимые объекты для данной работы
+    needStruct = models.ManyToManyField(NeedStruct, blank=True, default=None, null=True,
+                                        related_name="needStructDetail123")
+    # склад
+    stockStruct = models.ManyToManyField(StockStruct)
 
 
 # класс сборочных единиц
-class AssemblyUnits(models.Model):
+class AssemblyUnit(models.Model):
     # сборочные единицы
     assemblyUnits = models.ManyToManyField("self")
     # оснастка и комплектующие
     equipment = models.ManyToManyField(Equipment)
-    # материалы
-    materials = models.ManyToManyField(Material)
     # имя
     name = models.CharField(max_length=1000)
     # чертёж
     scheme = models.ManyToManyField(Scheme)
     # шифр
     code = models.CharField(max_length=100)
-    # работы для изделия
-    fullWorks = models.ManyToManyField(FullStandartWork)
-    # текущее положение очереди работ
-    fullWorkPos = models.IntegerField(default=0)
-    # деталь
-    details = models.ManyToManyField(Detail)
+    # необходимые объекты для данной работы
+    needStruct = models.ManyToManyField(NeedStruct, blank=True, default=None, null=True,
+                                        related_name="needStructAssemblyUnit")
+    # склад
+    stockStruct = models.ManyToManyField(StockStruct)
 
     # сдандартные работы
     def __str__(self):
@@ -270,30 +141,7 @@ class AssemblyUnits(models.Model):
         return self.name
 
 
-class TehUnit(models.Model):
-    cnt = models.IntegerField(default=1)
-    standartWork = models.ForeignKey(StandartWork)
-    equipment = models.ForeignKey(StandartWork)
-    materials = models.ForeignKey(Material)
-    equipment = models.ForeignKey(Equipment)
-    detail = models.ForeignKey(Detail)
-    assemblyUnit = models.ForeignKey(AssemblyUnits)
-    comment = models.CharField(max_length=1000)
-    nextUnits = models.ManyToManyField("self")
-
-
-class TehReview(models.Model):
-    name = models.CharField(max_length=1000)
-    firstUnit = models.ForeignKey(TehUnit)
-
-
 class Order(models.Model):
-    # сборочные единицы
-    assemblyUnits = models.ManyToManyField(AssemblyUnits)
-    # оснаска и комплектующие
-    equipment = models.ManyToManyField(Equipment)
-    # материалы
-    materials = models.ManyToManyField(Material)
     # заказчик
     customer = models.ForeignKey(Customer)
     # номер заказа
@@ -314,20 +162,35 @@ class Order(models.Model):
     agreementDate = models.DateField('date agreement')
     # дата по плану
     planDate = models.DateField('date plan')
-    # работы для изделия
-    fullWorks = models.ManyToManyField(FullStandartWork)
-    # текущее положение очереди работ
-    fullWorkPos = models.IntegerField(default=0)
-    # деталь
-    details = models.ManyToManyField(Detail)
-    # описание тех.процеса
-    tehReview = models.ForeignKey(TehReview)
+    # необходимые объекты для данной работы
+    needStruct = models.ManyToManyField(NeedStruct, blank=True, default=None, null=True)
 
+    # описание тех.процеса
+    # tehReview = models.ForeignKey(TehReview)
+    # нужно ли
     def __str__(self):
         return self.name
 
     def __unicode__(self):
         return self.name
+
+
+# брак
+class Reject(models.Model):
+    # деталь
+    needs = models.ManyToManyField(NeedStruct, blank=True, null=True)
+
+    def __unicode__(self):
+        if self.equipment != None:
+            return self.equipment.name
+        else:
+            return self.material.name
+
+    def __str__(self):
+        if self.equipment != None:
+            return self.equipment.name
+        else:
+            return self.material.name
 
 
 # наряд
@@ -352,10 +215,10 @@ class WorkReport(models.Model):
     # дата ВИК
     VIKDate = models.DateField(default=datetime.date.today)
     # плановая выдача комплектующих
-    planHardware = models.ManyToManyField(HardwareEquipment, verbose_name='Плановая', related_name="planHardware_name",
+    planHardware = models.ManyToManyField(StockReportStruct, verbose_name='Плановая', related_name="planHardware_name",
                                           blank=True, null=True)
     # внеплановая выдача комплектующих
-    noPlanHardware = models.ManyToManyField(HardwareEquipment, verbose_name='Внеплановая',
+    noPlanHardware = models.ManyToManyField(StockReportStruct, verbose_name='Внеплановая',
                                             related_name="no_PlanHardware_name", blank=True, null=True)
     # брак
     rejected = models.ManyToManyField(Reject, blank=True, null=True)
@@ -365,10 +228,14 @@ class WorkReport(models.Model):
     factWorkPart = models.ManyToManyField(WorkPart, related_name="fact_WorkPart", blank=True, null=True)
     # примечание
     note = models.CharField(max_length=10000, default="", blank=True, null=True)
-
+    # флаг для первого обсчёта плановой выдачи оборудования
     flgCalculateEquipment = models.BooleanField(default=False)
-
+    # заказ по которому выполняется наряд
     order = models.ForeignKey(Order, blank=True)
+    # флаг, что подобраны исполнители
+    flgCalculateWorkers = models.BooleanField(default=False)
+    # нужен ли вик
+    needVIK = models.BooleanField(default=False)
 
     def generateDoc(self):
         wp = []

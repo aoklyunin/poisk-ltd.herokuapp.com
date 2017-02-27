@@ -5,7 +5,8 @@ import datetime
 from django import forms
 from django.forms import ModelForm, Textarea
 
-from workReport.models import WorkerPosition, Attestation
+from plan.models import Attestation
+from workReport.models import WorkerPosition
 
 
 class LoginForm(forms.Form):

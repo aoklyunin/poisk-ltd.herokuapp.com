@@ -2,13 +2,13 @@
 # модуль с формами
 import datetime
 
-from crispy_forms.bootstrap import FormActions
+
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, Button, MultiField, Div, HTML, Field
+from crispy_forms.layout import Layout, Submit, Div, Field
 from django import forms
 from django.forms import ModelForm, BaseFormSet
 
-from .models import WorkerPosition, Worker, WorkPart, HardwareEquipment, Reject
+from .models import WorkerPosition, Worker, WorkPart, Reject, NeedStruct
 
 
 # форма для отчёта
@@ -27,7 +27,7 @@ class ReportForm(forms.Form):
     worker = forms.ModelChoiceField(queryset=Worker.objects.all(),
                                     label="Исполнитель", initial=0)
     # начальник
-    wPos = WorkerPosition.objects.get(name='Начальник смены')
+    wPos = WorkerPosition.objects.get(name='Начальник участка')
     supervisor = forms.ModelChoiceField(queryset=Worker.objects.filter(position=wPos),
                                         label="Начальник участка", initial=0)
     # кладовщик
@@ -149,9 +149,9 @@ class RejectForm(ModelForm):
         self.fields['equipment'].required = False
 
 
-class HardwareEquipmentForm(ModelForm):
+class NeedStructForm(ModelForm):
     class Meta:
-        model = HardwareEquipment
+        model = NeedStruct
         fields = '__all__'
         widgets = {
         }
@@ -173,7 +173,7 @@ class HardwareEquipmentForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         # first call parent's constructor
-        super(HardwareEquipmentForm, self).__init__(*args, **kwargs)
+        super(NeedStructForm, self).__init__(*args, **kwargs)
         # there's a `fields` property now
         self.fields['equipment'].required = False
         self.fields['material'].required = False
