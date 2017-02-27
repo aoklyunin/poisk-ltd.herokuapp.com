@@ -1,12 +1,12 @@
 {% extends "plan/base.html" %}
+{% load staticfiles %}
 {# Load the tag library #}
 {% load bootstrap3 %}
-
+{% load crispy_forms_tags %}
+{% load crispy_forms_tags %}
 {# Load CSS and JavaScript #}
 {% bootstrap_css %}
 {% bootstrap_javascript %}
-
-{# Display django.contrib.messages as Bootstrap alerts #}
 {% bootstrap_messages %}
 
 
@@ -29,5 +29,56 @@
     <a href = "/stock/equipment/list/"  class = "btn btn-default">Список оборудования</a>
     <a href = "/stock/detail/list/"  class = "btn btn-default">Список деталей</a>
     <a href = "/stock/assembly/list/"  class = "btn btn-default">Список сборочных единиц</a>
+
+{% endblock %}
+
+{% block sub_content %}
+
+
+<form method="post" class="formset_form">
+    {% csrf_token %}
+
+     {{ link_formset.management_form }}
+    {% for dict in link_formset.errors %}
+    {% for error in dict.values %}
+        {{ error }}
+    {% endfor %}
+{% endfor %}
+    <table cellspacing="3" cellpadding="7" >
+        <thead><tr>
+                <td align="center">Элемент</td>
+                <td align="center">Количество</td>
+            </tr>
+        </thead>
+        <tr></tr>
+    {% for link_form in link_formset %}
+        <tr class="link-formset">
+            <td valign = "top">{% bootstrap_field link_form.content_object  %} </td>
+            <td valign = "top" >{% bootstrap_field link_form.cnt %} </td>
+        </tr>
+
+    {% endfor %}
+        <div class="placeForAddBtn"></div>
+    </table>
+
+
+    <ul class="errorlist">
+    <li>Sender is required.</li>
+    </ul>
+    <input class = "btn btn-primary" type="submit" value="Сохранить" class="button"/>
+
+</form>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="{% static '/scripts/jquery.formset.js' %}"></script>
+<script>
+    $('.link-formset').formset({
+        addText: 'Добавить',
+        deleteText: 'Удалить',
+
+    });
+</script>
+
+
 
 {% endblock %}
