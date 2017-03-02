@@ -45,6 +45,8 @@ class Equipment(models.Model):
     scheme = models.ManyToManyField(Scheme, blank=True, null=True)
     # склад
     stockStruct = models.ManyToManyField(StockStruct, blank=True, null=True)
+    # нужно ли ОТК
+    needVIK = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -73,6 +75,8 @@ class StandartWork(models.Model):
                                         related_name="needStructStandartWork")
     #  длительность в минутах
     duration = models.FloatField(default=0)
+    # нужно ли ОТК
+    needVIK = models.BooleanField(default=False)
 
     def __str__(self):
         return self.text + "(" + str(self.duration) + ")"
@@ -89,6 +93,7 @@ class WorkPart(models.Model):
     standartWork = models.ForeignKey(StandartWork)
     workPlace = models.ForeignKey(WorkPlace, blank=True, default=None, null=True)
     rationale = models.ForeignKey(Rationale, blank=True, default=None, null=True)
+    scheme = models.ManyToManyField(Scheme, blank=True, default=None, null=True)
 
     def __str__(self):
         return self.startTime.strftime("%H:%M") + "-" + self.endTime.strftime("%H:%M") + " " \
@@ -100,38 +105,37 @@ class WorkPart(models.Model):
 
 
 class Detail(models.Model):
-    # оснаска и комплектующие
-    equipment = models.ManyToManyField(Equipment)
     # шифр
     code = models.CharField(max_length=100)
     # имя
     name = models.CharField(max_length=1000)
     # чертёж
-    scheme = models.ManyToManyField(Scheme)
+    scheme = models.ManyToManyField(Scheme, blank=True, default=None, null=True)
     # необходимые объекты для данной работы
     needStruct = models.ManyToManyField(NeedStruct, blank=True, default=None, null=True,
                                         related_name="needStructDetail123")
     # склад
     stockStruct = models.ManyToManyField(StockStruct)
+    # нужно ли ОТК
+    needVIK = models.BooleanField(default=False)
 
 
 # класс сборочных единиц
 class AssemblyUnit(models.Model):
-    # сборочные единицы
-    assemblyUnits = models.ManyToManyField("self")
-    # оснастка и комплектующие
-    equipment = models.ManyToManyField(Equipment)
     # имя
     name = models.CharField(max_length=1000)
     # чертёж
-    scheme = models.ManyToManyField(Scheme)
+    scheme = models.ManyToManyField(Scheme, blank=True, default=None, null=True)
     # шифр
-    code = models.CharField(max_length=100)
+    code = models.CharField(max_length=100, default="")
     # необходимые объекты для данной работы
     needStruct = models.ManyToManyField(NeedStruct, blank=True, default=None, null=True,
                                         related_name="needStructAssemblyUnit")
     # склад
     stockStruct = models.ManyToManyField(StockStruct)
+    # нужно ли ОТК
+    needVIK = models.BooleanField(default=False)
+
 
     # сдандартные работы
     def __str__(self):

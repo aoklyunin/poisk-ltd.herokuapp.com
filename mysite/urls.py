@@ -12,6 +12,7 @@ admin.autodiscover()
 urlpatterns = [
     url(r'^workReport/', include('workReport.urls')),
     url(r'^stock/', include('stock.urls')),
+    url(r'^constructors/', include('constructors.urls')),
     # панель администратора
     url(r'^admin/', include(admin.site.urls)),
     # выход из сайта

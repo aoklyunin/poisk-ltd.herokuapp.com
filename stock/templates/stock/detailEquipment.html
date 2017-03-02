@@ -22,7 +22,7 @@
 {% endblock %}
 
 {% block navigating %}
-<a href="/stock/workReport/list/0/" class="btn btn-default">Наряды</a>
+<a href="/stock/reports/" class="btn btn-default">Наряды</a>
 <a href="/stock/extradition/0/" class="btn btn-default">Выдача</a>
 <a href="/stock/acceptance/0/" class="btn btn-default">Приёмка</a>
 <a href="/stock/addEquipment/" class="btn btn-info">Добавить оборудование</a>
@@ -50,6 +50,9 @@
         </tr>
         <tr>
               <td valign="top">{% bootstrap_field form.scheme %}</td>
+        </tr>
+        <tr>
+            <td >   {% bootstrap_field form.needVIK %}</td>
         </tr>
     </table>
     <input align="center" class="btn btn-primary" type="submit" value="Сохранить" class="button"/>

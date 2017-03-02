@@ -105,11 +105,11 @@ def detailStockEquipment(request, equipment_id):
             eq.code = form.cleaned_data["code"]
             eq.equipmentType = form.cleaned_data["equipmentType"]
             eq.scheme = form.cleaned_data["scheme"]
+            eq.needVIK = form.cleaned_data["needVIK"]
             eq.save()
 
     return render(request, "stock/detailEquipment.html", {
         'form': EquipmentForm(instance=Equipment.objects.get(pk=equipment_id)),
-
     })
 
 
@@ -121,7 +121,8 @@ def removeStockEquipment(request, equipment_id):
     return HttpResponseRedirect('/stock/equipment/list/0/')
 
 
-def workReportList(request, equipment_id):
+def workReportList(request ):
+    print("sadas")
     return render(request, "stock/workReportList.html", {
 
     })
@@ -156,14 +157,3 @@ def equipmentDetail(request):
 
     })
 
-
-def detailList(request):
-    return render(request, "stock/detailList.html", {
-
-    })
-
-
-def assemblyList(request):
-    return render(request, "stock/assemblyList.html", {
-
-    })
