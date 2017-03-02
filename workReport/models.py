@@ -34,9 +34,9 @@ class StockReportStruct(models.Model):
 
 class Equipment(models.Model):
     # название
-    name = models.CharField(max_length=1000)
+    name = models.CharField(max_length=1000, default="Перчатки")
     # единица измерения
-    dimension = models.CharField(max_length=200)
+    dimension = models.CharField(max_length=200, default="Пара")
     # шифр
     code = models.CharField(max_length=100, blank=True, default="", null=True)
     # тип
@@ -44,7 +44,7 @@ class Equipment(models.Model):
     # чертёж
     scheme = models.ManyToManyField(Scheme, blank=True, null=True)
     # склад
-    stockStruct = models.ManyToManyField(StockStruct)
+    stockStruct = models.ManyToManyField(StockStruct, blank=True, null=True)
 
     def __str__(self):
         return self.name

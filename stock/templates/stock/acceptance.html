@@ -1,30 +1,149 @@
 {% extends "plan/base.html" %}
+{% load staticfiles %}
 {# Load the tag library #}
 {% load bootstrap3 %}
-
+{% load crispy_forms_tags %}
+{% load crispy_forms_tags %}
 {# Load CSS and JavaScript #}
 {% bootstrap_css %}
 {% bootstrap_javascript %}
-
-{# Display django.contrib.messages as Bootstrap alerts #}
 {% bootstrap_messages %}
 
 
 {% block title %}НПО Поиск{% endblock %}
 
 {% block content %}
-   <h1>Склад</h1>
+<h1>Склад</h1>
+{% if user.is_authenticated == False %}
+<p>Для доступа к системе Вам надо войти или зарегистрироваться</p>
+{% else %}
+
+{% endif %}
+{% endblock %}
+
+{% block navigating %}
+<a href="/stock/workReport/list/{{area_id}}/" class="btn btn-default">Наряды</a>
+<a href="/stock/extradition/{{area_id}}/" class="btn btn-default">Выдача</a>
+<a href="/stock/acceptance/{{area_id}}/" class="btn btn-info">Приёмка</a>
+<a href="/stock/addEquipment/" class="btn btn-default">Добавить оборудование</a>
+
+<a href="/stock/equipment/list/{{area_id}}/" class="btn btn-default">Список оборудования</a>
+<a href="/stock/detail/list/{{area_id}}/" class="btn btn-default">Список деталей</a>
+<a href="/stock/assembly/list/{{area_id}}/" class="btn btn-default">Список сборочных единиц</a>
 
 {% endblock %}
 
 
-{% block navigating %}
-    <a href = "/stock/extradition/" class = "btn btn-default">Выдача</a>
-    <a href = "/stock/acceptance/"  class = "btn btn-info">Приёмка</a>
-    <a href = "/stock/addEquipment/" class = "btn btn-default">Добавить оборудование</a>
+{% block sub_content %}
 
-    <a href = "/stock/equipment/list/"  class = "btn btn-default">Список оборудования</a>
-    <a href = "/stock/detail/list/"  class = "btn btn-default">Список деталей</a>
-    <a href = "/stock/assembly/list/"  class = "btn btn-default">Список сборочных единиц</a>
+<br>
+<div class="btn-group ">
+    {% ifnotequal area_id one %}
+    <a href="/stock/acceptance/0/" class="btn btn-info">Красное</a>
+    <a href="/stock/acceptance/1/" class="btn btn-default">Малахит</a>
+    {% else %}
+    <a href="/stock/acceptance/0/" class="btn btn-default">Красное</a>
+    <a href="/stock/acceptance/1/" class="btn btn-info">Малахит</a>
+    {%endifnotequal%}
+</div>
+<br>
+<br>
 
+<form method="post" class="formset_form">
+    {% csrf_token %}
+
+    {{ equipment_formset.management_form }}
+    {{ detail_formset.management_form }}
+    {{ assembly_formset.management_form }}
+    <table>
+        <tr>
+            <td valign="top">
+                <table cellspacing="3" cellpadding="7">
+                    <thead>
+                    <tr>
+                        <td align="center">Оснастка</td>
+                        <td align="center">Количество</td>
+                    </tr>
+                    </thead>
+                    <tr></tr>
+                    {% for link_form in equipment_formset %}
+                    <tr class="link-formset">
+                        <td valign="top">{% bootstrap_field link_form.equipment %}</td>
+                        <td valign="top">{% bootstrap_field link_form.cnt %}</td>
+                    </tr>
+
+                    {% endfor %}
+                    <div class="placeForAddBtn"></div>
+                </table>
+            </td>
+            <td valign="top">
+                <table cellspacing="3" cellpadding="7">
+                    <thead>
+                    <tr>
+                        <td align="center">Детали</td>
+                        <td align="center">Количество</td>
+                    </tr>
+                    </thead>
+                    <tr></tr>
+                    {% for link_form in detail_formset %}
+                    <tr class="link2-formset">
+                        <td valign="top">{% bootstrap_field link_form.detail %}</td>
+                        <td valign="top">{% bootstrap_field link_form.cnt %}</td>
+                    </tr>
+                    {% endfor %}
+                    <div class="placeForAddBtn"></div>
+                </table>
+            </td>
+            <td valign="top">
+                <table cellspacing="3" cellpadding="7">
+                    <thead>
+                    <tr>
+                        <td align="center">Сборочные единицы</td>
+                        <td align="center">Количество</td>
+                    </tr>
+                    </thead>
+                    <tr></tr>
+                    {% for link_form in assembly_formset %}
+                    <tr class="link3-formset">
+                        <td valign="top">{% bootstrap_field link_form.assembly %}</td>
+                        <td valign="top">{% bootstrap_field link_form.cnt %}</td>
+                    </tr>
+                    {% endfor %}
+                    <div class="placeForAddBtn"></div>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <input align="center" class="btn btn-primary" type="submit" value="Принять" class="button"/>
+
+</form>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="{% static '/scripts/jquery.formset.js' %}"></script>
+<script>
+    $('.link-formset').formset({
+        addText: 'Добавить',
+        deleteText: 'Удалить',
+        prefix:'equipment',
+    });
+
+$('.link2-formset').formset({
+        addText: 'Добавить',
+        deleteText: 'Удалить',
+        prefix:'detail',
+    });
+$('.link3-formset').formset({
+        addText: 'Добавить',
+        deleteText: 'Удалить',
+        prefix:'assembly',
+    });
+
+
+</script>
+
+
+{% endblock %}
+
+
+{% block error_messages %}
 {% endblock %}

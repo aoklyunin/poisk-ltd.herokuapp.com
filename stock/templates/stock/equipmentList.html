@@ -1,33 +1,74 @@
 {% extends "plan/base.html" %}
+{% load staticfiles %}
 {# Load the tag library #}
 {% load bootstrap3 %}
-
+{% load crispy_forms_tags %}
+{% load crispy_forms_tags %}
 {# Load CSS and JavaScript #}
 {% bootstrap_css %}
 {% bootstrap_javascript %}
-
-{# Display django.contrib.messages as Bootstrap alerts #}
 {% bootstrap_messages %}
 
+{% block style_block %}
+    .centering{
+        text-align: center;
+    }
+    td {
+    padding: 5px;
+    }
+{% endblock %}
 
 {% block title %}НПО Поиск{% endblock %}
 
 {% block content %}
-   <h1>Склад</h1>
-    {% if user.is_authenticated == False %}
-        <p>Для доступа к системе Вам надо войти или зарегистрироваться</p>
-    {% else %}
+<h1>Склад</h1>
+{% if user.is_authenticated == False %}
+<p>Для доступа к системе Вам надо войти или зарегистрироваться</p>
+{% else %}
 
-    {% endif %}
+{% endif %}
 {% endblock %}
 
 {% block navigating %}
-    <a href = "/stock/extradition/" class = "btn btn-default">Выдача</a>
-    <a href = "/stock/acceptance/"  class = "btn btn-default">Приёмка</a>
-    <a href = "/stock/addEquipment/" class = "btn btn-default">Добавить оборудование</a>
+<a href="/stock/workReport/list/{{area_id}}/" class="btn btn-default">Наряды</a>
+<a href="/stock/extradition/{{area_id}}/" class="btn btn-default">Выдача</a>
+<a href="/stock/acceptance/{{area_id}}/" class="btn btn-default">Приёмка</a>
+<a href="/stock/addEquipment/" class="btn btn-default">Добавить оборудование</a>
 
-    <a href = "/stock/equipment/list/"  class = "btn btn-info">Список оборудования</a>
-    <a href = "/stock/detail/list/"  class = "btn btn-default">Список деталей</a>
-    <a href = "/stock/assembly/list/"  class = "btn btn-default">Список сборочных единиц</a>
+<a href="/stock/equipment/list/{{area_id}}/" class="btn btn-info">Список оборудования</a>
+<a href="/stock/detail/list/{{area_id}}/" class="btn btn-default">Список деталей</a>
+<a href="/stock/assembly/list/{{area_id}}/" class="btn btn-default">Список сборочных единиц</a>
 
+{% endblock %}
+
+{% block sub_content %}
+
+<br>
+<div class="btn-group centering" >
+    {% ifnotequal area_id one %}
+    <a href="/stock/equipment/list/0/" class="btn btn-info">Красное</a>
+    <a href="/stock/equipment/list/1/" class="btn btn-default">Малахит</a>
+    {% else %}
+    <a href="/stock/equipment/list/0/" class="btn btn-default">Красное</a>
+    <a href="/stock/equipment/list/1/" class="btn btn-info">Малахит</a>
+    {%endifnotequal%}
+</div>
+<br>
+<br>
+<table cellpadding="10" align="center" width="60%">
+    {% for eq in eqs%}
+    <tr>
+        <td>{{ eq.name}}</td>
+        <td>{{ eq.cnt}} {{eq.dimension}}</td>
+        <td><a href="/stock/equipment/detail/{{ eq.id }}/" class="btn btn-default">Редактировать</a>
+        <a href="/stock/equipment/remove/{{ eq.id }}/" class="btn btn-danger">Удалить</a></td>
+        <td></td>
+
+
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
+
+{% block error_messages %}
 {% endblock %}

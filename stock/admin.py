@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-
 from django.contrib import admin
 
-# Register your models here.
+from stock.models import MoveEquipment, MoveDetail, MoveAssembly
+
+admin.site.register(MoveEquipment)
+admin.site.register(MoveDetail)
+admin.site.register(MoveAssembly)
