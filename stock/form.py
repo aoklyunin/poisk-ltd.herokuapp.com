@@ -3,7 +3,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Field
 from django.forms import ModelForm, BaseFormSet
 from django import forms
-from stock.models import MoveEquipment, MoveAssembly, MoveDetail
+from stock.models import MoveEquipment
 from workReport.models import Equipment
 
 
@@ -34,6 +34,9 @@ class EquipmentForm(ModelForm):
         super(EquipmentForm, self).__init__(*args, **kwargs)
         # there's a `fields` property now
         self.fields['scheme'].required = False
+        self.fields['code'].required = False
+        self.fields['equipmentType'].required = False
+        self.fields['needVIK'].required = False
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Field('name', css_class='col-sm-2', ),
@@ -72,61 +75,3 @@ class MoveEquipmentForm(ModelForm):
         self.helper.layout = Layout(
             Field('cnt', css_class='col-sm-2', ),
             Field('equipment', css_class='col-sm-2'))
-
-
-class MoveDetailForm(ModelForm):
-    class Meta:
-        model = MoveDetail
-        fields = {'cnt', 'detail'}
-        widgets = {
-
-        }
-
-        labels = {
-            'detail': '',
-            'cnt': '',
-        }
-
-        error_messages = {
-            'detail': {'invalid': '', 'invalid_choice': ''},
-            'cnt': {'required': ''},
-        }
-
-    def __init__(self, *args, **kwargs):
-        # first call parent's constructor
-        super(MoveDetailForm, self).__init__(*args, **kwargs)
-        # there's a `fields` property now
-        self.fields['detail'].required = False
-        self.helper = FormHelper()
-        self.helper.layout = Layout(
-            Field('cnt', css_class='col-sm-2', ),
-            Field('detail', css_class='col-sm-2'))
-
-
-class MoveAssemblyForm(ModelForm):
-    class Meta:
-        model = MoveAssembly
-        fields = {'cnt', 'assembly'}
-        widgets = {
-
-        }
-
-        labels = {
-            'assembly': '',
-            'cnt': '',
-        }
-
-        error_messages = {
-            'assembly': {'invalid': '', 'invalid_choice': ''},
-            'cnt': {'required': ''},
-        }
-
-    def __init__(self, *args, **kwargs):
-        # first call parent's constructor
-        super(MoveAssemblyForm, self).__init__(*args, **kwargs)
-        # there's a `fields` property now
-        self.fields['assembly'].required = False
-        self.helper = FormHelper()
-        self.helper.layout = Layout(
-            Field('cnt', css_class='col-sm-2', ),
-            Field('assembly', css_class='col-sm-2'))

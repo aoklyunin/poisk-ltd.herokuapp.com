@@ -13,8 +13,7 @@ from django.forms import formset_factory, BaseFormSet
 from django.urls import reverse
 
 from plan.forms import LoginForm
-from workReport.forms import ReportForm, WorkPartForm, NeedStructForm, RejectForm, ExampleFormSetHelper, \
-    ProfileForm, LinkForm, BaseLinkFormSet
+from workReport.forms import ReportForm, WorkPartForm, NeedStructForm, RejectForm
 from workReport.models import WorkReport, WorkPart, StandartWork, Reject,  Worker, \
     WorkerPosition, NeedStruct
 

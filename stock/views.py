@@ -5,8 +5,8 @@ from django.shortcuts import render
 
 from plan.forms import LoginForm
 from plan.models import Area
-from stock.form import MoveEquipmentForm, MoveDetailForm, MoveAssemblyForm, EquipmentForm
-from stock.models import  MoveEquipment
+from stock.form import MoveEquipmentForm, EquipmentForm
+from stock.models import MoveEquipment
 from workReport.models import Equipment, StockStruct
 from workReport.views import RequiredFormSet
 
@@ -21,26 +21,13 @@ class RequiredFormSeExtradiont(BaseFormSet):
             form.empty_permitted = False
 
 
-def addEquipment(request):
-    eq = Equipment.objects.create()
-    ms = StockStruct.objects.create(area=Area.objects.get(name="Малахит"))
-    ks = StockStruct.objects.create(area=Area.objects.get(name="Красное село"))
-    eq.stockStruct.add(ms)
-    eq.stockStruct.add(ks)
-    eq.save()
-    return HttpResponseRedirect('/stock/equipment/detail/' + str(eq.pk) + '/')
-
-
 def extradition(request, area_id):
     EquipmentFormset = formset_factory(MoveEquipmentForm, formset=RequiredFormSet)
-    DetailFormset = formset_factory(MoveDetailForm, formset=RequiredFormSet)
-    AssemblyFormset = formset_factory(MoveAssemblyForm, formset=RequiredFormSet)
     if request.method == 'POST':
         equipment_formset = EquipmentFormset(request.POST, request.FILES, prefix='equipment')
-        detail_formset = DetailFormset(request.POST, request.FILES, prefix='detail')
-        assembly_formset = AssemblyFormset(request.POST, request.FILES, prefix='assembly')
         if equipment_formset.is_valid():
             for form in equipment_formset.forms:
+                print(form.cleaned_data)
                 eq = form.cleaned_data["equipment"]
                 cnt = form.cleaned_data["cnt"]
                 e = MoveEquipment.objects.create(
@@ -51,10 +38,9 @@ def extradition(request, area_id):
                 e.save()
                 e.accept(area_id)
 
-
     c = {'equipment_formset': EquipmentFormset(prefix='equipment'),
-         'detail_formset': DetailFormset(prefix='detail'),
-         'assembly_formset': AssemblyFormset(prefix='assembly'),
+         'detail_formset': EquipmentFormset(prefix='detail'),
+         'assembly_formset': EquipmentFormset(prefix='assembly'),
          'login_form': LoginForm(),
          'area_id': area_id,
          'one': '1'
@@ -64,13 +50,9 @@ def extradition(request, area_id):
 
 def acceptance(request, area_id):
     EquipmentFormset = formset_factory(MoveEquipmentForm, formset=RequiredFormSet)
-    DetailFormset = formset_factory(MoveDetailForm, formset=RequiredFormSet)
-    AssemblyFormset = formset_factory(MoveAssemblyForm, formset=RequiredFormSet)
     if request.method == 'POST':
         print(request.POST)
         equipment_formset = EquipmentFormset(request.POST, request.FILES, prefix='equipment')
-        detail_formset = DetailFormset(request.POST, request.FILES, prefix='detail')
-        assembly_formset = AssemblyFormset(request.POST, request.FILES, prefix='assembly')
         if equipment_formset.is_valid():
             for form in equipment_formset.forms:
                 eq = form.cleaned_data["equipment"]
@@ -84,8 +66,8 @@ def acceptance(request, area_id):
                 e.accept(area_id)
 
     c = {'equipment_formset': EquipmentFormset(prefix='equipment'),
-         'detail_formset': DetailFormset(prefix='detail'),
-         'assembly_formset': AssemblyFormset(prefix='assembly'),
+         'detail_formset': EquipmentFormset(prefix='detail'),
+         'assembly_formset': EquipmentFormset(prefix='assembly'),
          'login_form': LoginForm(),
          'area_id': area_id,
          'one': '1'
@@ -121,14 +103,29 @@ def removeStockEquipment(request, equipment_id):
     return HttpResponseRedirect('/stock/equipment/list/0/')
 
 
-def workReportList(request ):
+def workReportList(request):
     print("sadas")
     return render(request, "stock/workReportList.html", {
 
     })
 
-
 def equipmentList(request, area_id):
+    if request.method == 'POST':
+        # строим форму на основе запроса
+        form = EquipmentForm(request.POST)
+        # если форма заполнена корректно
+        if form.is_valid():
+            d = {}
+            d["name"] = form.cleaned_data["name"]
+            d["dimension"] = form.cleaned_data["dimension"]
+            eq = Equipment.objects.create()
+            ms = StockStruct.objects.create(area=Area.objects.get(name="Малахит"))
+            ks = StockStruct.objects.create(area=Area.objects.get(name="Красное село"))
+            eq.stockStruct.add(ms)
+            eq.stockStruct.add(ks)
+            eq.save()
+            Equipment.objects.filter(pk=eq.pk).update(**d)
+
     if int(area_id) == 0:
         area = Area.objects.get(name="Красное село")
     else:
@@ -142,13 +139,13 @@ def equipmentList(request, area_id):
             "cnt": l.stockStruct.get(area=area).cnt,
             "id": l.pk
         })
-        print (l.stockStruct)
 
     return render(request, "stock/equipmentList.html", {
         'area_id': area_id,
         'login_form': LoginForm(),
         'eqs': arr,
-        'one': '1'
+        'one': '1',
+        'form': EquipmentForm(),
     })
 
 
@@ -156,4 +153,3 @@ def equipmentDetail(request):
     return render(request, "stock/detailEquipment.html", {
 
     })
-

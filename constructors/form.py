@@ -7,6 +7,87 @@ from stock.models import MoveEquipment, MoveAssembly, MoveDetail
 from workReport.models import Equipment
 
 
+
+class DetailForm(ModelForm):
+    class Meta:
+        model = Equipment
+        fields = {'name', 'code', 'equipmentType', 'scheme','needVIK'}
+        widgets = {
+            forms.Textarea(attrs={'cols': 150, 'rows': 10}),
+        }
+
+        labels = {
+            'name': 'Название',
+            'dimension': 'Единица измерения',
+            'code': 'Шифр',
+            'equipmentType': 'Тип оборудования(число)',
+            'scheme': 'Чертежи',
+            'needVIK': 'Приёмка ОТК'
+        }
+
+        error_messages = {
+            'name': {'invalid': '', 'invalid_choice': ''},
+            'dimension': {'required': ''},
+        }
+
+    def __init__(self, *args, **kwargs):
+        # first call parent's constructor
+        super(DetailForm, self).__init__(*args, **kwargs)
+        # there's a `fields` property now
+        self.fields['scheme'].required = False
+        self.fields['code'].required = False
+        self.fields['equipmentType'].required = False
+        self.fields['needVIK'].required = False
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Field('name', css_class='col-sm-2', ),
+            Field('code', css_class='col-sm-2'),
+            Field('equipmentType', css_class='col-sm-2'),
+            Field('sheme', css_class='col-sm-2'),
+            Field('needVIK', wrapper_class='i-checks'),
+        )
+
+class DetailForm(ModelForm):
+    class Meta:
+        model = Equipment
+        fields = {'name', 'code', 'equipmentType', 'scheme','needVIK'}
+        widgets = {
+            forms.Textarea(attrs={'cols': 150, 'rows': 10}),
+        }
+
+        labels = {
+            'name': 'Название',
+            'dimension': 'Единица измерения',
+            'code': 'Шифр',
+            'equipmentType': 'Тип оборудования(число)',
+            'scheme': 'Чертежи',
+            'needVIK': 'Приёмка ОТК'
+        }
+
+        error_messages = {
+            'name': {'invalid': '', 'invalid_choice': ''},
+            'dimension': {'required': ''},
+        }
+
+    def __init__(self, *args, **kwargs):
+        # first call parent's constructor
+        super(DetailForm, self).__init__(*args, **kwargs)
+        # there's a `fields` property now
+        self.fields['scheme'].required = False
+        self.fields['code'].required = False
+        self.fields['equipmentType'].required = False
+        self.fields['needVIK'].required = False
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Field('name', css_class='col-sm-2', ),
+            Field('code', css_class='col-sm-2'),
+            Field('equipmentType', css_class='col-sm-2'),
+            Field('sheme', css_class='col-sm-2'),
+            Field('needVIK', wrapper_class='i-checks'),
+        )
+
+
+
 class NeedEquipmentForm(ModelForm):
     class Meta:
         model = MoveEquipment

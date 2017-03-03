@@ -7,8 +7,7 @@ import datetime
 from django.db import models
 
 from plan.models import Area
-from workReport.models import Equipment, Detail, AssemblyUnit
-
+from workReport.models import Equipment
 
 class MoveEquipment(models.Model):
     date = models.DateField(default=datetime.date.today)
@@ -33,24 +32,3 @@ class MoveEquipment(models.Model):
             ss.cnt -= self.cnt
         ss.save()
 
-
-class MoveDetail(models.Model):
-    date = models.DateField(default=datetime.date.today)
-    cnt = models.IntegerField(default=0)
-    detail = models.ForeignKey(Detail)
-    flgAcceptance = models.BooleanField(default=True)
-    remainCnt = models.IntegerField(default=0)
-
-    def __str__(self):
-        return str(self.equipment) + ":" + str(self.cnt)
-
-
-class MoveAssembly(models.Model):
-    date = models.DateField(default=datetime.date.today)
-    cnt = models.IntegerField(default=0)
-    assembly = models.ForeignKey(AssemblyUnit)
-    flgAcceptance = models.BooleanField(default=True)
-    remainCnt = models.IntegerField(default=0)
-
-    def __str__(self):
-        return str(self.equipment) + ":" + str(self.cnt)

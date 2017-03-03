@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import render
 
-from workReport.models import Order, AssemblyUnit
-
+from workReport.models import Order
 
 def orderList(request):
     return render(request, 'plan/orders.html',
@@ -10,9 +9,3 @@ def orderList(request):
                        Order.objects.all()
                    })
 
-
-def assemlyUnitList(request):
-    return render(request, 'plan/assembly_units.html',
-                  {'assembly_units':
-                       AssemblyUnit.objects.all()
-                   })

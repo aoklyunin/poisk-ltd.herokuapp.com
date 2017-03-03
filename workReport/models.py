@@ -18,10 +18,6 @@ class StockStruct(models.Model):
 class StockReportStruct(models.Model):
     # оборудование
     equipment = models.ForeignKey('Equipment', blank=True)
-    # детали
-    detail = models.ForeignKey('Detail', blank=True)
-    # сборочные единицы
-    assemblyUnit = models.ForeignKey('AssemblyUnit', blank=True)
     # выдано
     getCnt = models.FloatField(default=0)
     # брак
@@ -48,6 +44,11 @@ class Equipment(models.Model):
     # нужно ли ОТК
     needVIK = models.BooleanField(default=False)
 
+    TYPE_EQUIPMENT = 0
+    TYPE_MATERIAL = 1
+    TYPE_DETAIL = 2
+    TYPE_ASSEMBLY_UNIT = 3
+
     def __str__(self):
         return self.name
 
@@ -59,8 +60,6 @@ class Equipment(models.Model):
 class NeedStruct(models.Model):
     equipment = models.ForeignKey('Equipment', blank=True)
     standartWork = models.ForeignKey('StandartWork', blank=True)
-    detail = models.ForeignKey('Detail', blank=True)
-    assemblyUnit = models.ForeignKey('AssemblyUnit', blank=True)
     cnt = models.FloatField(default=0)
 
 
@@ -103,46 +102,6 @@ class WorkPart(models.Model):
         return self.startTime.strftime("%H:%M") + "-" + self.endTime.strftime("%H:%M") + " " + str(
             self.standartWork) + " " + self.comment
 
-
-class Detail(models.Model):
-    # шифр
-    code = models.CharField(max_length=100)
-    # имя
-    name = models.CharField(max_length=1000)
-    # чертёж
-    scheme = models.ManyToManyField(Scheme, blank=True, default=None, null=True)
-    # необходимые объекты для данной работы
-    needStruct = models.ManyToManyField(NeedStruct, blank=True, default=None, null=True,
-                                        related_name="needStructDetail123")
-    # склад
-    stockStruct = models.ManyToManyField(StockStruct)
-    # нужно ли ОТК
-    needVIK = models.BooleanField(default=False)
-
-
-# класс сборочных единиц
-class AssemblyUnit(models.Model):
-    # имя
-    name = models.CharField(max_length=1000)
-    # чертёж
-    scheme = models.ManyToManyField(Scheme, blank=True, default=None, null=True)
-    # шифр
-    code = models.CharField(max_length=100, default="")
-    # необходимые объекты для данной работы
-    needStruct = models.ManyToManyField(NeedStruct, blank=True, default=None, null=True,
-                                        related_name="needStructAssemblyUnit")
-    # склад
-    stockStruct = models.ManyToManyField(StockStruct)
-    # нужно ли ОТК
-    needVIK = models.BooleanField(default=False)
-
-
-    # сдандартные работы
-    def __str__(self):
-        return self.name
-
-    def __unicode__(self):
-        return self.name
 
 
 class Order(models.Model):
