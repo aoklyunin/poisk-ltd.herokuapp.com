@@ -22,16 +22,16 @@
 {% endblock %}
 
 {% block navigating %}
-<a href="/stock/workReport/list/{{area_id}}/" class="btn btn-default">Добавить деталь</a>
-<a href="/stock/extradition/{{area_id}}/" class="btn btn-default">Добавить сборку</a>
-<a href="/stock/acceptance/{{area_id}}/" class="btn btn-info">Чертежи</a>
-<a href="/stock/addEquipment/" class="btn btn-default">Добавить оборудование</a>
+<a href="/constructors/reports/" class="btn btn-default">Наряды</a>
+    <a href="/constructors/list/equipment/0/{{area_id}}/" class="btn btn-default">Оборудование</a>
+    <a href="/constructors/list/equipment/1/{{area_id}}/" class="btn btn-default">Материалы</a>
+    <a href="/constructors/list/equipment/2/{{area_id}}/" class="btn btn-default">Детали</a>
+    <a href="/constructors/list/equipment/3/{{area_id}}/" class="btn btn-default">Сборочные единицы</a>
+    <a href="" class="btn btn-info">Редактировать</a>
 
-<a href="/stock/equipment/list/{{area_id}}/" class="btn btn-default">Список оборудования</a>
-<a href="/stock/detail/list/{{area_id}}/" class="btn btn-default">Список деталей</a>
-<a href="/stock/assembly/list/{{area_id}}/" class="btn btn-default">Список сборочных единиц</a>
-
+<a href="/constructors/list/standartWork/" class="btn btn-default">Стандартные работы</a>
 {% endblock %}
+
 
 
 {% block sub_content %}

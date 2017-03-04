@@ -21,6 +21,9 @@ class LoginForm(forms.Form):
     }
 
 
+def subdict(form,keyset):
+    return dict((k, form.cleaned_data[k]) for k in keyset)
+
 # форма регистрации
 class RegisterForm(forms.Form):
     # логин

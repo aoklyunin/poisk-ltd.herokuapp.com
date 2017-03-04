@@ -23,31 +23,11 @@
 
 {% block navigating %}
 <a href="/constructors/reports/" class="btn btn-default">Наряды</a>
-{% ifequal equipment_type zero %}
-    <a href="/constructors/list/0/{{area_id}}/" class="btn btn-info">Оборудование</a>
-    <a href="/constructors/list/1/{{area_id}}/" class="btn btn-default">Материалы</a>
-    <a href="/constructors/list/2/{{area_id}}/" class="btn btn-default">Детали</a>
-    <a href="/constructors/list/3/{{area_id}}/" class="btn btn-default">Сборочные единицы</a>
-{% endifequal %}
-{% ifequal equipment_type one %}
-    <a href="/constructors/list/0/{{area_id}}/" class="btn btn-default">Оборудование</a>
-    <a href="/constructors/list/1/{{area_id}}/" class="btn btn-info">Материалы</a>
-    <a href="/constructors/list/2/{{area_id}}/" class="btn btn-default">Детали</a>
-    <a href="/constructors/list/3/{{area_id}}/" class="btn btn-default">Сборочные единицы</a>
-{% endifequal %}
-{% ifequal equipment_type two %}
-    <a href="/constructors/list/0/{{area_id}}/" class="btn btn-default">Оборудование</a>
-    <a href="/constructors/list/1/{{area_id}}/" class="btn btn-default">Материалы</a>
-    <a href="/constructors/list/2/{{area_id}}/" class="btn btn-info">Детали</a>
-    <a href="/constructors/list/3/{{area_id}}/" class="btn btn-default">Сборочные единицы</a>
-{% endifequal %}
-{% ifequal equipment_type three %}
-    <a href="/constructors/list/0/{{area_id}}/" class="btn btn-default">Оборудование</a>
-    <a href="/constructors/list/1/{{area_id}}/" class="btn btn-default">Материалы</a>
-    <a href="/constructors/list/2/{{area_id}}/" class="btn btn-default">Детали</a>
-    <a href="/constructors/list/3/{{area_id}}/" class="btn btn-info">Сборочные единицы</a>
-{% endifequal %}
-
+    <a href="/constructors/list/equipment/0/{{area_id}}/" class="btn btn-default">Оборудование</a>
+    <a href="/constructors/list/equipment/1/{{area_id}}/" class="btn btn-default">Материалы</a>
+    <a href="/constructors/list/equipment/2/{{area_id}}/" class="btn btn-default">Детали</a>
+    <a href="/constructors/list/equipment/3/{{area_id}}/" class="btn btn-default">Сборочные единицы</a>
+    <a href="" class="btn btn-info">Редактировать работу</a>
 
 <a href="/constructors/list/standartWork/" class="btn btn-default">Стандартные работы</a>
 {% endblock %}
@@ -61,94 +41,22 @@
 <form method="post" class="formset_form">
     {% csrf_token %}
 
-    {{ equipment_formset.management_form }}
-    {{ detail_formset.management_form }}
-    {{ assembly_formset.management_form }}
+    {{ form.management_form }}
     <table>
         <tr>
-            <td valign="top">
-                <table cellspacing="3" cellpadding="7">
-                    <thead>
-                    <tr>
-                        <td align="center">Оснастка</td>
-                        <td align="center">Количество</td>
-                    </tr>
-                    </thead>
-                    <tr></tr>
-                    {% for link_form in equipment_formset %}
-                    <tr class="link-formset">
-                        <td valign="top">{% bootstrap_field link_form.equipment %}</td>
-                        <td valign="top">{% bootstrap_field link_form.cnt %}</td>
-                    </tr>
+             <td valign="top">{% bootstrap_field form.text %}</td>
+             <td valign="top">{% bootstrap_field form.positionsEnable %}</td>
+             <td valign="top">{% bootstrap_field form.duration %}</td>
+        </tr>
 
-                    {% endfor %}
-                    <div class="placeForAddBtn"></div>
-                </table>
-            </td>
-            <td valign="top">
-                <table cellspacing="3" cellpadding="7">
-                    <thead>
-                    <tr>
-                        <td align="center">Детали</td>
-                        <td align="center">Количество</td>
-                    </tr>
-                    </thead>
-                    <tr></tr>
-                    {% for link_form in detail_formset %}
-                    <tr class="link2-formset">
-                        <td valign="top">{% bootstrap_field link_form.detail %}</td>
-                        <td valign="top">{% bootstrap_field link_form.cnt %}</td>
-                    </tr>
-                    {% endfor %}
-                    <div class="placeForAddBtn"></div>
-                </table>
-            </td>
-            <td valign="top">
-                <table cellspacing="3" cellpadding="7">
-                    <thead>
-                    <tr>
-                        <td align="center">Сборочные единицы</td>
-                        <td align="center">Количество</td>
-                    </tr>
-                    </thead>
-                    <tr></tr>
-                    {% for link_form in assembly_formset %}
-                    <tr class="link3-formset">
-                        <td valign="top">{% bootstrap_field link_form.assembly %}</td>
-                        <td valign="top">{% bootstrap_field link_form.cnt %}</td>
-                    </tr>
-                    {% endfor %}
-                    <div class="placeForAddBtn"></div>
-                </table>
-            </td>
+        <tr>
+            <td >   {% bootstrap_field form.needVIK %}</td>
         </tr>
     </table>
-
-    <input align="center" class="btn btn-primary" type="submit" value="Принять" class="button"/>
+    <input align="center" class="btn btn-primary" type="submit" value="Сохранить" class="button"/>
 
 </form>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-<script src="{% static '/scripts/jquery.formset.js' %}"></script>
-<script>
-    $('.link-formset').formset({
-        addText: 'Добавить',
-        deleteText: 'Удалить',
-        prefix:'equipment',
-    });
 
-$('.link2-formset').formset({
-        addText: 'Добавить',
-        deleteText: 'Удалить',
-        prefix:'detail',
-    });
-$('.link3-formset').formset({
-        addText: 'Добавить',
-        deleteText: 'Удалить',
-        prefix:'assembly',
-    });
-
-
-</script>
 
 
 {% endblock %}

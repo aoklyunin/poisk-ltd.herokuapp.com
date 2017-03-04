@@ -23,10 +23,10 @@
 
 {% block navigating %}
 <a href="/constructors/reports/" class="btn btn-default">Наряды</a>
-    <a href="/constructors/list/0/0/" class="btn btn-default">Оборудование</a>
-    <a href="/constructors/list/1/0/" class="btn btn-default">Материалы</a>
-    <a href="/constructors/list/2/0/" class="btn btn-default">Детали</a>
-    <a href="/constructors/list/3/0/" class="btn btn-default">Сборочные единицы</a>
+    <a href="/constructors/list/equipment/0/0/" class="btn btn-default">Оборудование</a>
+    <a href="/constructors/list/equipment/1/0/" class="btn btn-default">Материалы</a>
+    <a href="/constructors/list/equipment/2/0/" class="btn btn-default">Детали</a>
+    <a href="/constructors/list/equipment/3/0/" class="btn btn-default">Сборочные единицы</a>
 
 <a href="/constructors/list/standartWork/" class="btn btn-info">Стандартные работы</a>
 {% endblock %}
@@ -41,7 +41,7 @@
      {% csrf_token %}
 <table>
     <tr>
-        <td> {%  bootstrap_field form.name %}</td>
+        <td> {%  bootstrap_field form.text %}</td>
     </tr>
 </table>
 
@@ -53,10 +53,9 @@
 <table cellpadding="10" align="center" width="60%">
   {% for eq in eqs%}
     <tr>
-        <td>{{ eq.name}}</td>
-        <td>{{ eq.cnt}} {{eq.dimension}}</td>
-        <td><a href="/stock/equipment/detail/{{ eq.id }}/" class="btn btn-default">Редактировать</a>
-        <a href="/stock/equipment/remove/{{ eq.id }}/" class="btn btn-danger">Удалить</a></td>
+        <td>{{ eq.text}}</td>
+        <td><a href="/constructors/detail/standartWork/{{ eq.id }}/" class="btn btn-default">Редактировать</a>
+        <a href="/constructors/remove/standartWork/{{ eq.id }}/" class="btn btn-danger">Удалить</a></td>
         <td></td>
     </tr>
     {% endfor %}

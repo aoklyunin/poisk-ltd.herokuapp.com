@@ -8,6 +8,13 @@ from plan.models import Customer
 from workReport.workReportGenerator import generateReport
 
 
+# сколько чего надо по тех. процессу
+class NeedStruct(models.Model):
+    equipment = models.ForeignKey('Equipment', blank=True, null=True)
+    standartWork = models.ForeignKey('StandartWork', blank=True, null=True)
+    cnt = models.FloatField(default=0)
+
+
 # Что хранится на складе
 class StockStruct(models.Model):
     cnt = models.FloatField(default=0)
@@ -30,9 +37,9 @@ class StockReportStruct(models.Model):
 
 class Equipment(models.Model):
     # название
-    name = models.CharField(max_length=1000, default="Перчатки")
+    name = models.CharField(max_length=1000, default="")
     # единица измерения
-    dimension = models.CharField(max_length=200, default="Пара")
+    dimension = models.CharField(max_length=200, default="")
     # шифр
     code = models.CharField(max_length=100, blank=True, default="", null=True)
     # тип
@@ -43,6 +50,9 @@ class Equipment(models.Model):
     stockStruct = models.ManyToManyField(StockStruct, blank=True, null=True)
     # нужно ли ОТК
     needVIK = models.BooleanField(default=False)
+    # необходимые объекты для данной работы
+    needStruct = models.ManyToManyField(NeedStruct, blank=True, default=None, null=True,
+                                        related_name="needStructStandartWork12")
 
     TYPE_EQUIPMENT = 0
     TYPE_MATERIAL = 1
@@ -54,13 +64,6 @@ class Equipment(models.Model):
 
     def __unicode__(self):
         return self.name
-
-
-# сколько чего надо по тех. процессу
-class NeedStruct(models.Model):
-    equipment = models.ForeignKey('Equipment', blank=True)
-    standartWork = models.ForeignKey('StandartWork', blank=True)
-    cnt = models.FloatField(default=0)
 
 
 # стандартная работа
@@ -101,7 +104,6 @@ class WorkPart(models.Model):
     def __unicode__(self):
         return self.startTime.strftime("%H:%M") + "-" + self.endTime.strftime("%H:%M") + " " + str(
             self.standartWork) + " " + self.comment
-
 
 
 class Order(models.Model):
