@@ -5,26 +5,22 @@ from django.shortcuts import render
 
 from plan.forms import LoginForm
 from plan.models import Area
-from stock.form import MoveEquipmentForm, EquipmentForm
+from stock.form import MoveEquipmentForm, EquipmentForm, MoveMaterialForm, MoveDetailForm, MoveAssemblyForm
 from stock.models import MoveEquipment
 from workReport.models import Equipment, StockStruct
 from workReport.views import RequiredFormSet
 
 
-class RequiredFormSeExtradiont(BaseFormSet):
-    def clean(self):
-        return
-
-    def __init__(self, *args, **kwargs):
-        super(RequiredFormSet, self).__init__(*args, **kwargs)
-        for form in self.forms:
-            form.empty_permitted = False
-
-
 def extradition(request, area_id):
     EquipmentFormset = formset_factory(MoveEquipmentForm, formset=RequiredFormSet)
+    MaterialFormset = formset_factory(MoveMaterialForm, formset=RequiredFormSet)
+    DetailFormset = formset_factory(MoveDetailForm, formset=RequiredFormSet)
+    AssemblyFormset = formset_factory(MoveAssemblyForm, formset=RequiredFormSet)
     if request.method == 'POST':
         equipment_formset = EquipmentFormset(request.POST, request.FILES, prefix='equipment')
+        material_formset = MaterialFormset(request.POST, request.FILES, prefix='material')
+        detail_formset = DetailFormset(request.POST, request.FILES, prefix='detail')
+        assembly_formset = AssemblyFormset(request.POST, request.FILES, prefix='assembly')
         if equipment_formset.is_valid():
             for form in equipment_formset.forms:
                 print(form.cleaned_data)
@@ -39,8 +35,9 @@ def extradition(request, area_id):
                 e.accept(area_id)
 
     c = {'equipment_formset': EquipmentFormset(prefix='equipment'),
-         'detail_formset': EquipmentFormset(prefix='detail'),
-         'assembly_formset': EquipmentFormset(prefix='assembly'),
+         'material_formset': MaterialFormset(prefix='detail'),
+         'detail_formset': DetailFormset(prefix='detail'),
+         'assembly_formset': AssemblyFormset(prefix='assembly'),
          'login_form': LoginForm(),
          'area_id': area_id,
          'one': '1'
@@ -103,12 +100,6 @@ def removeStockEquipment(request, equipment_id):
     return HttpResponseRedirect('/stock/equipment/list/0/')
 
 
-def workReportList(request):
-    print("sadas")
-    return render(request, "stock/workReportList.html", {
-
-    })
-
 def equipmentList(request, area_id):
     if request.method == 'POST':
         # строим форму на основе запроса
@@ -118,6 +109,7 @@ def equipmentList(request, area_id):
             d = {}
             d["name"] = form.cleaned_data["name"]
             d["dimension"] = form.cleaned_data["dimension"]
+            d["equipmentType"] = Equipment.TYPE_EQUIPMENT
             eq = Equipment.objects.create()
             ms = StockStruct.objects.create(area=Area.objects.get(name="Малахит"))
             ks = StockStruct.objects.create(area=Area.objects.get(name="Красное село"))
@@ -132,7 +124,7 @@ def equipmentList(request, area_id):
         area = Area.objects.get(name="Малахит")
 
     arr = []
-    for l in Equipment.objects.all():
+    for l in Equipment.objects.filter(equipmentType=Equipment.TYPE_EQUIPMENT):
         arr.append({
             "name": l.name,
             "dimension": l.dimension,
@@ -149,7 +141,8 @@ def equipmentList(request, area_id):
     })
 
 
-def equipmentDetail(request):
-    return render(request, "stock/detailEquipment.html", {
+def workReportList(request):
+    print("sadas")
+    return render(request, "stock/workReportList.html", {
 
     })

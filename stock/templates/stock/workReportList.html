@@ -16,7 +16,7 @@
    <h1>Склад</h1>
 {% if user.is_authenticated == False %}
 <p>Для доступа к системе Вам надо войти или зарегистрироваться</p>
-
+{% endif%}
 {% endblock %}
 
 
@@ -24,9 +24,11 @@
 <a href="/stock/reports/" class="btn btn-info">Наряды</a>
 <a href="/stock/extradition/0/" class="btn btn-default">Выдача</a>
 <a href="/stock/acceptance/0/" class="btn btn-default">Приёмка</a>
-<a href="/stock/addEquipment/" class="btn btn-default">Добавить оборудование</a>
 
-<a href="/stock/equipment/list/0/" class="btn btn-default">Список оборудования</a>
+<a href="/stock/equipment/list/{{area_id}}/" class="btn btn-default">Список оборудования</a>
+<a href="/stock/material/list/{{area_id}}/" class="btn btn-default">Материалы</a>
+<a href="/stock/detail/list/{{area_id}}/" class="btn btn-default">Детали</a>
+<a href="/stock/assembly/list/{{area_id}}/" class="btn btn-default">Сборочные единицы</a>
 
 {% endblock %}
 

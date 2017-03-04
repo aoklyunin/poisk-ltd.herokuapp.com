@@ -1,0 +1,66 @@
+{% extends "plan/base.html" %}
+{% load staticfiles %}
+{# Load the tag library #}
+{% load bootstrap3 %}
+{% load crispy_forms_tags %}
+{% load crispy_forms_tags %}
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% bootstrap_messages %}
+
+
+{% block title %}НПО Поиск{% endblock %}
+
+{% block content %}
+<h1>Конструкторам</h1>
+{% if user.is_authenticated == False %}
+<p>Для доступа к системе Вам надо войти или зарегистрироваться</p>
+{% else %}
+
+{% endif %}
+{% endblock %}
+
+{% block navigating %}
+<a href="/stock/workReport/list/{{area_id}}/" class="btn btn-default">Добавить деталь</a>
+<a href="/stock/extradition/{{area_id}}/" class="btn btn-default">Добавить сборку</a>
+<a href="/stock/acceptance/{{area_id}}/" class="btn btn-info">Чертежи</a>
+<a href="/stock/addEquipment/" class="btn btn-default">Добавить оборудование</a>
+
+<a href="/stock/equipment/list/{{area_id}}/" class="btn btn-default">Список оборудования</a>
+<a href="/stock/detail/list/{{area_id}}/" class="btn btn-default">Список деталей</a>
+<a href="/stock/assembly/list/{{area_id}}/" class="btn btn-default">Список сборочных единиц</a>
+
+{% endblock %}
+
+
+{% block sub_content %}
+
+<br>
+<form method="post" class="formset_form">
+    {% csrf_token %}
+
+    {{ form.management_form }}
+    <table>
+        <tr>
+             <td valign="top">{% bootstrap_field form.name %}</td>
+             <td valign="top">{% bootstrap_field form.dimension %}</td>
+             <td valign="top">{% bootstrap_field form.code %}</td>
+        </tr>
+        <tr>
+              <td valign="top">{% bootstrap_field form.scheme %}</td>
+        </tr>
+        <tr>
+            <td >   {% bootstrap_field form.needVIK %}</td>
+        </tr>
+    </table>
+    <input align="center" class="btn btn-primary" type="submit" value="Сохранить" class="button"/>
+
+</form>
+
+
+{% endblock %}
+
+
+{% block error_messages %}
+{% endblock %}

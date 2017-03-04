@@ -33,10 +33,11 @@
 <a href="/stock/reports/" class="btn btn-default">Наряды</a>
 <a href="/stock/extradition/{{area_id}}/" class="btn btn-default">Выдача</a>
 <a href="/stock/acceptance/{{area_id}}/" class="btn btn-default">Приёмка</a>
-<a href="/stock/equipment/list/{{area_id}}/" class="btn btn-info">Оснастка</a>
+
+<a href="/stock/equipment/list/{{area_id}}/" class="btn btn-default">Оснастка</a>
 <a href="/stock/material/list/{{area_id}}/" class="btn btn-default">Материалы</a>
 <a href="/stock/detail/list/{{area_id}}/" class="btn btn-default">Детали</a>
-<a href="/stock/assembly/list/{{area_id}}/" class="btn btn-default">Сборочные единицы</a>
+<a href="/stock/assembly/list/{{area_id}}/" class="btn btn-info">Сборочные единицы</a>
 {% endblock %}
 
 {% block sub_content %}
@@ -54,17 +55,6 @@
     {%endifnotequal%}
 </div>
 <br>
-<form method="post">
-     {% csrf_token %}
-<table>
-    <tr>
-        <td> {%  bootstrap_field form.name %}</td>
-        <td> {%  bootstrap_field form.dimension %}</td>
-    </tr>
-</table>
-
-    <input align="center" class="btn btn-primary" type="submit" value="Создать" class="button"/>
-</form>
 
 <br>
 <br>

@@ -13,12 +13,22 @@
 {% block title %}НПО Поиск{% endblock %}
 
 {% block content %}
+<h1>Конструкторам</h1>
     {% if user.is_authenticated == False %}
         <p>Для доступа к системе Вам надо войти или зарегистрироваться</p>
     {% else %}
 
     {% endif %}
-    <a href = "/workReport/create/" class="btn btn-primary" >Сформировать наряд</a>
+
+{% endblock %}
+
+{% block navigating %}
+<a href="/constructors/reports/" class="btn btn-info">Наряды</a>
+<a href="/constructors/list/0/0/" class="btn btn-default">Оборудование</a>
+<a href="/constructors/list/1/0/" class="btn btn-default">Материалы</a>
+<a href="/constructors/list/2/0/" class="btn btn-default">Детали</a>
+<a href="/constructors/list/3/0/" class="btn btn-default">Сборочные единицы</a>
+<a href="/constructors/list/standartWork/" class="btn btn-default">Стандартные работы</a>
 
 {% endblock %}
 

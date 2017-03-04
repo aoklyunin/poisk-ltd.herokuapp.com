@@ -10,7 +10,7 @@ from workReport.models import Equipment
 class EquipmentForm(ModelForm):
     class Meta:
         model = Equipment
-        fields = {'name', 'dimension', 'code', 'equipmentType', 'scheme','needVIK'}
+        fields = {'name', 'dimension', 'code', 'scheme','needVIK'}
         widgets = {
             forms.Textarea(attrs={'cols': 150, 'rows': 10}),
         }
@@ -19,7 +19,6 @@ class EquipmentForm(ModelForm):
             'name': 'Название',
             'dimension': 'Единица измерения',
             'code': 'Шифр',
-            'equipmentType': 'Тип оборудования(число)',
             'scheme': 'Чертежи',
             'needVIK': 'Приёмка ОТК'
         }
@@ -35,20 +34,18 @@ class EquipmentForm(ModelForm):
         # there's a `fields` property now
         self.fields['scheme'].required = False
         self.fields['code'].required = False
-        self.fields['equipmentType'].required = False
         self.fields['needVIK'].required = False
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Field('name', css_class='col-sm-2', ),
             Field('dimension', css_class='col-sm-2'),
             Field('code', css_class='col-sm-2'),
-            Field('equipmentType', css_class='col-sm-2'),
             Field('sheme', css_class='col-sm-2'),
             Field('needVIK', wrapper_class='i-checks'),
         )
 
 
-class MoveEquipmentForm(ModelForm):
+class MoveForm(ModelForm):
     class Meta:
         model = MoveEquipment
         fields = {'cnt', 'equipment'}
@@ -68,10 +65,35 @@ class MoveEquipmentForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         # first call parent's constructor
-        super(MoveEquipmentForm, self).__init__(*args, **kwargs)
+        super(MoveForm, self).__init__(*args, **kwargs)
         # there's a `fields` property now
         self.fields['equipment'].required = False
+
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Field('cnt', css_class='col-sm-2', ),
             Field('equipment', css_class='col-sm-2'))
+
+
+class MoveEquipmentForm(MoveForm):
+    def __init__(self, *args, **kwargs):
+        super(MoveEquipmentForm, self).__init__(*args, **kwargs)
+        self.fields['equipment'].queryset = Equipment.objects.filter(equipmentType=Equipment.TYPE_EQUIPMENT)
+
+
+class MoveMaterialForm(MoveForm):
+    def __init__(self, *args, **kwargs):
+        super(MoveMaterialForm, self).__init__(*args, **kwargs)
+        self.fields['equipment'].queryset = Equipment.objects.filter(equipmentType=Equipment.TYPE_MATERIAL)
+
+
+class MoveDetailForm(MoveForm):
+    def __init__(self, *args, **kwargs):
+        super(MoveDetailForm, self).__init__(*args, **kwargs)
+        self.fields['equipment'].queryset = Equipment.objects.filter(equipmentType=Equipment.TYPE_DETAIL)
+
+
+class MoveAssemblyForm(MoveForm):
+    def __init__(self, *args, **kwargs):
+        super(MoveAssemblyForm, self).__init__(*args, **kwargs)
+        self.fields['equipment'].queryset = Equipment.objects.filter(equipmentType=Equipment.TYPE_ASSEMBLY_UNIT)

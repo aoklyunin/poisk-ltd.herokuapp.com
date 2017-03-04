@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
 from django.conf.urls import url
 
-from constructors.views import workReportList, addDetail, addAssembly, detailDetail, detailAssembly, addStandartWork, \
-    detailStandartWork, listDetail, listAssembly, listStandartWork
+from constructors.views import workReportList, removeEquipment, listStandartWork, listEquipment, detailStandartWork, \
+    detailEquipment
 
 urlpatterns = [
     url(r'^reports/$', workReportList),
-    url(r'^add/detail/$', addDetail),
-    url(r'^add/assembly/$', addAssembly),
-    url(r'^add/standartWork/$', addStandartWork),
-    url(r'^detail/detail/(?P<detail_id>[0-9]+)/$', detailDetail),
-    url(r'^detail/assembly/(?P<assembly_id>[0-9]+)/$', detailAssembly),
-    url(r'^detail/detail/(?P<detail_id>[0-9]+)/$', detailStandartWork),
-    url(r'^list/detail/(?P<detail_id>[0-9]+)/$', listDetail),
-    url(r'^list/assembly/(?P<assembly_id>[0-9]+)/$', listAssembly),
-    url(r'^list/detail/(?P<detail_id>[0-9]+)/$', listStandartWork),
+
+    url(r'^detail/(?P<equipment_id>[0-9]+)/$', detailEquipment),
+    url(r'^detail/standartWork/(?P<swork_id>[0-9]+)/$', detailStandartWork),
+
+    url(r'^list/(?P<equipment_type>[0-9]+)/(?P<area_id>[0-9]+)/$', listEquipment),
+    url(r'^list/standartWork/$', listStandartWork),
+    url(r'^remove/(?P<equipment_id>[0-9]+)/$', removeEquipment),
+
 ]
