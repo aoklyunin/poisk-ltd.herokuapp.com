@@ -3,7 +3,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Field
 from django.forms import ModelForm, BaseFormSet, TextInput
 from django import forms
-from stock.models import MoveEquipment
+from stock.models import MoveEquipment, MoveStandartWork
 from workReport.models import Equipment, StandartWork
 
 
@@ -108,6 +108,7 @@ class MoveForm(ModelForm):
         super(MoveForm, self).__init__(*args, **kwargs)
         # there's a `fields` property now
         self.fields['equipment'].required = False
+        self.fields['cnt'].required = False
 
         self.helper = FormHelper()
         self.helper.layout = Layout(
@@ -137,3 +138,34 @@ class MoveAssemblyForm(MoveForm):
     def __init__(self, *args, **kwargs):
         super(MoveAssemblyForm, self).__init__(*args, **kwargs)
         self.fields['equipment'].queryset = Equipment.objects.filter(equipmentType=Equipment.TYPE_ASSEMBLY_UNIT)
+
+
+class MoveStandartWorkForm(ModelForm):
+    class Meta:
+        model = MoveStandartWork
+        fields = {'cnt', 'standartWork'}
+        widgets = {
+
+        }
+
+        labels = {
+            'standartWork': '',
+            'cnt': '',
+        }
+
+        error_messages = {
+            'standartWork': {'invalid': '', 'invalid_choice': ''},
+            'cnt': {'required': ''},
+        }
+
+    def __init__(self, *args, **kwargs):
+        # first call parent's constructor
+        super(MoveStandartWorkForm, self).__init__(*args, **kwargs)
+        # there's a `fields` property now
+        self.fields['standartWork'].required = False
+        self.fields['cnt'].required = False
+
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Field('cnt', css_class='col-sm-2', ),
+            Field('standartWork', css_class='col-sm-2'))

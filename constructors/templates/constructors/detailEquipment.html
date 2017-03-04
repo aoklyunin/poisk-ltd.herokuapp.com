@@ -23,10 +23,10 @@
 
 {% block navigating %}
 <a href="/constructors/reports/" class="btn btn-default">Наряды</a>
-    <a href="/constructors/list/equipment/0/{{area_id}}/" class="btn btn-default">Оборудование</a>
-    <a href="/constructors/list/equipment/1/{{area_id}}/" class="btn btn-default">Материалы</a>
-    <a href="/constructors/list/equipment/2/{{area_id}}/" class="btn btn-default">Детали</a>
-    <a href="/constructors/list/equipment/3/{{area_id}}/" class="btn btn-default">Сборочные единицы</a>
+    <a href="/constructors/list/equipment/0/0/" class="btn btn-default">Оборудование</a>
+    <a href="/constructors/list/equipment/1/0/" class="btn btn-default">Материалы</a>
+    <a href="/constructors/list/equipment/2/0/" class="btn btn-default">Детали</a>
+    <a href="/constructors/list/equipment/3/0/" class="btn btn-default">Сборочные единицы</a>
     <a href="" class="btn btn-info">Редактировать</a>
 
 <a href="/constructors/list/standartWork/" class="btn btn-default">Стандартные работы</a>
@@ -54,9 +54,156 @@
             <td >   {% bootstrap_field form.needVIK %}</td>
         </tr>
     </table>
+
+    {{ equipment_formset.management_form }}
+    {{ detail_formset.management_form }}
+    {{ material_formset.management_form }}
+    {{ assembly_formset.management_form }}
+    {{ swork_formset.management_form }}
+
+    <h2 align="center"> Зависит от: </h2>
+    <table>
+        <tr>
+            <td valign="top">
+                <table cellspacing="3" cellpadding="7">
+                    <thead>
+                    <tr>
+                        <td align="center">Оснастка</td>
+                        <td align="center">Количество</td>
+                    </tr>
+                    </thead>
+                    <tr></tr>
+                    {% for link_form in equipment_formset %}
+                    <tr class="equipment-formset">
+                        <td valign="top">{% bootstrap_field link_form.equipment %}</td>
+                        <td valign="top">{% bootstrap_field link_form.cnt %}</td>
+                    </tr>
+
+                    {% endfor %}
+                    <div class="placeForAddBtn"></div>
+                </table>
+            </td>
+            <td valign="top">
+                <table cellspacing="3" cellpadding="7">
+                    <thead>
+                    <tr>
+                        <td align="center">Материалы</td>
+                        <td align="center">Количество</td>
+                    </tr>
+                    </thead>
+                    <tr></tr>
+                    {% for link_form in material_formset %}
+                    <tr class="material-formset">
+                        <td valign="top">{% bootstrap_field link_form.equipment %}</td>
+                        <td valign="top">{% bootstrap_field link_form.cnt %}</td>
+                    </tr>
+
+                    {% endfor %}
+                    <div class="placeForAddBtn"></div>
+                </table>
+            </td>
+            <td valign="top">
+                <table cellspacing="3" cellpadding="7">
+                    <thead>
+                    <tr>
+                        <td align="center">Детали</td>
+                        <td align="center">Количество</td>
+                    </tr>
+                    </thead>
+                    <tr></tr>
+                    {% for link_form in detail_formset %}
+                    <tr class="detail-formset">
+                        <td valign="top">{% bootstrap_field link_form.equipment %}</td>
+                        <td valign="top">{% bootstrap_field link_form.cnt %}</td>
+                    </tr>
+                    {% endfor %}
+                    <div class="placeForAddBtn"></div>
+                </table>
+            </td>
+            <td valign="top">
+                <table cellspacing="3" cellpadding="7">
+                    <thead>
+                    <tr>
+                        <td align="center">Сборочные единицы</td>
+                        <td align="center">Количество</td>
+                    </tr>
+                    </thead>
+                    <tr></tr>
+                    {% for link_form in assembly_formset %}
+                    <tr class="assembly-formset">
+                        <td valign="top">{% bootstrap_field link_form.equipment %}</td>
+                        <td valign="top">{% bootstrap_field link_form.cnt %}</td>
+                    </tr>
+                    {% endfor %}
+                    <div class="placeForAddBtn"></div>
+                </table>
+            </td>
+            <td valign="top">
+                <table cellspacing="3" cellpadding="7">
+                    <thead>
+                    <tr>
+                        <td align="center">Работы</td>
+                        <td align="center">Количество</td>
+                    </tr>
+                    </thead>
+                    <tr></tr>
+                    {% for link_form in swork_formset %}
+                    <tr class="swork-formset">
+                        <td valign="top">{% bootstrap_field link_form.standartWork %}</td>
+                        <td valign="top">{% bootstrap_field link_form.cnt %}</td>
+                    </tr>
+                    {% endfor %}
+                    <div class="placeForAddBtn"></div>
+                </table>
+            </td>
+        </tr>
+    </table>
+
     <input align="center" class="btn btn-primary" type="submit" value="Сохранить" class="button"/>
 
 </form>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="{% static '/scripts/jquery.formset.js' %}"></script>
+<script>
+
+$('.equipment-formset').formset({
+        addText: 'Добавить',
+        deleteText: 'Удалить',
+        prefix:'equipment',
+    });
+
+   $('.material-formset').formset({
+        addText: 'Добавить',
+        deleteText: 'Удалить',
+        prefix:'material',
+    });
+
+$('.detail-formset').formset({
+        addText: 'Добавить',
+        deleteText: 'Удалить',
+        prefix:'detail',
+    });
+
+    $('.link-formset').formset({
+        addText: 'Добавить',
+        deleteText: 'Удалить',
+        prefix:'equipment',
+    });
+
+$('.assembly-formset').formset({
+        addText: 'Добавить',
+        deleteText: 'Удалить',
+        prefix:'assembly',
+    });
+$('.swork-formset').formset({
+        addText: 'Добавить',
+        deleteText: 'Удалить',
+        prefix:'standart_work',
+    });
+
+
+</script>
+
 
 
 {% endblock %}

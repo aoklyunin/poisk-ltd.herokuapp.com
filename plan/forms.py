@@ -3,11 +3,21 @@
 import datetime
 
 from django import forms
-from django.forms import ModelForm, Textarea
+from django.forms import ModelForm, Textarea, BaseFormSet
 
 from plan.models import Attestation
 from workReport.models import WorkerPosition
 
+class RequiredFormSet(BaseFormSet):
+    def clean(self):
+        return
+
+    def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, queryset=None, **kwargs):
+        self.queryset = queryset
+        self.initial_extra = kwargs.pop('initial', None)
+        defaults = {'data': data, 'files': files, 'auto_id': auto_id, 'prefix': prefix}
+        defaults.update(kwargs)
+        super(RequiredFormSet, self).__init__(**defaults)
 
 class LoginForm(forms.Form):
     # имя пользователя

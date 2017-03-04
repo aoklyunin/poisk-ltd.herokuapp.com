@@ -18,14 +18,7 @@ from workReport.models import WorkReport, WorkPart, StandartWork, Reject,  Worke
     WorkerPosition, NeedStruct
 
 
-class RequiredFormSet(BaseFormSet):
-    def clean(self):
-        return
 
-    def __init__(self, *args, **kwargs):
-        super(RequiredFormSet, self).__init__(*args, **kwargs)
-        for form in self.forms:
-            form.empty_permitted = False
 
 
 def workReportPage1(request, workReport_id):

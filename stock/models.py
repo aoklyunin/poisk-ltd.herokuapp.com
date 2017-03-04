@@ -7,7 +7,8 @@ import datetime
 from django.db import models
 
 from plan.models import Area
-from workReport.models import Equipment
+from workReport.models import Equipment, StandartWork
+
 
 class MoveEquipment(models.Model):
     date = models.DateField(default=datetime.date.today)
@@ -32,3 +33,13 @@ class MoveEquipment(models.Model):
             ss.cnt -= self.cnt
         ss.save()
 
+
+class MoveStandartWork(models.Model):
+    date = models.DateField(default=datetime.date.today)
+    cnt = models.IntegerField(default=0)
+    standartWork = models.ForeignKey(StandartWork, blank=True, null=True)
+    flgAcceptance = models.BooleanField(default=True)
+    remainCnt = models.IntegerField(default=0)
+
+    def __str__(self):
+        return str(self.standartWork) + ":" + str(self.cnt)

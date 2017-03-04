@@ -8,7 +8,7 @@ from plan.models import Area
 from stock.form import MoveEquipmentForm, EquipmentForm, MoveMaterialForm, MoveDetailForm, MoveAssemblyForm
 from stock.models import MoveEquipment
 from workReport.models import Equipment, StockStruct
-from workReport.views import RequiredFormSet
+from plan.forms import RequiredFormSet
 
 
 def extradition(request, area_id):

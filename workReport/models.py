@@ -14,6 +14,11 @@ class NeedStruct(models.Model):
     standartWork = models.ForeignKey('StandartWork', blank=True, null=True)
     cnt = models.FloatField(default=0)
 
+    def __str__(self):
+        if self.equipment!=None:
+            return str(self.equipment)+" "+str(self.cnt)
+        else:
+            return str(self.standartWork)+" "+str(self.cnt)
 
 # Что хранится на складе
 class StockStruct(models.Model):
@@ -53,11 +58,22 @@ class Equipment(models.Model):
     # необходимые объекты для данной работы
     needStruct = models.ManyToManyField(NeedStruct, blank=True, default=None, null=True,
                                         related_name="needStructStandartWork12")
-
     TYPE_EQUIPMENT = 0
     TYPE_MATERIAL = 1
     TYPE_DETAIL = 2
     TYPE_ASSEMBLY_UNIT = 3
+    TYPE_STANDART_WORK = 4
+
+    def generateDataFromNeedStructs(self, NeedEquipmentType):
+        arr = []
+        for ns in self.needStruct.all():
+            if (ns.equipment != None) and (ns.equipment.equipmentType == NeedEquipmentType):
+                arr.append({'equipment': ns.equipment,
+                            'cnt': ns.cnt})
+            elif (ns.standartWork != None):
+                arr.append({'standartWork': ns.standartWork,
+                            'cnt': ns.cnt})
+        return arr
 
     def __str__(self):
         return self.name
