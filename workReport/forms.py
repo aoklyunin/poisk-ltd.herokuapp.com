@@ -41,6 +41,7 @@ class ReportForm(forms.Form):
     note = forms.CharField(widget=forms.Textarea(attrs={'rows': 4, 'cols': 20, 'placeholder': 'Что довавить'}),
                            label="Примечание", required=False)
 
+
     def __init__(self, *args, **kwargs):
         super(ReportForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
