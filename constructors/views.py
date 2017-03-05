@@ -3,12 +3,12 @@ from django.forms import formset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
-# Create your views here.
+
 from plan.forms import LoginForm, subdict
 from plan.models import Area, WorkerPosition, Scheme
 from stock.form import EquipmentForm, StandartWorkForm, MoveEquipmentForm, MoveMaterialForm, MoveDetailForm, \
     MoveAssemblyForm, MoveStandartWorkForm
-from workReport.models import StockStruct, Equipment, StandartWork, NeedStruct
+from .models import StockStruct, Equipment, StandartWork
 
 
 
@@ -32,20 +32,6 @@ def removeStandartWork(request, swork_id):
     return HttpResponseRedirect('/constructors/standartWork/list/')
 
 
-def addFromFormset(equipment_id, formset, doCrear=False):
-    eq = Equipment.objects.get(pk=equipment_id)
-    if (doCrear):
-        eq.needStruct.clear()
-
-    if formset.is_valid():
-        for form in formset.forms:
-            if (len(form.cleaned_data) > 0) and (not form.cleaned_data["equipment"] is None):
-                print(form.cleaned_data)
-                ns = NeedStruct.objects.create(**form.cleaned_data)
-                ns.save()
-                eq.needStruct.add(ns)
-
-
 def detailEquipment(request, equipment_id):
     EquipmentFormset = formset_factory(MoveEquipmentForm)
     MaterialFormset = formset_factory(MoveMaterialForm)
@@ -60,15 +46,14 @@ def detailEquipment(request, equipment_id):
         material_formset = MaterialFormset(request.POST, request.FILES, prefix='material')
         detail_formset = DetailFormset(request.POST, request.FILES, prefix='detail')
         assembly_formset = AssemblyFormset(request.POST, request.FILES, prefix='assembly')
-        print(request.POST)
+
         swork_formset = StandartWorkFormset(request.POST, request.FILES, prefix='standart_work')
 
-        print(str(swork_formset))
-        addFromFormset(equipment_id, equipment_formset, True)
-        addFromFormset(equipment_id, material_formset)
-        addFromFormset(equipment_id, detail_formset)
-        addFromFormset(equipment_id, assembly_formset)
-        addFromFormset(equipment_id, swork_formset)
+        eq.addFromFormset(equipment_formset, True)
+        eq.addFromFormset(material_formset)
+        eq.addFromFormset(detail_formset)
+        eq.addFromFormset(assembly_formset)
+        eq.addFromFormset(swork_formset)
 
         # строим форму на основе запроса
         form = EquipmentForm(request.POST, prefix='main_form')
@@ -96,28 +81,67 @@ def detailEquipment(request, equipment_id):
         'login_form': LoginForm(),
         'one': '1',
         'form': EquipmentForm(instance=Equipment.objects.get(pk=equipment_id), prefix="main_form"),
+        'eqType':eq.equipmentType,
     }
 
-    return render(request, "constructors/detailEquipment.html", c)
+    return render(request, "constructors/detail.html", c)
 
 
 def detailStandartWork(request, swork_id):
+    EquipmentFormset = formset_factory(MoveEquipmentForm)
+    MaterialFormset = formset_factory(MoveMaterialForm)
+    DetailFormset = formset_factory(MoveDetailForm)
+    AssemblyFormset = formset_factory(MoveAssemblyForm)
+    StandartWorkFormset = formset_factory(MoveStandartWorkForm)
+
+    eq = StandartWork.objects.get(pk=swork_id)
+
     if request.method == 'POST':
+        equipment_formset = EquipmentFormset(request.POST, request.FILES, prefix='equipment')
+        material_formset = MaterialFormset(request.POST, request.FILES, prefix='material')
+        detail_formset = DetailFormset(request.POST, request.FILES, prefix='detail')
+        assembly_formset = AssemblyFormset(request.POST, request.FILES, prefix='assembly')
+        swork_formset = StandartWorkFormset(request.POST, request.FILES, prefix='standart_work')
+
+        print(equipment_formset)
+        print(material_formset)
+        print(detail_formset)
+        eq.addFromFormset(equipment_formset, True)
+        eq.addFromFormset(material_formset)
+        eq.addFromFormset(detail_formset)
+        eq.addFromFormset(assembly_formset)
+        eq.addFromFormset(swork_formset)
+
         # строим форму на основе запроса
-        form = StandartWorkForm(request.POST)
+        form = StandartWorkForm(request.POST, prefix='main_form')
         # если форма заполнена корректно
         if form.is_valid():
-            d = subdict(form, ("text", "needVIK"))
+            d = subdict(form, ("text", "duration"))
             StandartWork.objects.filter(pk=swork_id).update(**d)
             StandartWork.objects.get(pk=swork_id).positionsEnable.clear()
             for e in form.cleaned_data["positionsEnable"]:
                 StandartWork.objects.get(pk=swork_id).positionsEnable.add(
                     WorkerPosition.objects.get(name=e)
                 )
-            return HttpResponseRedirect('/constructors/list/standartWork/')
-    return render(request, "constructors/detailStandartWork.html", {
-        'form': StandartWorkForm(instance=StandartWork.objects.get(pk=swork_id)),
-    })
+        return HttpResponseRedirect('/constructors/list/standartWork/')
+
+    c = {'equipment_formset': EquipmentFormset(initial=eq.generateDataFromNeedStructs(
+        NeedEquipmentType=Equipment.TYPE_EQUIPMENT), prefix='equipment', ),
+        'material_formset': MaterialFormset(initial=eq.generateDataFromNeedStructs(
+            NeedEquipmentType=Equipment.TYPE_MATERIAL), prefix='material'),
+        'detail_formset': DetailFormset(initial=eq.generateDataFromNeedStructs(
+            NeedEquipmentType=Equipment.TYPE_DETAIL), prefix='detail', ),
+        'assembly_formset': AssemblyFormset(initial=eq.generateDataFromNeedStructs(
+            NeedEquipmentType=Equipment.TYPE_ASSEMBLY_UNIT), prefix='assembly', ),
+        'swork_formset': StandartWorkFormset(initial=eq.generateDataFromNeedStructs(
+            NeedEquipmentType=Equipment.TYPE_STANDART_WORK), prefix='standart_work', ),
+        'login_form': LoginForm(),
+        'one': '1',
+        'form': StandartWorkForm(instance=StandartWork.objects.get(pk=swork_id), prefix="main_form"),
+        'eqType': Equipment.TYPE_STANDART_WORK,
+    }
+
+    return render(request, "constructors/detail.html", c)
 
 
 def listEquipment(request, equipment_type, area_id):
@@ -154,7 +178,6 @@ def listEquipment(request, equipment_type, area_id):
             "cnt": l.stockStruct.get(area=area).cnt,
             "id": l.pk
         })
-    print(arr)
 
     return render(request, "constructors/equipmentList.html", {
         'area_id': area_id,

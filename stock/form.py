@@ -3,8 +3,10 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Field
 from django.forms import ModelForm, BaseFormSet, TextInput
 from django import forms
+
+from constructors.models import Equipment
 from stock.models import MoveEquipment, MoveStandartWork
-from workReport.models import Equipment, StandartWork
+from workReport.models import StandartWork
 
 
 class EquipmentForm(ModelForm):

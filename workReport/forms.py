@@ -2,7 +2,6 @@
 # модуль с формами
 import datetime
 
-
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Div, Field
 from django import forms
@@ -16,7 +15,7 @@ class ReportForm(forms.Form):
     wPos = WorkerPosition.objects.get(name='Контролёр ОТК')
     # ответственный за ВИК
     VIKer = forms.ModelChoiceField(queryset=Worker.objects.filter(position=wPos),
-                                   label="Контроллёр ОТК", initial=0)
+                                   label="Контролёр ОТК", initial=0)
     # составил наряд
     reportMaker = forms.ModelChoiceField(queryset=Worker.objects.all(),
                                          label="Составил наряд", initial=0)
@@ -174,7 +173,3 @@ class NeedStructForm(ModelForm):
         super(NeedStructForm, self).__init__(*args, **kwargs)
         # there's a `fields` property now
         self.fields['equipment'].required = False
-
-
-
-

@@ -104,6 +104,7 @@ INSTALLED_APPS = (
     'crispy_forms',
     'workReport',
     'stock',
+    'orders',
     'constructors',
 )
 
