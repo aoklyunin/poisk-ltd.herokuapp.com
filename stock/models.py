@@ -11,8 +11,6 @@ from plan.models import Area
 
 
 
-
-
 class MoveEquipment(models.Model):
     date = models.DateField(default=datetime.date.today)
     cnt = models.IntegerField(default=0)

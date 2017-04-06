@@ -10,11 +10,11 @@ urlpatterns = [
     url(r'^equipment/remove/(?P<equipment_id>[0-9]+)/$', removeStockEquipment),
     url(r'^equipment/list/(?P<area_id>[0-9]+)/$', equipmentList),
 
-   # url(r'^material/detail/(?P<equipment_id>[0-9]+)/$', detailStockMaterial),
-   # url(r'^material/remove/(?P<equipment_id>[0-9]+)/$', removeStockMaterial),
-   # url(r'^material/list/(?P<area_id>[0-9]+)/$', materialList),
-   # url(r'^detail/list/(?P<area_id>[0-9]+)/$', detailList),
-  #  url(r'^assembly/list/(?P<area_id>[0-9]+)/$', assemblyList),
+    url(r'^material/detail/(?P<equipment_id>[0-9]+)/$', detailStockMaterial),
+    url(r'^material/remove/(?P<equipment_id>[0-9]+)/$', removeStockMaterial),
+    url(r'^material/list/(?P<area_id>[0-9]+)/$', materialList),
+    url(r'^detail/list/(?P<area_id>[0-9]+)/$', detailList),
+    url(r'^assembly/list/(?P<area_id>[0-9]+)/$', assemblyList),
 #
     url(r'^reports/$', workReportList),
 ]

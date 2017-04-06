@@ -100,6 +100,49 @@ def removeStockEquipment(request, equipment_id):
     return HttpResponseRedirect('/stock/equipment/list/0/')
 
 
+def detailStockMaterial(request, area_id):
+    if request.method == 'POST':
+        # строим форму на основе запроса
+        form = EquipmentForm(request.POST)
+        # если форма заполнена корректно
+        if form.is_valid():
+            d = {}
+            d["name"] = form.cleaned_data["name"]
+            d["dimension"] = form.cleaned_data["dimension"]
+            d["equipmentType"] = Equipment.TYPE_EQUIPMENT
+            eq = Equipment.objects.create()
+            ms = StockStruct.objects.create(area=Area.objects.get(name="Малахит"))
+            ks = StockStruct.objects.create(area=Area.objects.get(name="Красное село"))
+            eq.stockStruct.add(ms)
+            eq.stockStruct.add(ks)
+            eq.save()
+            Equipment.objects.filter(pk=eq.pk).update(**d)
+
+    if int(area_id) == 0:
+        area = Area.objects.get(name="Красное село")
+    else:
+        area = Area.objects.get(name="Малахит")
+
+    arr = []
+    for l in Equipment.objects.filter(equipmentType=Equipment.TYPE_EQUIPMENT):
+        arr.append({
+            "name": l.name,
+            "dimension": l.dimension,
+            "cnt": l.stockStruct.get(area=area).cnt,
+            "id": l.pk
+        })
+
+    return render(request, "stock/equipmentList.html", {
+        'area_id': area_id,
+        'login_form': LoginForm(),
+        'eqs': arr,
+        'one': '1',
+        'form': EquipmentForm(),
+    })
+
+
+
+
 def equipmentList(request, area_id):
     if request.method == 'POST':
         # строим форму на основе запроса
@@ -143,6 +186,5 @@ def equipmentList(request, area_id):
 
 def workReportList(request):
     print("sadas")
-    return render(request, "stock/workReportList.html", {
-
+    return render(request, "stock/workReportList9.html", {
     })

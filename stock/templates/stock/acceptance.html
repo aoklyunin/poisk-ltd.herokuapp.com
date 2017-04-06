@@ -22,11 +22,10 @@
 {% endblock %}
 
 {% block navigating %}
-<a href="/stock/reports/" class="btn btn-default">Наряды</a>
+
 <a href="/stock/extradition/{{area_id}}/" class="btn btn-default">Выдача</a>
 <a href="/stock/acceptance/{{area_id}}/" class="btn btn-info">Приёмка</a>
 <a href="/stock/addEquipment/" class="btn btn-default">Добавить оборудование</a>
-
 <a href="/stock/equipment/list/{{area_id}}/" class="btn btn-default">Список оборудования</a>
 {% endblock %}
 
@@ -84,7 +83,7 @@
                     <tr></tr>
                     {% for link_form in detail_formset %}
                     <tr class="link2-formset">
-                        <td valign="top">{% bootstrap_field link_form.detail %}</td>
+                        <td valign="top">{% bootstrap_field link_form.equipment %}</td>
                         <td valign="top">{% bootstrap_field link_form.cnt %}</td>
                     </tr>
                     {% endfor %}
@@ -102,7 +101,7 @@
                     <tr></tr>
                     {% for link_form in assembly_formset %}
                     <tr class="link3-formset">
-                        <td valign="top">{% bootstrap_field link_form.assembly %}</td>
+                        <td valign="top">{% bootstrap_field link_form.equipment %}</td>
                         <td valign="top">{% bootstrap_field link_form.cnt %}</td>
                     </tr>
                     {% endfor %}
@@ -124,12 +123,12 @@
         prefix:'equipment',
     });
 
-$('.link2-formset').formset({
+    $('.link2-formset').formset({
         addText: 'Добавить',
         deleteText: 'Удалить',
         prefix:'detail',
     });
-$('.link3-formset').formset({
+    $('.link3-formset').formset({
         addText: 'Добавить',
         deleteText: 'Удалить',
         prefix:'assembly',
