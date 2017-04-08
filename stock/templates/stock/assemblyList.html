@@ -30,6 +30,7 @@
 {% endblock %}
 
 {% block navigating %}
+<a href="/stock/report/list/{{area_id}}/" class="btn btn-default">Наряды</a>
 <a href="/stock/extradition/{{area_id}}/" class="btn btn-default">Выдача</a>
 <a href="/stock/acceptance/{{area_id}}/" class="btn btn-default">Приёмка</a>
 
@@ -46,11 +47,11 @@
 
 <div class="btn-group centering" >
     {% ifnotequal area_id one %}
-    <a href="/stock/equipment/list/0/" class="btn btn-info">Красное</a>
-    <a href="/stock/equipment/list/1/" class="btn btn-default">Малахит</a>
+    <a href="/stock/assembly/list/0/" class="btn btn-info">Красное</a>
+    <a href="/stock/assembly/list/1/" class="btn btn-default">Малахит</a>
     {% else %}
-    <a href="/stock/equipment/list/0/" class="btn btn-default">Красное</a>
-    <a href="/stock/equipment/list/1/" class="btn btn-info">Малахит</a>
+    <a href="/stock/assembly/list/0/" class="btn btn-default">Красное</a>
+    <a href="/stock/assembly/list/1/" class="btn btn-info">Малахит</a>
     {%endifnotequal%}
 </div>
 <br>
@@ -62,9 +63,7 @@
     <tr>
         <td>{{ eq.name}}</td>
         <td>{{ eq.cnt}} {{eq.dimension}}</td>
-        <td><a href="/stock/equipment/detail/{{ eq.id }}/" class="btn btn-default">Редактировать</a>
-        <a href="/stock/equipment/remove/{{ eq.id }}/" class="btn btn-danger">Удалить</a></td>
-        <td></td>
+
     </tr>
     {% endfor %}
 </table>

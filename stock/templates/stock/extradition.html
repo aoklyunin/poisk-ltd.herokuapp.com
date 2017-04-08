@@ -27,10 +27,12 @@ text-align: center;
 {% endblock %}
 
 {% block navigating %}
+<a href="/stock/report/list/{{area_id}}/" class="btn btn-default">Наряды</a>
 <a href="/stock/extradition/{{area_id}}/" class="btn btn-info">Выдача</a>
 <a href="/stock/acceptance/{{area_id}}/" class="btn btn-default">Приёмка</a>
-<a href="/stock/equipment/list/" class="btn btn-default">Оборудование</a>
-<a href="/stock/material/list/" class="btn btn-default">Материалы</a>
+
+<a href="/stock/equipment/list/{{area_id}}/" class="btn btn-default">Оснастка</a>
+<a href="/stock/material/list/{{area_id}}/" class="btn btn-default">Материалы</a>
 <a href="/stock/detail/list/{{area_id}}/" class="btn btn-default">Детали</a>
 <a href="/stock/assembly/list/{{area_id}}/" class="btn btn-default">Сборочные единицы</a>
 
@@ -55,7 +57,7 @@ text-align: center;
     {% csrf_token %}
 
     {{ equipment_formset.management_form }}
-    {{ material.management_form }}
+    {{ material_formset.management_form }}
     {{ detail_formset.management_form }}
     {{ assembly_formset.management_form }}
 

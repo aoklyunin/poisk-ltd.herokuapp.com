@@ -22,11 +22,14 @@
 {% endblock %}
 
 {% block navigating %}
-
+<a href="/stock/report/list/{{area_id}}/" class="btn btn-default">Наряды</a>
 <a href="/stock/extradition/{{area_id}}/" class="btn btn-default">Выдача</a>
 <a href="/stock/acceptance/{{area_id}}/" class="btn btn-info">Приёмка</a>
-<a href="/stock/addEquipment/" class="btn btn-default">Добавить оборудование</a>
-<a href="/stock/equipment/list/{{area_id}}/" class="btn btn-default">Список оборудования</a>
+
+<a href="/stock/equipment/list/{{area_id}}/" class="btn btn-default">Оснастка</a>
+<a href="/stock/material/list/{{area_id}}/" class="btn btn-default">Материалы</a>
+<a href="/stock/detail/list/{{area_id}}/" class="btn btn-default">Детали</a>
+<a href="/stock/assembly/list/{{area_id}}/" class="btn btn-default">Сборочные единицы</a>
 {% endblock %}
 
 
@@ -49,6 +52,7 @@
     {% csrf_token %}
 
     {{ equipment_formset.management_form }}
+    {{ material_formset.management_form }}
     {{ detail_formset.management_form }}
     {{ assembly_formset.management_form }}
     <table>
@@ -64,10 +68,28 @@
                     <tr></tr>
                     {% for link_form in equipment_formset %}
                     <tr class="link-formset">
-                        <td valign="top">{% bootstrap_field link_form.equipment %}</td>
-                        <td valign="top">{% bootstrap_field link_form.cnt %}</td>
+                        <td valign="top">{% bootstrap_field link_form.equipment size="small" %}</td>
+                        <td valign="top">{% bootstrap_field link_form.cnt size="small" %}</td>
                     </tr>
 
+                    {% endfor %}
+                    <div class="placeForAddBtn"></div>
+                </table>
+            </td>
+            <td valign="top">
+                <table cellspacing="3" cellpadding="7">
+                    <thead>
+                    <tr>
+                        <td align="center">Материалы</td>
+                        <td align="center">Количество</td>
+                    </tr>
+                    </thead>
+                    <tr></tr>
+                    {% for link_form in material_formset %}
+                    <tr class="link2-formset">
+                        <td valign="top">{% bootstrap_field link_form.equipment  size="small"%}</td>
+                        <td valign="top">{% bootstrap_field link_form.cnt size="small" %}</td>
+                    </tr>
                     {% endfor %}
                     <div class="placeForAddBtn"></div>
                 </table>
@@ -82,9 +104,9 @@
                     </thead>
                     <tr></tr>
                     {% for link_form in detail_formset %}
-                    <tr class="link2-formset">
-                        <td valign="top">{% bootstrap_field link_form.equipment %}</td>
-                        <td valign="top">{% bootstrap_field link_form.cnt %}</td>
+                    <tr class="link3-formset">
+                        <td valign="top">{% bootstrap_field link_form.equipment  size="small"%}</td>
+                        <td valign="top">{% bootstrap_field link_form.cnt  size="small"%}</td>
                     </tr>
                     {% endfor %}
                     <div class="placeForAddBtn"></div>
@@ -94,20 +116,21 @@
                 <table cellspacing="3" cellpadding="7">
                     <thead>
                     <tr>
-                        <td align="center">Сборочные единицы</td>
+                        <td align="center">Сб. единицы</td>
                         <td align="center">Количество</td>
                     </tr>
                     </thead>
                     <tr></tr>
                     {% for link_form in assembly_formset %}
-                    <tr class="link3-formset">
-                        <td valign="top">{% bootstrap_field link_form.equipment %}</td>
-                        <td valign="top">{% bootstrap_field link_form.cnt %}</td>
+                    <tr class="link4-formset">
+                        <td valign="top">{% bootstrap_field link_form.equipment size="small"%}</td>
+                        <td valign="top">{% bootstrap_field link_form.cnt size="small"%}</td>
                     </tr>
                     {% endfor %}
                     <div class="placeForAddBtn"></div>
                 </table>
             </td>
+
         </tr>
     </table>
 
@@ -126,15 +149,20 @@
     $('.link2-formset').formset({
         addText: 'Добавить',
         deleteText: 'Удалить',
-        prefix:'detail',
+        prefix:'material',
     });
     $('.link3-formset').formset({
         addText: 'Добавить',
         deleteText: 'Удалить',
-        prefix:'assembly',
+        prefix:'detail',
+
     });
 
-
+    $('.link4-formset').formset({
+        addText: 'Добавить',
+        deleteText: 'Удалить',
+        prefix:'assembly',
+    });
 </script>
 
 

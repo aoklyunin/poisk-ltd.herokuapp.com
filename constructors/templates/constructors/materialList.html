@@ -9,6 +9,14 @@
 {% bootstrap_javascript %}
 {% bootstrap_messages %}
 
+{% block style_block %}
+    .centering{
+        text-align: center;
+    }
+    td {
+    padding: 5px;
+    }
+{% endblock %}
 
 {% block title %}НПО Поиск{% endblock %}
 
@@ -24,45 +32,43 @@
 {% block navigating %}
 <a href="/constructors/report/list/{{area_id}}/" class="btn btn-default">Наряды</a>
 <a href="/constructors/equipment/list/{{area_id}}/" class="btn btn-default">Оснастка</a>
-<a href="/constructors/material/list/{{area_id}}/" class="btn btn-default">Материалы</a>
+<a href="/constructors/material/list/{{area_id}}/" class="btn btn-info">Материалы</a>
 <a href="/constructors/detail/list/{{area_id}}/" class="btn btn-default">Детали</a>
 <a href="/constructors/assembly/list/{{area_id}}/" class="btn btn-default">Сборочные единицы</a>
-<a href="/constructors/standartWork/list/" class="btn btn-info">Стандартные работы</a>
+<a href="/constructors/standartWork/list/" class="btn btn-default">Стандартные работы</a>
 <a href="/constructors/shemes/list/" class="btn btn-default">Чертежи</a>
 {% endblock %}
-
 
 {% block sub_content %}
 
 <br>
 
-<br>
-<form method="post">
-     {% csrf_token %}
-<table>
-    <tr>
-        <td> {%  bootstrap_field form.name %}</td>
-    </tr>
-</table>
 
-    <input align="center" class="btn btn-primary" type="submit" value="Создать" class="button"/>
-</form>
+<div class="btn-group centering" >
+    {% ifnotequal area_id one %}
+    <a href="/stock/equipment/list/0/" class="btn btn-info">Красное</a>
+    <a href="/stock/equipment/list/1/" class="btn btn-default">Малахит</a>
+    {% else %}
+    <a href="/stock/equipment/list/0/" class="btn btn-default">Красное</a>
+    <a href="/stock/equipment/list/1/" class="btn btn-info">Малахит</a>
+    {%endifnotequal%}
+</div>
+<br>
+<br>
 
 <br>
 <br>
 <table cellpadding="10" align="center" width="60%">
-  {% for eq in eqs%}
+    {% for eq in eqs%}
     <tr>
         <td>{{ eq.name}}</td>
-        <td><a href="/constructors/standartWork/detail/{{ eq.id }}/" class="btn btn-default">Редактировать</a>
-        <a href="/constructors/standartWork/remove/{{ eq.id }}/" class="btn btn-danger">Удалить</a></td>
+        <td>{{ eq.cnt}} {{eq.dimension}}</td>
+
         <td></td>
     </tr>
     {% endfor %}
 </table>
-
 {% endblock %}
-
 
 {% block error_messages %}
 {% endblock %}

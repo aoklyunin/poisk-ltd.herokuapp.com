@@ -51,6 +51,8 @@ class Equipment(models.Model):
     TYPE_ASSEMBLY_UNIT = 3
     TYPE_STANDART_WORK = 4
 
+    duration = models.FloatField(default=0)
+
     def generateDataFromNeedStructs(self, NeedEquipmentType):
         arr = []
         for ns in self.needStruct.all():

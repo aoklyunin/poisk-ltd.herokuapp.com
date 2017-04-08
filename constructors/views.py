@@ -3,36 +3,46 @@ from django.forms import formset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
-
+from constructors.form import SchemeForm
 from plan.forms import LoginForm, subdict
 from plan.models import Area, WorkerPosition, Scheme
 from stock.form import EquipmentForm, StandartWorkForm, MoveEquipmentForm, MoveMaterialForm, MoveDetailForm, \
     MoveAssemblyForm, MoveStandartWorkForm
+from stock.views import listEquipmentByType
 from .models import StockStruct, Equipment, StandartWork
 
 
-
-def workReportList(request):
-    return render(request, "constructors/workReportList.html", {
-
-    })
+# список оснастки
+def equipmentList(request, area_id):
+    return listEquipmentByType(request, area_id, Equipment.TYPE_EQUIPMENT, "constructors/equipmentList.html")
 
 
-def removeEquipment(request, equipment_id):
+# список материалов
+def materialList(request, area_id):
+    return listEquipmentByType(request, area_id, Equipment.TYPE_MATERIAL, "constructors/materialList.html")
+
+
+# список деталей
+def detailList(request, area_id):
+    return listEquipmentByType(request, area_id, Equipment.TYPE_DETAIL, "constructors/detailList.html")
+
+# список Сборочных единиц
+def assemblyList(request, area_id):
+    return listEquipmentByType(request, area_id, Equipment.TYPE_ASSEMBLY_UNIT, "constructors/assemblyList.html")
+
+# список стандартных единиц
+def standartWorkList(request):
+    return listEquipmentByType(request,0, Equipment.TYPE_STANDART_WORK, "constructors/standartWorkList.html")
+
+# удалить конструкторское оборудование
+def removeConstructorEquipment(request, equipment_id):
     eq = Equipment.objects.get(pk=equipment_id)
     eq.stockStruct.clear()
     eq.delete()
+    return HttpResponseRedirect('/constructors/detail/list/0/')
 
-    return HttpResponseRedirect('/constructors/equipment/list/0/0/' + str(eq.equipmentType) + '/')
-
-
-def removeStandartWork(request, swork_id):
-    eq = StandartWork.objects.get(pk=swork_id)
-    eq.delete()
-    return HttpResponseRedirect('/constructors/standartWork/list/')
-
-
-def detailEquipment(request, equipment_id):
+# редактировать оборудование
+def detailConstructorEquipment(request, equipment_id):
     EquipmentFormset = formset_factory(MoveEquipmentForm)
     MaterialFormset = formset_factory(MoveMaterialForm)
     DetailFormset = formset_factory(MoveDetailForm)
@@ -46,7 +56,6 @@ def detailEquipment(request, equipment_id):
         material_formset = MaterialFormset(request.POST, request.FILES, prefix='material')
         detail_formset = DetailFormset(request.POST, request.FILES, prefix='detail')
         assembly_formset = AssemblyFormset(request.POST, request.FILES, prefix='assembly')
-
         swork_formset = StandartWorkFormset(request.POST, request.FILES, prefix='standart_work')
 
         eq.addFromFormset(equipment_formset, True)
@@ -81,10 +90,21 @@ def detailEquipment(request, equipment_id):
         'login_form': LoginForm(),
         'one': '1',
         'form': EquipmentForm(instance=Equipment.objects.get(pk=equipment_id), prefix="main_form"),
-        'eqType':eq.equipmentType,
+        'eqType': eq.equipmentType,
     }
 
     return render(request, "constructors/detail.html", c)
+
+
+
+
+def removeStandartWork(request, swork_id):
+    eq = StandartWork.objects.get(pk=swork_id)
+    eq.delete()
+    return HttpResponseRedirect('/constructors/standartWork/list/')
+
+
+
 
 
 def detailStandartWork(request, swork_id):
@@ -209,4 +229,34 @@ def listStandartWork(request):
         'eqs': StandartWork.objects.all(),
         'one': '1',
         'form': StandartWorkForm(),
+    })
+
+
+def shemesList(request):
+    if request.method == 'POST':
+        # строим форму на основе запроса
+        form = SchemeForm(request.POST)
+        # если форма заполнена корректно
+        if form.is_valid():
+            code = form.cleaned_data["code"]
+            sch = Scheme.objects.create(link = form.cleaned_data["link"],author =  form.cleaned_data["author"] )
+            sch.save()
+            if (code is not None):
+                sch.code = code
+                sch.save()
+
+    return render(request, "constructors/shemesList.html", {
+        'login_form': LoginForm(),
+        'schs': Scheme.objects.all(),
+        'one': '1',
+        'form': SchemeForm(),
+    })
+
+
+
+def workReportList(request,area_id):
+    return render(request, "constructors/workReportList.html", {
+        'login_form': LoginForm(),
+        'area_id': area_id,
+        'one': '1'
     })

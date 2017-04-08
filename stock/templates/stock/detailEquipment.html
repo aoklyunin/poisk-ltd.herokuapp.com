@@ -22,11 +22,14 @@
 {% endblock %}
 
 {% block navigating %}
-<a href="/stock/extradition/0/" class="btn btn-default">Выдача</a>
-<a href="/stock/acceptance/0/" class="btn btn-default">Приёмка</a>
-<a href="" class="btn btn-info">Редактирование оборудования</a>
+<a href="/stock/report/list/{{area_id}}/" class="btn btn-default">Наряды</a>
+<a href="/stock/extradition/{{area_id}}/" class="btn btn-default">Выдача</a>
+<a href="/stock/acceptance/{{area_id}}/" class="btn btn-default">Приёмка</a>
 
-<a href="/stock/equipment/list/0/" class="btn btn-default">Список оборудования</a>
+<a href="/stock/equipment/list/{{area_id}}/" class="btn btn-info">Оснастка</a>
+<a href="/stock/material/list/{{area_id}}/" class="btn btn-default">Материалы</a>
+<a href="/stock/detail/list/{{area_id}}/" class="btn btn-default">Детали</a>
+<a href="/stock/assembly/list/{{area_id}}/" class="btn btn-default">Сборочные единицы</a>
 
 {% endblock %}
 
@@ -43,7 +46,6 @@
              <td valign="top">{% bootstrap_field form.name %}</td>
              <td valign="top">{% bootstrap_field form.dimension %}</td>
              <td valign="top">{% bootstrap_field form.code %}</td>
-             <td valign="top">{% bootstrap_field form.equipmentType %}</td>
         </tr>
         <tr>
               <td valign="top">{% bootstrap_field form.scheme %}</td>

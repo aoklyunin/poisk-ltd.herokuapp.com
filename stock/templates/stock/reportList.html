@@ -1,4 +1,4 @@
-equipmentList.html{% extends "plan/base.html" %}
+{% extends "plan/base.html" %}
 {% load staticfiles %}
 {# Load the tag library #}
 {% load bootstrap3 %}
@@ -30,13 +30,13 @@ equipmentList.html{% extends "plan/base.html" %}
 {% endblock %}
 
 {% block navigating %}
-<a href="/stock/report/list/{{area_id}}/" class="btn btn-default">Наряды</a>
+<a href="/stock/report/list/{{area_id}}/" class="btn btn-info">Наряды</a>
 <a href="/stock/extradition/{{area_id}}/" class="btn btn-default">Выдача</a>
 <a href="/stock/acceptance/{{area_id}}/" class="btn btn-default">Приёмка</a>
 
 <a href="/stock/equipment/list/{{area_id}}/" class="btn btn-default">Оснастка</a>
 <a href="/stock/material/list/{{area_id}}/" class="btn btn-default">Материалы</a>
-<a href="/stock/detail/list/{{area_id}}/" class="btn btn-info">Детали</a>
+<a href="/stock/detail/list/{{area_id}}/" class="btn btn-default">Детали</a>
 <a href="/stock/assembly/list/{{area_id}}/" class="btn btn-default">Сборочные единицы</a>
 {% endblock %}
 
@@ -47,25 +47,27 @@ equipmentList.html{% extends "plan/base.html" %}
 
 <div class="btn-group centering" >
     {% ifnotequal area_id one %}
-    <a href="/stock/detail/list/0/" class="btn btn-info">Красное</a>
-    <a href="/stock/detail/list/1/" class="btn btn-default">Малахит</a>
+    <a href="/stock/report/list/0/" class="btn btn-info">Красное</a>
+    <a href="/stock/report/list/1/" class="btn btn-default">Малахит</a>
     {% else %}
-    <a href="/stock/detail/list/0/" class="btn btn-default">Красное</a>
-    <a href="/stock/detail/list/1/" class="btn btn-info">Малахит</a>
+    <a href="/stock/report/list/0/" class="btn btn-default">Красное</a>
+    <a href="/stock/report/list/1/" class="btn btn-info">Малахит</a>
     {%endifnotequal%}
 </div>
+<br>
+      <table cellpadding="2">
+        {% for report in reports %}
+            <tr>
+                <td>{{ report }}</td>
+                <td> <a href="/workReport/print/{{report.pk}}/" class="btn">Печать</a></td>
+                <td> <a href="/workReport/page1/{{report.pk}}/" class="btn">Просмотр</a></td>
+                <td> <a href="/workReport/delete/{{report.pk}}/" class="btn">Удалить</a></td>
+            </tr>
+        {% endfor %}
+        </table>
 
-<br>
-<br>
-<table cellpadding="10" align="center" width="60%">
-    {% for eq in eqs%}
-    <tr>
-        <td>{{ eq.name}}</td>
-        <td>{{ eq.cnt}} {{eq.dimension}}</td>
-    </tr>
-    {% endfor %}
-</table>
 {% endblock %}
+
 
 {% block error_messages %}
 {% endblock %}

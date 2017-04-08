@@ -20,7 +20,6 @@ from workReport.models import WorkReport, WorkPart, StandartWork, Reject,  Worke
 
 
 
-
 def workReportPage1(request, workReport_id):
     work_report = WorkReport.objects.get(pk=workReport_id)
     # если post запрос
