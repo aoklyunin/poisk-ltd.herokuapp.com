@@ -22,13 +22,14 @@
 {% endblock %}
 
 {% block navigating %}
-<a href="/constructors/reports/" class="btn btn-default">Наряды</a>
-    <a href="/constructors/list/equipment/0/0/" class="btn btn-default">Оборудование</a>
-    <a href="/constructors/list/equipment/1/0/" class="btn btn-default">Материалы</a>
-    <a href="/constructors/list/equipment/2/0/" class="btn btn-default">Детали</a>
-    <a href="/constructors/list/equipment/3/0/" class="btn btn-default">Сборочные единицы</a>
-    <a href="" class="btn btn-info">Редактировать</a>
-<a href="/constructors/list/standartWork/" class="btn btn-default">Стандартные работы</a>
+<a href="/constructors/report/list/{{area_id}}/" class="btn btn-default">Наряды</a>
+<a href="/constructors/equipment/list/{{area_id}}/" class="btn btn-default">Оснастка</a>
+<a href="/constructors/material/list/{{area_id}}/" class="btn btn-default">Материалы</a>
+<a href="/constructors/detail/list/{{area_id}}/" class="btn btn-default">Детали</a>
+ <a href="" class="btn btn-info">Редактировать</a>
+<a href="/constructors/assembly/list/{{area_id}}/" class="btn btn-default">Сборочные единицы</a>
+<a href="/constructors/standartWork/list/" class="btn btn-default">Стандартные работы</a>
+<a href="/constructors/shemes/list/" class="btn btn-default">Чертежи</a>
 {% endblock %}
 
 
@@ -114,7 +115,7 @@
                 </table>
             </td>
             {%endif%}
-            {% if eqType > 1 %}
+            {% if eqType > 2 %}
             <td valign="top">
                 <table cellspacing="3" cellpadding="7">
                     <thead>
