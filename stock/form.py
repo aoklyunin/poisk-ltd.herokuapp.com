@@ -5,7 +5,7 @@ from django.forms import ModelForm, BaseFormSet, TextInput
 from django import forms
 
 from constructors.models import Equipment
-from stock.models import MoveEquipment, MoveStandartWork
+from stock.models import MoveEquipment
 from workReport.models import StandartWork
 
 
@@ -142,32 +142,9 @@ class MoveAssemblyForm(MoveForm):
         self.fields['equipment'].queryset = Equipment.objects.filter(equipmentType=Equipment.TYPE_ASSEMBLY_UNIT)
 
 
-class MoveStandartWorkForm(ModelForm):
-    class Meta:
-        model = MoveStandartWork
-        fields = {'cnt', 'standartWork'}
-        widgets = {
-
-        }
-
-        labels = {
-            'standartWork': '',
-            'cnt': '',
-        }
-
-        error_messages = {
-            'standartWork': {'invalid': '', 'invalid_choice': ''},
-            'cnt': {'required': ''},
-        }
-
+class MoveStandartWorkForm(MoveForm):
     def __init__(self, *args, **kwargs):
-        # first call parent's constructor
         super(MoveStandartWorkForm, self).__init__(*args, **kwargs)
-        # there's a `fields` property now
-        self.fields['standartWork'].required = False
-        self.fields['cnt'].required = False
+        self.fields['equipment'].queryset = Equipment.objects.filter(equipmentType=Equipment.TYPE_STANDART_WORK)
 
-        self.helper = FormHelper()
-        self.helper.layout = Layout(
-            Field('cnt', css_class='col-sm-2', ),
-            Field('standartWork', css_class='col-sm-2'))
+

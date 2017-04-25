@@ -41,6 +41,7 @@ def removeConstructorEquipment(request, equipment_id):
     eq.delete()
     return HttpResponseRedirect('/constructors/detail/list/0/')
 
+
 # редактировать оборудование
 def detailConstructorEquipment(request, equipment_id):
     EquipmentFormset = formset_factory(MoveEquipmentForm)
@@ -92,9 +93,7 @@ def detailConstructorEquipment(request, equipment_id):
         'form': EquipmentForm(instance=Equipment.objects.get(pk=equipment_id), prefix="main_form"),
         'eqType': eq.equipmentType,
     }
-
     return render(request, "constructors/detail.html", c)
-
 
 
 def detailStandartWork(request, swork_id):

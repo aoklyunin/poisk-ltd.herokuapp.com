@@ -46,9 +46,14 @@ def listEquipmentByType(request, area_id, tp, template):
         })
     ef = EquipmentForm()
 
+    ef.fields["name"].label = ""
+
     if tp == Equipment.TYPE_STANDART_WORK:
-        ef.fields["name"].label = ""
         ef.fields["name"].widget = TextInput(attrs={'placeholder': 'Сварка'})
+    elif tp == Equipment.TYPE_DETAIL:
+        ef.fields["name"].widget = TextInput(attrs={'placeholder': 'Деталь 1'})
+    elif tp == Equipment.TYPE_ASSEMBLY_UNIT:
+        ef.fields["name"].widget = TextInput(attrs={'placeholder': 'Сборка 1'})
 
     return render(request, template, {
         'area_id': area_id,
