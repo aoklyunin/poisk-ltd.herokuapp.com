@@ -97,16 +97,6 @@ def detailConstructorEquipment(request, equipment_id):
 
 
 
-
-def removeStandartWork(request, swork_id):
-    eq = StandartWork.objects.get(pk=swork_id)
-    eq.delete()
-    return HttpResponseRedirect('/constructors/standartWork/list/')
-
-
-
-
-
 def detailStandartWork(request, swork_id):
     EquipmentFormset = formset_factory(MoveEquipmentForm)
     MaterialFormset = formset_factory(MoveMaterialForm)
@@ -162,54 +152,6 @@ def detailStandartWork(request, swork_id):
     }
 
     return render(request, "constructors/detail.html", c)
-
-
-def listEquipment(request, equipment_type, area_id):
-    if request.method == 'POST':
-        # строим форму на основе запроса
-        form = EquipmentForm(request.POST)
-        # если форма заполнена корректно
-        if form.is_valid():
-            d = {}
-            d["name"] = form.cleaned_data["name"]
-            if int(equipment_type) > 1:
-                d["dimension"] = 'шт.'
-            else:
-                d["dimension"] = form.cleaned_data["dimension"]
-            d["equipmentType"] = equipment_type
-            eq = Equipment.objects.create()
-            ms = StockStruct.objects.create(area=Area.objects.get(name="Малахит"))
-            ks = StockStruct.objects.create(area=Area.objects.get(name="Красное село"))
-            eq.stockStruct.add(ms)
-            eq.stockStruct.add(ks)
-            eq.save()
-            Equipment.objects.filter(pk=eq.pk).update(**d)
-
-    if int(area_id) == 0:
-        area = Area.objects.get(name="Красное село")
-    else:
-        area = Area.objects.get(name="Малахит")
-
-    arr = []
-    for l in Equipment.objects.filter(equipmentType=equipment_type):
-        arr.append({
-            "name": l.name,
-            "dimension": l.dimension,
-            "cnt": l.stockStruct.get(area=area).cnt,
-            "id": l.pk
-        })
-
-    return render(request, "constructors/equipmentList.html", {
-        'area_id': area_id,
-        'equipment_type': equipment_type,
-        'login_form': LoginForm(),
-        'eqs': arr,
-        'zero': '0',
-        'one': '1',
-        'two': '2',
-        'three': '3',
-        'form': EquipmentForm(),
-    })
 
 
 def shemesList(request):
