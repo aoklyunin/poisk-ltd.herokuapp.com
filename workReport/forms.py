@@ -7,6 +7,7 @@ from crispy_forms.layout import Layout, Submit, Div, Field
 from django import forms
 from django.forms import ModelForm, BaseFormSet
 
+from constructors.models import Equipment
 from .models import WorkerPosition, Worker, WorkPart, Reject, NeedStruct
 
 
@@ -91,6 +92,7 @@ class WorkPartForm(ModelForm):
         super(WorkPartForm, self).__init__(*args, **kwargs)
         # there's a `fields` property now
         self.fields['comment'].required = False
+        self.fields["standartWork"].queryset = Equipment.objects.filter(equipmentType=Equipment.TYPE_STANDART_WORK)
         self.fields['workPlace'].required = False
         self.fields['rationale'].required = False
         self.helper = FormHelper()

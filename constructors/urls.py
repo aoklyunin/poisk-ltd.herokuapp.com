@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 from django.conf.urls import url
 
-from constructors.views import workReportList, equipmentList, materialList, detailList, assemblyList, standartWorkList, \
+from constructors.views import  equipmentList, materialList, detailList, assemblyList, standartWorkList, \
     shemesList, removeConstructorEquipment, detailConstructorEquipment
 
 urlpatterns = [
-    url(r'^report/list/(?P<area_id>[0-9]+)/$', workReportList),
     url(r'^equipment/list/(?P<area_id>[0-9]+)/$', equipmentList),
     url(r'^material/list/(?P<area_id>[0-9]+)/$', materialList),
     url(r'^detail/list/(?P<area_id>[0-9]+)/$', detailList),

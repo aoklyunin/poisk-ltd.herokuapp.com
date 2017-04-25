@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.forms import TextInput
 from django.forms.formsets import BaseFormSet, formset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -30,7 +31,6 @@ def listEquipmentByType(request, area_id, tp, template):
             eq.save()
             Equipment.objects.filter(pk=eq.pk).update(**d)
 
-
     if int(area_id) == 0:
         area = Area.objects.get(name="Красное село")
     else:
@@ -41,16 +41,21 @@ def listEquipmentByType(request, area_id, tp, template):
         arr.append({
             "name": l.name,
             "dimension": l.dimension,
-            "cnt": 0 if l.equipmentType==Equipment.TYPE_STANDART_WORK else l.stockStruct.get(area=area).cnt,
+            "cnt": 0 if l.equipmentType == Equipment.TYPE_STANDART_WORK else l.stockStruct.get(area=area).cnt,
             "id": l.pk
         })
+    ef = EquipmentForm()
+
+    if tp == Equipment.TYPE_STANDART_WORK:
+        ef.fields["name"].label = ""
+        ef.fields["name"].widget = TextInput(attrs={'placeholder': 'Сварка'})
 
     return render(request, template, {
         'area_id': area_id,
         'login_form': LoginForm(),
         'eqs': arr,
         'one': '1',
-        'form': EquipmentForm(),
+        'form': ef,
     })
 
 
@@ -67,6 +72,7 @@ def materialList(request, area_id):
 # список деталей
 def detailList(request, area_id):
     return listEquipmentByType(request, area_id, Equipment.TYPE_DETAIL, "stock/detailList.html")
+
 
 # список Сборочных единиц
 def assemblyList(request, area_id):
@@ -96,11 +102,12 @@ def detailStockEquipment(request, equipment_id):
         'form': EquipmentForm(instance=Equipment.objects.get(pk=equipment_id)),
     })
 
+
 # обработать формсет движения оборудования(приёмка/выдача)
 def processMovingFomset(formset, flgAcceptance, area_id):
     if formset.is_valid():
         for form in formset.forms:
-            if ("equipment" in form.cleaned_data.keys())and("cnt" in form.cleaned_data.keys()):
+            if ("equipment" in form.cleaned_data.keys()) and ("cnt" in form.cleaned_data.keys()):
                 print(form.cleaned_data)
                 eq = form.cleaned_data["equipment"]
                 cnt = form.cleaned_data["cnt"]

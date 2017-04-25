@@ -212,26 +212,6 @@ def listEquipment(request, equipment_type, area_id):
     })
 
 
-def listStandartWork(request):
-    if request.method == 'POST':
-        # строим форму на основе запроса
-        form = StandartWorkForm(request.POST)
-        # если форма заполнена корректно
-        if form.is_valid():
-            d = {}
-            d["text"] = form.cleaned_data["text"]
-            eq = StandartWork.objects.create()
-            eq.save()
-            StandartWork.objects.filter(pk=eq.pk).update(**d)
-
-    return render(request, "constructors/standartWorkList.html", {
-        'login_form': LoginForm(),
-        'eqs': StandartWork.objects.all(),
-        'one': '1',
-        'form': StandartWorkForm(),
-    })
-
-
 def shemesList(request):
     if request.method == 'POST':
         # строим форму на основе запроса
@@ -253,10 +233,3 @@ def shemesList(request):
     })
 
 
-
-def workReportList(request,area_id):
-    return render(request, "constructors/workReportList.html", {
-        'login_form': LoginForm(),
-        'area_id': area_id,
-        'one': '1'
-    })

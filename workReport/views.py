@@ -12,12 +12,11 @@ from django.shortcuts import render, render_to_response, redirect
 from django.forms import formset_factory, BaseFormSet
 from django.urls import reverse
 
-from plan.forms import LoginForm
+from constructors.models import Equipment
+from plan.forms import LoginForm, RequiredFormSet
 from workReport.forms import ReportForm, WorkPartForm, NeedStructForm, RejectForm
 from workReport.models import WorkReport, WorkPart, StandartWork, Reject,  Worker, \
     WorkerPosition, NeedStruct
-
-
 
 
 def workReportPage1(request, workReport_id):
@@ -110,7 +109,7 @@ def workReportPage2(request, workReport_id):
 
     c = {'link_formset': report_formset,
          'login_form': LoginForm(),
-         'caption': 'страница 2 - Выполняемые работы',
+         'caption': 'Заявленные работы',
          'pk': workReport_id,
          }
     return render(request, 'workReport/workReportFormsetWorkPart.html', c)
@@ -160,7 +159,7 @@ def workReportPage3(request, workReport_id):
         report_formset = ReportFormset(data)
     c = {'link_formset': report_formset,
          'login_form': LoginForm(),
-         'caption': 'страница 3 - Фактически выполненные работы',
+         'caption': 'Выполненные работы',
          'pk': workReport_id,
          }
     return render(request, 'workReport/workReportFormsetWorkPart.html', c)
@@ -412,14 +411,16 @@ def workReportPage6(request, workReport_id):
 
 
 
-def workReports(request):
+def workReports(request,area_id):
     return render(request, 'workReport/workReportList.html',
                   {'reports':
-                       WorkReport.objects.all().order_by('-adate')
-                   })
+                       WorkReport.objects.filter(area=int(area_id)).order_by('-adate'),
+                   'one':'1',
+                   'area_id':area_id,
+                  })
 
 
-def createWorkReport(request):
+def createWorkReport(request,area_id):
     w = WorkReport()
     wPos = WorkerPosition.objects.get(name='Контролёр ОТК')
     w.VIKer = Worker.objects.filter(position=wPos).first()
@@ -430,37 +431,39 @@ def createWorkReport(request):
     w.supervisor = Worker.objects.filter(position=wPos).first()
     wPos = WorkerPosition.objects.get(name='Кладовщик')
     w.stockMan = Worker.objects.filter(position=wPos).first()
+    w.area = int(area_id)
     w.save()
+
     # заявленные работы
     wp = WorkPart.objects.create(startTime=time(hour=8, minute=30),
                                  endTime=time(hour=8, minute=45),
-                                 standartWork=StandartWork.objects.get(
-                                     text='Получение наряда и ТМЦ для выполнения работ'),
+                                 standartWork=Equipment.objects.get(
+                                     name='Получение наряда и ТМЦ для выполнения работ'),
                                  )
     w.workPart.add(wp)
     wp = WorkPart.objects.create(startTime=time(hour=16, minute=45),
                                  endTime=time(hour=17, minute=00),
-                                 standartWork=StandartWork.objects.get(text='Уборка рабочего места'),
+                                 standartWork=Equipment.objects.get(name='Уборка рабочего места'),
                                  )
     w.workPart.add(wp)
     # фактически выполненные работы
     wp = WorkPart.objects.create(startTime=time(hour=8, minute=30),
                                  endTime=time(hour=8, minute=45),
-                                 standartWork=StandartWork.objects.get(
-                                     text='Получение наряда и ТМЦ для выполнения работ'),
+                                 standartWork=Equipment.objects.get(
+                                     name='Получение наряда и ТМЦ для выполнения работ'),
                                  )
     w.factWorkPart.add(wp)
     wp = WorkPart.objects.create(startTime=time(hour=16, minute=30),
                                  endTime=time(hour=16, minute=45),
-                                 standartWork=StandartWork.objects.get(
-                                     text='Отчет о выполненных работах перед РП и ознакомление со сменным нарядом на следующий рабочий день, проверка инструмента, сдача ТМЦ'),
+                                 standartWork=Equipment.objects.get(
+                                     name='Отчет о выполненных работах перед РП и ознакомление со сменным нарядом на следующий рабочий день, проверка инструмента, сдача ТМЦ'),
                                  )
     w.factWorkPart.add(wp)
 
     wp = WorkPart.objects.create(startTime=time(hour=16, minute=45),
                                  endTime=time(hour=17, minute=00),
-                                 standartWork=StandartWork.objects.get(
-                                     text='Уборка рабочего места'),
+                                 standartWork=Equipment.objects.get(
+                                     name='Уборка рабочего места'),
                                  )
     w.factWorkPart.add(wp)
 
@@ -469,7 +472,7 @@ def createWorkReport(request):
 
 def deleteReport(request, workReport_id):
     WorkReport.objects.filter(pk=workReport_id).delete()
-    return HttpResponseRedirect('/workReport/list/')
+    return HttpResponseRedirect('/workReport/list/0/')
 
 
 def printReport(request, workReport_id):

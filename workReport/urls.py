@@ -5,8 +5,8 @@ from workReport.views import createWorkReport, workReports, workReportPage2, wor
     workReportPage4, workReportPage5, workReportPage6, printReport, deleteReport
 
 urlpatterns = [
-    url(r'^create/$', createWorkReport),
-    url(r'^list/$', workReports),
+    url(r'^create/(?P<area_id>[0-9]+)/$', createWorkReport),
+    url(r'^list/(?P<area_id>[0-9]+)/$', workReports),
     url(r'^page1/(?P<workReport_id>[0-9]+)/$', workReportPage1),
     url(r'^page2/(?P<workReport_id>[0-9]+)/$', workReportPage2),
     url(r'^page3/(?P<workReport_id>[0-9]+)/$', workReportPage3),
@@ -15,4 +15,5 @@ urlpatterns = [
     url(r'^page6/(?P<workReport_id>[0-9]+)/$', workReportPage6),
     url(r'^print/(?P<workReport_id>[0-9]+)/$', printReport),
     url(r'^delete/(?P<workReport_id>[0-9]+)/$', deleteReport),
+
 ]

@@ -3,7 +3,7 @@ import datetime
 
 from django.db import models
 
-from constructors.models import StandartWork, NeedStruct
+from constructors.models import StandartWork, NeedStruct, Equipment
 from orders.models import Order
 from plan.models import Agreement, Scheme, WorkerPosition, WorkPlace, Rationale, Worker, Area
 from plan.models import Customer
@@ -30,7 +30,7 @@ class WorkPart(models.Model):
     comment = models.CharField(max_length=2000, blank=True, default="", null=True)
     startTime = models.TimeField()
     endTime = models.TimeField()
-    standartWork = models.ForeignKey(StandartWork)
+    standartWork = models.ForeignKey(Equipment)
     workPlace = models.ForeignKey(WorkPlace, blank=True, default=None, null=True)
     rationale = models.ForeignKey(Rationale, blank=True, default=None, null=True)
     scheme = models.ManyToManyField(Scheme, blank=True, default=None)
@@ -100,11 +100,13 @@ class WorkReport(models.Model):
     # флаг для первого обсчёта плановой выдачи оборудования
     flgCalculateEquipment = models.BooleanField(default=False)
     # заказ по которому выполняется наряд
-    order = models.ForeignKey(Order, blank=True)
+    order = models.ForeignKey(Order, blank=True, null=True)
     # флаг, что подобраны исполнители
     flgCalculateWorkers = models.BooleanField(default=False)
     # нужен ли вик
     needVIK = models.BooleanField(default=False)
+    # площадка
+    area = models.IntegerField(default=0)
 
     def generateDoc(self):
         wp = []

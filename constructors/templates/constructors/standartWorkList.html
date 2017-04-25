@@ -22,7 +22,6 @@
 {% endblock %}
 
 {% block navigating %}
-<a href="/constructors/report/list/{{area_id}}/" class="btn btn-default">Наряды</a>
 <a href="/constructors/equipment/list/{{area_id}}/" class="btn btn-default">Оснастка</a>
 <a href="/constructors/material/list/{{area_id}}/" class="btn btn-default">Материалы</a>
 <a href="/constructors/detail/list/{{area_id}}/" class="btn btn-default">Детали</a>
@@ -37,24 +36,26 @@
 <br>
 
 <br>
-<form method="post">
+<form method="post" align="center" width="90%">
      {% csrf_token %}
-<table>
+<table align="center" width="90%">
     <tr>
-        <td> {%  bootstrap_field form.name %}</td>
+        <td valign="top"> {%  bootstrap_field form.name %}</td>
+        <td width="10%" align="center" valign="top"> <input align="left" class="btn btn-primary" type="submit" value="Создать" class="button"/></td>
+        <td width="40%"> </td>
     </tr>
 </table>
 
-    <input align="center" class="btn btn-primary" type="submit" value="Создать" class="button"/>
+
 </form>
 
 <br>
 <br>
-<table cellpadding="10" align="center" width="60%">
+<table cellpadding="10" align="center" width="70%">
   {% for eq in eqs%}
     <tr>
         <td>{{ eq.name}}</td>
-        <td><a href="/constructors/standartWork/detail/{{ eq.id }}/" class="btn btn-default">Редактировать</a>
+        <td width="30%"><a href="/constructors/standartWork/detail/{{ eq.id }}/" class="btn btn-default">Редактировать</a>
         <a href="/constructors/standartWork/remove/{{ eq.id }}/" class="btn btn-danger">Удалить</a></td>
         <td></td>
     </tr>

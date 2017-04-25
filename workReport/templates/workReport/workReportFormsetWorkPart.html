@@ -34,7 +34,7 @@ ul.errorlist {display:none;}
     {% if user.is_authenticated == False %}
         <p>Для доступа к системе Вам надо войти или зарегистрироваться</p>
     {% else %}
-
+        <H1> Наряд: {{ caption }}</H1>
     {% endif %}
 
 {% endblock %}
@@ -46,8 +46,6 @@ ul.errorlist {display:none;}
     {% else %}
 
 
-
-<H3> Наряд: {{ caption }}</H3>
 <a class="btn btn-danger" href="../../list/">Выход</a>
 <a class="btn btn-success" href="../../print/{{pk}}/">Печать</a>
     <table align="center">
@@ -65,17 +63,17 @@ ul.errorlist {display:none;}
 <form method="post" class="formset_form">
     {% csrf_token %}
 
-     {{ link_formset.management_form }}
+    {{ link_formset.management_form }}
     {% for dict in link_formset.errors %}
-    {% for error in dict.values %}
-        {{ error }}
+        {% for error in dict.values %}
+            {{ error }}
+        {% endfor %}
     {% endfor %}
-{% endfor %}
     <table cellspacing="3" cellpadding="7" >
         <thead><tr>
                 <td align="center">Начало</td>
                 <td align="center">Конец</td>
-                <td  align="center">Работа</td>
+                <td align="center">Работа</td>
                 <td align="center">Рабочее место</td>
                 <td align="center">Обоснование</td>
                 <td align="center">Комментарий</td>
@@ -91,7 +89,6 @@ ul.errorlist {display:none;}
             <td valign = "top">{% bootstrap_field link_form.rationale %} </td>
             <td valign = "top" >{% bootstrap_field link_form.comment %} </td>
         </tr>
-
     {% endfor %}
         <div class="placeForAddBtn"></div>
     </table>
@@ -110,11 +107,8 @@ ul.errorlist {display:none;}
     $('.link-formset').formset({
         addText: 'Добавить',
         deleteText: 'Удалить',
-
     });
 </script>
-
-
+    {% endif %}
 {% endblock %}
-
 

@@ -25,12 +25,17 @@
 {% endblock %}
 
 {% block content %}
+ {% if user.is_authenticated == False %}
+        <p>Для доступа к системе Вам надо войти или зарегистрироваться</p>
+    {% else %}
+        <H1> Наряд: Работники</H1>
+    {% endif %}
 
 {% endblock %}
 
 
 {% block sub_content %}
-<H3> Наряд: страница 1</H3>
+
 <a class="btn btn-danger" href="../../list/">Выход</a>
 <a class="btn btn-success" href="../../print/{{pk}}/">Печать</a>
 
