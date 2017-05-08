@@ -13,7 +13,7 @@ class StockStruct(models.Model):
     area = models.ForeignKey(Area)
 
     def __str__(self):
-        return self.area.name+" ("+str(self.cnt)+")"
+        return self.area.name + " (" + str(self.cnt) + ")"
 
 
 # сколько чего надо по тех. процессу
@@ -62,10 +62,10 @@ class Equipment(models.Model):
         return arr
 
     def __str__(self):
-        return self.name+"("+self.dimension+")"
+        return self.name + "(" + self.dimension + ")"
 
     def __unicode__(self):
-        return self.name+"("+self.dimension+")"
+        return self.name + "(" + self.dimension + ")"
 
     def addFromFormset(self, formset, doCrear=False):
         if (doCrear):
@@ -101,6 +101,14 @@ class Equipment(models.Model):
         "Стандартные работы",
     ]
     EQUIPMENT_TYPE_COUNT = len(EQUIPMENT_LABELS)
+    CONSTRUCTOR_ENABLED = [
+        2, 3, 4
+    ]
+    # формируем список для конструкторов
+    CONSTRUCTOR_CHOICES = []
+    for i in CONSTRUCTOR_ENABLED:
+        CONSTRUCTOR_CHOICES.append((str(i), EQUIPMENT_LABELS[i]))
+
 
 
 class MyEquipment(models.Model):

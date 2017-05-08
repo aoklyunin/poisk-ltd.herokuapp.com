@@ -4,7 +4,7 @@ from django.forms import formset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
-from constructors.form import SchemeForm, EquipmentListForm
+from constructors.form import SchemeForm, EquipmentListForm, EquipmentConstructorSingleForm, AddEquipmentForm
 from plan.forms import LoginForm, subdict
 from plan.models import Area, WorkerPosition, Scheme
 from stock.form import EquipmentForm, MoveEquipmentForm, MoveMaterialForm, MoveDetailForm, \
@@ -49,7 +49,7 @@ def stockBalance(request, area_id):
             if len(lst) > 0:
                 # формируем страницу со списком
                 c = {
-                    'area_id': int(area_id), #иначе не сравнить с id площадки при переборе
+                    'area_id': int(area_id),  # иначе не сравнить с id площадки при переборе
                     'login_form': LoginForm(),
                     'lst': lst,
                     'areas': Area.objects.all().order_by('name'),
@@ -57,22 +57,79 @@ def stockBalance(request, area_id):
                 return render(request, "constructors/stockList.html", c)
 
     c = {
-        'area_id': int(area_id),#иначе не сравнить с id площадки при переборе
+        'area_id': int(area_id),  # иначе не сравнить с id площадки при переборе
         'areas': Area.objects.all().order_by('name'),
         'login_form': LoginForm(),
         'form': EquipmentListForm(prefix="main_form")
     }
     return render(request, "constructors/stockBalance.html", c)
 
-
-# главная страница конструкторского отдела
+# страница конструкторской работы
 def constructorsWork(request):
+    if request.method == "POST":
+        # форма редактирования оборудования
+        eq_form = EquipmentConstructorSingleForm(request.POST, prefix='eq_form')
+        # если форма заполнена корректно
+        if eq_form.is_valid():
+            print(eq_form.cleaned_data)
+            eq = Equipment.objects.get(pk=int(eq_form.cleaned_data['equipment']))
+            return HttpResponseRedirect('/constructors/detail/' + str(eq.pk) + '/')
     c = {
         'login_form': LoginForm(),
+        'eq_form': EquipmentConstructorSingleForm(prefix="eq_form"),
+        'form': AddEquipmentForm(prefix="main_form")
     }
     return render(request, "constructors/work.html", c)
 
+# добавление оборудования
+def addEquipment(request):
+    if request.method == "POST":
+        # форма добавления оборужования
+        form = AddEquipmentForm(request.POST, prefix='main_form')
+        # если форма заполнена корректно
+        if form.is_valid():
+            d = {}
+            d["name"] = form.cleaned_data["name"]
+            d["equipmentType"] = form.cleaned_data["tp"]
+            eq = Equipment.objects.create()
+            for area in Area.objects.all():
+                s = StockStruct.objects.create(area=area)
+                eq.stockStruct.add(s)
+            eq.save()
+            Equipment.objects.filter(pk=eq.pk).update(**d)
+            return HttpResponseRedirect('/constructors/detail/' + str(eq.pk) + '/')
+    return HttpResponseRedirect('/constructors/work/')
 
+
+def detailEquipment(request, eq_id):
+    EquipmentFormset = formset_factory(MoveEquipmentForm)
+
+    eq = Equipment.objects.get(pk=eq_id)
+
+    if request.method == 'POST':
+        equipment_formset = EquipmentFormset(request.POST, request.FILES, prefix='equipment')
+        eq.addFromFormset(equipment_formset, True)
+        # строим форму на основе запроса
+        form = EquipmentForm(request.POST, prefix='main_form')
+        # если форма заполнена корректно
+        # if form.is_valid():
+        # d = subdict(form, ("name", "dimension", "code", "needVIK"))
+        # Equipment.objects.filter(pk=equipment_id).update(**d)
+        # Equipment.objects.get(pk=equipment_id).scheme.clear()
+        # for e in form.cleaned_data["scheme"]:
+        #    Equipment.objects.get(pk=equipment_id).scheme.add(
+        #        Scheme.objects.get(name=e)
+        #   )
+        return HttpResponseRedirect('/constructors/work/')
+
+    c = {'equipment_formset': EquipmentFormset(initial=eq.generateDataFromNeedStructs(
+        NeedEquipmentType=Equipment.TYPE_INSTUMENT), prefix='equipment', ),
+        'login_form': LoginForm(),
+        'one': '1',
+        'form': EquipmentForm(instance=Equipment.objects.get(pk=eq_id), prefix="main_form"),
+        'eqType': eq.equipmentType,
+    }
+    return render(request, "constructors/detail.html", c)
 
 
 # список оснастки

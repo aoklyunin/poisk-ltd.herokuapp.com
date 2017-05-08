@@ -16,8 +16,8 @@ class EquipmentForm(ModelForm):
         model = Equipment
         fields = {'name', 'dimension', 'code', 'scheme', 'needVIK'}
         widgets = {
-            'name': TextInput(attrs={'placeholder': 'Перчатки'}),
-            'dimension': TextInput(attrs={'placeholder': 'пара'}),
+            'name': TextInput(attrs={'placeholder': 'Изделие'}),
+            'dimension': TextInput(attrs={'placeholder': 'шт.'}),
         }
 
         labels = {
