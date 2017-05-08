@@ -9,7 +9,6 @@ from searchableselect.widgets import SearchableSelect
 
 from constructors.models import Equipment
 from stock.models import MoveEquipment
-from workReport.models import StandartWork
 
 
 class EquipmentForm(ModelForm):
@@ -52,44 +51,6 @@ class EquipmentForm(ModelForm):
         )
 
 
-class StandartWorkForm(ModelForm):
-    class Meta:
-        model = StandartWork
-        fields = {'text', 'positionsEnable', 'duration', 'needVIK'}
-        widgets = {
-            'text': TextInput(attrs={'placeholder': 'Работа'}),
-        }
-
-        labels = {
-            'text': 'Название',
-            'positionsEnable': 'Должности',
-            'duration': 'длительность',
-            'needVIK': 'Приёмка ОТК'
-        }
-
-        error_messages = {
-            'positionsEnable': {'invalid': '', 'invalid_choice': ''},
-            'text': {'required': ''},
-            'duration': {'required': ''},
-            'needVIK': {'required': ''},
-        }
-
-    def __init__(self, *args, **kwargs):
-        # first call parent's constructor
-        super(StandartWorkForm, self).__init__(*args, **kwargs)
-        # there's a `fields` property now
-        self.fields['duration'].required = False
-        self.fields['positionsEnable'].required = False
-        self.fields['needVIK'].required = False
-        self.helper = FormHelper()
-        self.helper.layout = Layout(
-            Field('positionsEnable', css_class='col-sm-2', ),
-            Field('text', css_class='col-sm-2'),
-            Field('needVIK', css_class='col-sm-2'),
-            Field('duration', css_class='col-sm-2'),
-        )
-
-
 class MoveForm(ModelForm):
     class Meta:
         model = MoveEquipment
@@ -124,7 +85,7 @@ class MoveForm(ModelForm):
 class MoveEquipmentForm(MoveForm):
     def __init__(self, *args, **kwargs):
         super(MoveEquipmentForm, self).__init__(*args, **kwargs)
-        self.fields['equipment'].queryset = Equipment.objects.filter(equipmentType=Equipment.TYPE_EQUIPMENT)
+        self.fields['equipment'].queryset = Equipment.objects.filter(equipmentType=Equipment.TYPE_INSTUMENT)
 
 
 class MoveMaterialForm(MoveForm):

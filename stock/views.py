@@ -66,7 +66,7 @@ def listEquipmentByType(request, area_id, tp, template):
 
 # список оснастки
 def equipmentList(request, area_id):
-    return listEquipmentByType(request, area_id, Equipment.TYPE_EQUIPMENT, "stock/equipmentList.html")
+    return listEquipmentByType(request, area_id, Equipment.TYPE_INSTUMENT, "stock/equipmentList.html")
 
 
 # список материалов
@@ -98,7 +98,7 @@ def detailStockEquipment(request, equipment_id):
             eq.scheme = form.cleaned_data["scheme"]
             eq.needVIK = form.cleaned_data["needVIK"]
             eq.save()
-            if eq.equipmentType == Equipment.TYPE_EQUIPMENT:
+            if eq.equipmentType == Equipment.TYPE_INSTUMENT:
                 return HttpResponseRedirect('/stock/equipment/list/0/')
             else:
                 return HttpResponseRedirect('/stock/material/list/0/')
@@ -165,7 +165,7 @@ def removeStockEquipment(request, equipment_id):
     eq.stockStruct.clear()
     eq.delete()
 
-    if tp == Equipment.TYPE_EQUIPMENT:
+    if tp == Equipment.TYPE_INSTUMENT:
         return HttpResponseRedirect('/stock/equipment/list/0/')
     else:
         return HttpResponseRedirect('/stock/material/list/0/')

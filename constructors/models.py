@@ -16,7 +16,6 @@ class StockStruct(models.Model):
 # сколько чего надо по тех. процессу
 class NeedStruct(models.Model):
     equipment = models.ForeignKey('Equipment', blank=True, default=None)
-    standartWork = models.ForeignKey('StandartWork', blank=True, default=None)
     cnt = models.FloatField(default=0)
     completeCnt = models.FloatField(default=0)
 
@@ -45,11 +44,21 @@ class Equipment(models.Model):
     # необходимые объекты для данной работы
     needStruct = models.ManyToManyField(NeedStruct, blank=True, default=None,
                                         related_name="needStructStandartWork12")
-    TYPE_EQUIPMENT = 0
+    TYPE_INSTUMENT = 0
     TYPE_MATERIAL = 1
     TYPE_DETAIL = 2
     TYPE_ASSEMBLY_UNIT = 3
     TYPE_STANDART_WORK = 4
+
+    EQUIPMENT_LABELS = [
+        "Инструмент",
+        "Комплетующие",
+        "Детали",
+        "Сборочные единицы",
+        "Стандартные работы",
+    ]
+
+    EQUIPMENT_TYPE_COUNT = 5
 
     duration = models.FloatField(default=0)
 
@@ -88,51 +97,23 @@ class Equipment(models.Model):
                     self.needStruct.add(ns)
 
 
-# стандартная работа
-class StandartWork(models.Model):
-    # название
-    text = models.CharField(max_length=2000)
-    # должности, которые могут выполнять
-    positionsEnable = models.ManyToManyField(WorkerPosition)
-    # необходимые объекты для данной работы
-    needStruct = models.ManyToManyField(NeedStruct, blank=True, default=None,
-                                        related_name="needStructStandartWork")
-    #  длительность в минутах
-    duration = models.FloatField(default=0)
-    # нужно ли ОТК
-    needVIK = models.BooleanField(default=False)
+class MyEquipment(models.Model):
+    equipment = models.ManyToManyField("constructors.Equipment")
 
     def __str__(self):
-        return self.text + "(" + str(self.duration) + ")"
+        return str(self.equipment) + ":" + str(self.cnt)
 
-    def __unicode__(self):
-        return self.text + "(" + str(self.duration) + ")"
+    def accept(self, area_id):
+        if int(area_id) == 0:
+            area = Area.objects.get(name="Красное село")
+        else:
+            area = Area.objects.get(name="Малахит")
 
-    def addFromFormset(self, formset, doCrear=False):
-        if (doCrear):
-            for ns in self.needStruct.all():
-                ns.delete()
-            self.needStruct.clear()
+        ss = self.equipment.stockStruct.get(area=area)
+        if self.flgAcceptance:
+            ss.cnt += self.cnt
+        else:
+            ss.cnt -= self.cnt
+        ss.save()
 
-        if formset.is_valid():
-            for form in formset.forms:
-                d = form.cleaned_data
-                if (len(d) > 0) and \
-                        (("equipment" in d) and (not d["equipment"] is None) or (
-                                        ("standartWork" in d) and (d["standartWork"] != None) and (
-                                        not d["standartWork"] is self))):
-                    print(d)
-                    ns = NeedStruct.objects.create(**d)
-                    ns.save()
-                    self.needStruct.add(ns)
 
-    def generateDataFromNeedStructs(self, NeedEquipmentType):
-        arr = []
-        for ns in self.needStruct.all():
-            if (ns.equipment != None) and (ns.equipment.equipmentType == NeedEquipmentType):
-                arr.append({'equipment': ns.equipment,
-                            'cnt': ns.cnt})
-            elif (ns.standartWork != None):
-                arr.append({'standartWork': ns.standartWork,
-                            'cnt': ns.cnt})
-        return arr

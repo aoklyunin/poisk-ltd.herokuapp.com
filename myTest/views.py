@@ -3,15 +3,27 @@ from django.shortcuts import render
 from django.http import HttpResponse
 
 # Create your views here.
-from myTest.form import BookForm
+from constructors.form import EquipmentListForm
+from constructors.models import Equipment
 from myTest.models import Book
 from stock.form import MoveForm
 
 
+
+
 def test(request):
+    if request.method == "POST":
+        # строим форму на основе запроса
+        form = EquipmentListForm(request.POST, prefix='main_form')
+        # если форма заполнена корректно
+        if form.is_valid():
+            for e in form.cleaned_data['equipment']:
+                print(Equipment.objects.get(pk=e))
+
+
     template = 'myTest/index.html'
     context = {
-        'form': BookForm()
+        'form': EquipmentListForm(prefix="main_form")
     }
     return render(request, template, context)
 

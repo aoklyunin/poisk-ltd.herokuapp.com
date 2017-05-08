@@ -15,7 +15,7 @@ from django.urls import reverse
 from constructors.models import Equipment
 from plan.forms import LoginForm, RequiredFormSet
 from workReport.forms import ReportForm, WorkPartForm, NeedStructForm, RejectForm
-from workReport.models import WorkReport, WorkPart, StandartWork, Reject,  Worker, \
+from workReport.models import WorkReport, WorkPart, Reject,  Worker, \
     WorkerPosition, NeedStruct
 
 

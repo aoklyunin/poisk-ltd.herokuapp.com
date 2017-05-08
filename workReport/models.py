@@ -3,7 +3,7 @@ import datetime
 
 from django.db import models
 
-from constructors.models import StandartWork, NeedStruct, Equipment
+from constructors.models import     NeedStruct, Equipment
 from orders.models import Order
 from plan.models import Agreement, Scheme, WorkerPosition, WorkPlace, Rationale, Worker, Area
 from plan.models import Customer
