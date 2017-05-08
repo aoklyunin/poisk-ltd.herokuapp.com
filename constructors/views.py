@@ -116,10 +116,8 @@ def detailEquipment(request, eq_id):
         # если форма заполнена корректно
         if form.is_valid():
             d = subdict(form, ("name", "dimension", "code", "needVIK", "equipmentType"))
-
             Equipment.objects.filter(pk=eq_id).update(**d)
             Equipment.objects.get(pk=eq_id).scheme.clear()
-            #print(form.cleaned_data["scheme"])
             for e in form.cleaned_data["scheme"]:
                 eq.scheme.add(e)
 
@@ -128,27 +126,26 @@ def detailEquipment(request, eq_id):
 
     ef = EquipmentForm(instance=Equipment.objects.get(pk=eq_id),initial={'scheme':eq.getSchemeChoices()}, prefix="main_form")
     ef.fields["equipmentType"].initial = eq.equipmentType
-    #ef.fields["scheme"].initial =
 
-    print(eq.getSchemeChoices())
     c = {'equipment_formset': EquipmentFormset(initial=eq.generateDataFromNeedStructs(), prefix='equipment'),
          'login_form': LoginForm(),
          'one': '1',
          'form': ef,
          'eqType': eq.equipmentType,
+         'eq_id':eq_id,
          }
     return render(request, "constructors/detail.html", c)
 
 
 # удалить конструкторское оборудование
-def removeConstructorEquipment(request, equipment_id):
-    eq = Equipment.objects.get(pk=equipment_id)
+def deleteConstructorEquipment(request, eq_id):
+    eq = Equipment.objects.get(pk=eq_id)
     eq.stockStruct.clear()
     eq.delete()
     return HttpResponseRedirect('/constructors/tehnology/')
 
 # список чертежей
-def shemesList(request):
+def shemes(request):
     if request.method == 'POST':
         # строим форму на основе запроса
         form = SchemeForm(request.POST)

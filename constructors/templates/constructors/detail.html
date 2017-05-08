@@ -31,7 +31,6 @@
 {% endblock %}
 
 
-
 {% block sub_content %}
 
 <br>
@@ -42,16 +41,16 @@
     <table width="90%" align="center">
 
         <tr>
-             <td >{% bootstrap_field form.name %}</td>
-             <td >{% bootstrap_field form.dimension %}</td>
-            <td >{% bootstrap_field form.code %}</td>
-            <td >{% bootstrap_field form.equipmentType %}</td>
+            <td>{% bootstrap_field form.name %}</td>
+            <td>{% bootstrap_field form.dimension %}</td>
+            <td>{% bootstrap_field form.code %}</td>
+            <td>{% bootstrap_field form.equipmentType %}</td>
 
         </tr>
 
         <tr>
-             <td colspan="3">{% bootstrap_field form.scheme %}</td>
-<td >   {% bootstrap_field form.needVIK %}</td>
+            <td colspan="3">{% bootstrap_field form.scheme %}</td>
+            <td> {% bootstrap_field form.needVIK %}</td>
         </tr>
     </table>
 
@@ -60,29 +59,33 @@
     <h2 align="center"> Зависит от: </h2>
 
 
+    <table cellspacing="3" cellpadding="7" width="90%" align="center">
+        <thead>
+        <tr>
+            <td align="center">Оснастка</td>
+            <td align="center">Количество</td>
+        </tr>
+        </thead>
+        <tr></tr>
+        {% for link_form in equipment_formset %}
+        <tr class="equipment-formset">
+            <td valign="top">{% bootstrap_field link_form.equipment %}</td>
+            <td valign="top" width="20%">{% bootstrap_field link_form.cnt %}</td>
+        </tr>
 
-                <table cellspacing="3" cellpadding="7" width="90%" align="center">
-                    <thead>
-                    <tr>
-                        <td align="center">Оснастка</td>
-                        <td align="center">Количество</td>
-                    </tr>
-                    </thead>
-                    <tr></tr>
-                    {% for link_form in equipment_formset %}
-                    <tr class="equipment-formset">
-                        <td valign="top">{% bootstrap_field link_form.equipment %}</td>
-                        <td valign="top" width="20%">{% bootstrap_field link_form.cnt %}</td>
-                    </tr>
-
-                    {% endfor %}
-                    <div class="placeForAddBtn"></div>
-                </table>
+        {% endfor %}
+        <div class="placeForAddBtn"></div>
+    </table>
     <div align="center">
         <a href="constructors/work/" class="btn btn-default">Назад</a>
+        <a href='/constructors/delete/{{eq_id}}/'  class="btn btn-danger" onclick="YNconfirm(); return false;">Удалить</a>
         <input align="center" class="btn btn-primary" type="submit" value="Сохранить" class="button"/>
     </div>
+    <br>
+    <a href="/constructors/" hidden id="deleteLin123"></a>
 </form>
+
+ <link rel="stylesheet" type="text/css" href="bootstrap.min.css">
 
 <script src="https://code.jquery.com/jquery-3.1.1.min.js"
         integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
@@ -96,7 +99,19 @@
 
     });
 
+
+
 </script>
+<script>
+
+    function YNconfirm() {
+ if (window.confirm('Вы уверены, что хотите удалить?'))
+ {
+   window.location.href = '/constructors/delete/{{eq_id}}/';
+ }
+}
+</script>
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
 <script>
@@ -111,16 +126,18 @@
            });
         })
 
+
 </script>
 
 
- <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
-    <link rel="stylesheet" type="text/css"
-          href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-css/1.4.6/select2-bootstrap.css">
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
+<link rel="stylesheet" type="text/css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-css/1.4.6/select2-bootstrap.css">
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
 
 <script type="text/javascript">
           $(".js-example-basic-multiple").select2();
+
 </script>
 
 
