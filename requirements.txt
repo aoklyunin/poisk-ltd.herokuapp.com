@@ -10,3 +10,7 @@ setuptools==20.10.1
 lxml==3.7.2
 python-docx==0.8.6
 django-crispy-forms==1.6.1
+django-searchable-select==1.4.5
+selenium==3.0.1
+coverage==4.2
+python-coveralls==2.9.0

@@ -41,7 +41,7 @@
 
     {{ form.management_form }}
     <table>
-        {% ifnotequal eqType  4 %}
+
         <tr>
              <td valign="top">{% bootstrap_field form.name %}</td>
              <td valign="top">{% bootstrap_field form.dimension %}</td>
@@ -50,13 +50,7 @@
         <tr>
               <td valign="top">{% bootstrap_field form.scheme %}</td>
         </tr>
-        {% else %}
-        <tr>
-             <td valign="top">{% bootstrap_field form.text %}</td>
-             <td valign="top">{% bootstrap_field form.positionsEnable %}</td>
-             <td valign="top">{% bootstrap_field form.duration %}</td>
-        </tr>
-        {% endifnotequal %}
+
         <tr>
             <td >   {% bootstrap_field form.needVIK %}</td>
         </tr>
@@ -70,10 +64,17 @@
 {% if eqType > 1 %}
     <h2 align="center"> Зависит от: </h2>
      {%endif%}
+
+    <select class="selectpicker">
+  <option>Mustard</option>
+  <option>Ketchup</option>
+  <option>Relish</option>
+</select>
+
     <table>
         <tr>
             {% if eqType > 1 %}
-            <td valign="top">
+            <td valign="top" width="30%">
                 <table cellspacing="3" cellpadding="7">
                     <thead>
                     <tr>
@@ -85,7 +86,7 @@
                     {% for link_form in equipment_formset %}
                     <tr class="equipment-formset">
                         <td valign="top">{% bootstrap_field link_form.equipment size='small'%}</td>
-                        <td valign="top">{% bootstrap_field link_form.cnt  size='small'%}</td>
+                        <td valign="top" width="20%">{% bootstrap_field link_form.cnt  size='small'%}</td>
                     </tr>
 
                     {% endfor %}
@@ -94,7 +95,7 @@
             </td>
             {%endif%}
              {% if eqType > 1 %}
-            <td valign="top">
+            <td valign="top"  width="30%">
                 <table cellspacing="3" cellpadding="7">
                     <thead>
                     <tr>
@@ -106,7 +107,7 @@
                     {% for link_form in material_formset %}
                     <tr class="material-formset">
                         <td valign="top">{% bootstrap_field link_form.equipment size='small' %}</td>
-                        <td valign="top">{% bootstrap_field link_form.cnt size='small' %}</td>
+                        <td valign="top" width="20%">{% bootstrap_field link_form.cnt size='small' %}</td>
                     </tr>
 
                     {% endfor %}
@@ -115,7 +116,7 @@
             </td>
             {%endif%}
             {% if eqType > 2 %}
-            <td valign="top">
+            <td valign="top"  width="30%">
                 <table cellspacing="3" cellpadding="7">
                     <thead>
                     <tr>
@@ -127,15 +128,18 @@
                     {% for link_form in detail_formset %}
                     <tr class="detail-formset">
                         <td valign="top">{% bootstrap_field link_form.equipment  size='small'%}</td>
-                        <td valign="top">{% bootstrap_field link_form.cnt size='small' %}</td>
+                        <td valign="top" width="20%">{% bootstrap_field link_form.cnt size='small' %}</td>
                     </tr>
                     {% endfor %}
                     <div class="placeForAddBtn"></div>
                 </table>
             </td>
+
             {% endif %}
             {% if eqType > 2 %}
-            <td valign="top">
+        </tr>
+        <tr>
+            <td valign="top"  width="30%">
                 <table cellspacing="3" cellpadding="7">
                     <thead>
                     <tr>
@@ -147,7 +151,7 @@
                     {% for link_form in assembly_formset %}
                     <tr class="assembly-formset">
                         <td valign="top">{% bootstrap_field link_form.equipment size='small' %}</td>
-                        <td valign="top">{% bootstrap_field link_form.cnt  size='small'%}</td>
+                        <td valign="top" width="20%">{% bootstrap_field link_form.cnt  size='small'%}</td>
                     </tr>
                     {% endfor %}
                     <div class="placeForAddBtn"></div>
@@ -155,7 +159,7 @@
             </td>
             {% endif %}
             {% if eqType > 1 %}
-            <td valign="top">
+            <td valign="top"  width="30%">
                 <table cellspacing="3" cellpadding="7">
                     <thead>
                     <tr>
@@ -166,8 +170,8 @@
                     <tr></tr>
                     {% for link_form in swork_formset %}
                     <tr class="swork-formset">
-                        <td valign="top">{% bootstrap_field link_form.equipment size='small' %}</td>
-                        <td valign="top">{% bootstrap_field link_form.cnt  size='small'%}</td>
+                        <td valign="top">{% bootstrap_field link_form.equipment size='small'  %}</td>
+                        <td valign="top" width="20%">{% bootstrap_field link_form.cnt  size='small'%}</td>
                     </tr>
                     {% endfor %}
                     <div class="placeForAddBtn"></div>
@@ -217,6 +221,13 @@
         deleteText: 'Удалить',
         prefix:'standart_work',
     });
+
+
+    $('.selectpicker').selectpicker({
+        style: 'btn-info',
+        size: 4
+    });
+
 </script>
 
 {% endblock %}

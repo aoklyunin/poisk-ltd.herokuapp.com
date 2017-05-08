@@ -107,6 +107,7 @@ INSTALLED_APPS = (
     'orders',
     'constructors',
     'otk',
+    'searchableselect',
 )
 
 from django.contrib.messages import constants as messages
