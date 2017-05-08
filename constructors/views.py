@@ -3,13 +3,63 @@ from django.forms import formset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
-from constructors.form import SchemeForm
+from constructors.form import SchemeForm, EquipmentListForm
 from plan.forms import LoginForm, subdict
 from plan.models import Area, WorkerPosition, Scheme
-from stock.form import EquipmentForm,  MoveEquipmentForm, MoveMaterialForm, MoveDetailForm, \
+from stock.form import EquipmentForm, MoveEquipmentForm, MoveMaterialForm, MoveDetailForm, \
     MoveAssemblyForm, MoveStandartWorkForm
 from stock.views import listEquipmentByType
 from .models import StockStruct, Equipment
+
+
+# главная страница конструкторского отдела
+def index(request):
+    c = {
+        'area_id': Area.objects.first().pk,
+        'login_form': LoginForm(),
+    }
+    return render(request, "constructors/index.html", c)
+
+
+# баланс на складе
+def stockBalance(request, area_id):
+    if request.method == "POST":
+        # строим форму на основе запроса
+        form = EquipmentListForm(request.POST, prefix='main_form')
+        # если форма заполнена корректно
+        if form.is_valid():
+            area = Area.objects.get(pk=area_id)
+            lst = []
+            for e in form.cleaned_data['equipment']:
+                # try:
+                eq = Equipment.objects.get(pk=e)
+                flg = True
+                for ss in eq.stockStruct.all():
+                    if ss.area == area:
+                        lst.append([eq, ss.cnt])
+                        flg = False
+                if flg:
+                    print("На этой площадке не найдено складской структуры " + eq.name)
+
+            if len(lst) > 0:
+                c = {
+                    'area_id': int(area_id),
+                    'login_form': LoginForm(),
+                    'lst': lst,
+                    'areas': Area.objects.all(),
+                }
+                return render(request, "constructors/stockList.html", c)
+
+                # except:
+                #   print("Оборудования с таким id не найдено")
+
+    c = {
+        'area_id': int(area_id),
+        'areas':Area.objects.all(),
+        'login_form': LoginForm(),
+        'form': EquipmentListForm(prefix="main_form")
+    }
+    return render(request, "constructors/stockBalance.html", c)
 
 
 # список оснастки
@@ -26,13 +76,16 @@ def materialList(request, area_id):
 def detailList(request, area_id):
     return listEquipmentByType(request, area_id, Equipment.TYPE_DETAIL, "constructors/detailList.html")
 
+
 # список Сборочных единиц
 def assemblyList(request, area_id):
     return listEquipmentByType(request, area_id, Equipment.TYPE_ASSEMBLY_UNIT, "constructors/assemblyList.html")
 
+
 # список стандартных единиц
 def standartWorkList(request):
-    return listEquipmentByType(request,0, Equipment.TYPE_STANDART_WORK, "constructors/standartWorkList.html")
+    return listEquipmentByType(request, 0, Equipment.TYPE_STANDART_WORK, "constructors/standartWorkList.html")
+
 
 # удалить конструкторское оборудование
 def removeConstructorEquipment(request, equipment_id):
@@ -96,7 +149,6 @@ def detailConstructorEquipment(request, equipment_id):
     return render(request, "constructors/detail.html", c)
 
 
-
 def shemesList(request):
     if request.method == 'POST':
         # строим форму на основе запроса
@@ -104,7 +156,7 @@ def shemesList(request):
         # если форма заполнена корректно
         if form.is_valid():
             code = form.cleaned_data["code"]
-            sch = Scheme.objects.create(link = form.cleaned_data["link"],author =  form.cleaned_data["author"] )
+            sch = Scheme.objects.create(link=form.cleaned_data["link"], author=form.cleaned_data["author"])
             sch.save()
             if (code is not None):
                 sch.code = code
@@ -116,5 +168,3 @@ def shemesList(request):
         'one': '1',
         'form': SchemeForm(),
     })
-
-

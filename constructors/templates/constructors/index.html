@@ -1,0 +1,48 @@
+{% extends "plan/base.html" %}
+{% load staticfiles %}
+{# Load the tag library #}
+{% load bootstrap3 %}
+{% load crispy_forms_tags %}
+{% load crispy_forms_tags %}
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% bootstrap_messages %}
+
+{% block style_block %}
+    .centering{
+        text-align: center;
+    }
+    td {
+    padding: 5px;
+    }
+{% endblock %}
+
+{% block title %}НПО Поиск{% endblock %}
+
+{% block content %}
+<h1>Конструкторам</h1>
+{% if user.is_authenticated == False %}
+<p>Для доступа к системе Вам надо войти или зарегистрироваться</p>
+{% else %}
+
+{% endif %}
+{% endblock %}
+
+{% block navigating %}
+<a href="/constructors/" class="btn btn-info">Главная</a>
+<a href="/constructors/stock_balance/{{area_id}}/" class="btn btn-default">Баланс на складе</a>
+<a href="/constructors/workReports/" class="btn btn-default">Наряды</a>
+<a href="/constructors/work/" class="btn btn-default">Конструкторское дело</a>
+<a href="/constructors/sWorks/" class="btn btn-default">Стандартные работы</a>
+<a href="/constructors/shemes/" class="btn btn-default">Чертежи</a>
+{% endblock %}
+
+{% block sub_content %}
+
+<br>
+
+{% endblock %}
+
+{% block error_messages %}
+{% endblock %}

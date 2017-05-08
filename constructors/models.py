@@ -12,6 +12,9 @@ class StockStruct(models.Model):
     cnt = models.FloatField(default=0)
     area = models.ForeignKey(Area)
 
+    def __str__(self):
+        return self.area.name+" ("+str(self.cnt)+")"
+
 
 # сколько чего надо по тех. процессу
 class NeedStruct(models.Model):
@@ -44,22 +47,7 @@ class Equipment(models.Model):
     # необходимые объекты для данной работы
     needStruct = models.ManyToManyField(NeedStruct, blank=True, default=None,
                                         related_name="needStructStandartWork12")
-    TYPE_INSTUMENT = 0
-    TYPE_MATERIAL = 1
-    TYPE_DETAIL = 2
-    TYPE_ASSEMBLY_UNIT = 3
-    TYPE_STANDART_WORK = 4
-
-    EQUIPMENT_LABELS = [
-        "Инструмент",
-        "Комплетующие",
-        "Детали",
-        "Сборочные единицы",
-        "Стандартные работы",
-    ]
-
-    EQUIPMENT_TYPE_COUNT = 5
-
+    # длительность
     duration = models.FloatField(default=0)
 
     def generateDataFromNeedStructs(self, NeedEquipmentType):
@@ -74,10 +62,10 @@ class Equipment(models.Model):
         return arr
 
     def __str__(self):
-        return self.name
+        return self.name+"("+self.dimension+")"
 
     def __unicode__(self):
-        return self.name
+        return self.name+"("+self.dimension+")"
 
     def addFromFormset(self, formset, doCrear=False):
         if (doCrear):
@@ -95,6 +83,24 @@ class Equipment(models.Model):
                     ns = NeedStruct.objects.create(**d)
                     ns.save()
                     self.needStruct.add(ns)
+
+    # константы
+    # стандартные работы обязательно должны быть последними
+    # типы оборудования
+    TYPE_INSTUMENT = 0
+    TYPE_MATERIAL = 1
+    TYPE_DETAIL = 2
+    TYPE_ASSEMBLY_UNIT = 3
+    TYPE_STANDART_WORK = 4
+    # названия групп
+    EQUIPMENT_LABELS = [
+        "Инструмент",
+        "Комплетующие",
+        "Детали",
+        "Сборочные единицы",
+        "Стандартные работы",
+    ]
+    EQUIPMENT_TYPE_COUNT = len(EQUIPMENT_LABELS)
 
 
 class MyEquipment(models.Model):
@@ -115,5 +121,3 @@ class MyEquipment(models.Model):
         else:
             ss.cnt -= self.cnt
         ss.save()
-
-
