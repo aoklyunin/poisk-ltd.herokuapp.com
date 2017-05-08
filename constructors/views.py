@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.contrib import messages
 from django.forms import formset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -28,38 +29,50 @@ def stockBalance(request, area_id):
         form = EquipmentListForm(request.POST, prefix='main_form')
         # если форма заполнена корректно
         if form.is_valid():
+            # получаем объект площадки
             area = Area.objects.get(pk=area_id)
+            # формируем список оборудования, у которого есть данные об этой площадке
             lst = []
             for e in form.cleaned_data['equipment']:
-                # try:
-                eq = Equipment.objects.get(pk=e)
-                flg = True
-                for ss in eq.stockStruct.all():
-                    if ss.area == area:
-                        lst.append([eq, ss.cnt])
-                        flg = False
-                if flg:
-                    print("На этой площадке не найдено складской структуры " + eq.name)
-
+                try:
+                    eq = Equipment.objects.get(pk=e)
+                    flg = True
+                    for ss in eq.stockStruct.all():
+                        if ss.area == area:
+                            lst.append([eq, ss.cnt])
+                            flg = False
+                    if flg:
+                        messages.error(request, "На этой площадке не найдено складской структуры " + eq.name)
+                except:
+                    messages.error(request, "Оборудования с таким id не найдено")
+            # если списокнепустой
             if len(lst) > 0:
+                # формируем страницу со списком
                 c = {
-                    'area_id': int(area_id),
+                    'area_id': int(area_id), #иначе не сравнить с id площадки при переборе
                     'login_form': LoginForm(),
                     'lst': lst,
-                    'areas': Area.objects.all(),
+                    'areas': Area.objects.all().order_by('name'),
                 }
                 return render(request, "constructors/stockList.html", c)
 
-                # except:
-                #   print("Оборудования с таким id не найдено")
-
     c = {
-        'area_id': int(area_id),
-        'areas':Area.objects.all(),
+        'area_id': int(area_id),#иначе не сравнить с id площадки при переборе
+        'areas': Area.objects.all().order_by('name'),
         'login_form': LoginForm(),
         'form': EquipmentListForm(prefix="main_form")
     }
     return render(request, "constructors/stockBalance.html", c)
+
+
+# главная страница конструкторского отдела
+def constructorsWork(request):
+    c = {
+        'login_form': LoginForm(),
+    }
+    return render(request, "constructors/work.html", c)
+
+
 
 
 # список оснастки

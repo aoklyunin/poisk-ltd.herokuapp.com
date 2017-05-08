@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from django.conf.urls import url
 
-from constructors.views import  equipmentList, materialList, detailList, assemblyList, standartWorkList, \
-    shemesList, removeConstructorEquipment, detailConstructorEquipment, index,stockBalance
+from constructors.views import equipmentList, materialList, detailList, assemblyList, standartWorkList, \
+    shemesList, removeConstructorEquipment, detailConstructorEquipment, index, stockBalance, constructorsWork
 
 urlpatterns = [
 
@@ -22,8 +22,10 @@ urlpatterns = [
    # url(r'^assembly/detail/(?P<equipment_id>[0-9]+)/$', detailConstructorEquipment),
    # url(r'^standartWork/detail/(?P<equipment_id>[0-9]+)/$', detailConstructorEquipment),
 
+    url(r'^work/$', constructorsWork),
     url(r'^stock_balance/(?P<area_id>[0-9]+)/$', stockBalance),
-    url(r'^',index)
+    url(r'^', index)
+
    # url(r'^detail/standartWork/(?P<swork_id>[0-9]+)/$', detailStandartWork),
 
     #url(r'^list/equipment/(?P<equipment_type>[0-9]+)/(?P<area_id>[0-9]+)/$', listEquipment),

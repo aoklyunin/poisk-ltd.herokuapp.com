@@ -7,6 +7,26 @@ from constructors.models import Equipment
 from plan.models import Scheme
 
 
+# форма для выбора нескольких объектов оборудования
+class EquipmentListForm(Form):
+    equipment = MultipleChoiceField(label="")
+    def __init__(self, *args, **kwargs):
+        super(EquipmentListForm, self).__init__(*args, **kwargs)
+        self.fields['equipment'].choices = self.templates_as_choices()
+        self.fields['equipment'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['equipment'].widget.attrs['id'] = 'disease'
+
+    def templates_as_choices(self):
+        templates = []
+        for i in range(Equipment.EQUIPMENT_TYPE_COUNT-1):
+            lst = []
+            for eq in Equipment.objects.filter(equipmentType=i).order_by('name'):
+                lst.append([eq.id, eq.name])
+            templates.append([Equipment.EQUIPMENT_LABELS[i], lst])
+
+        return templates
+
+
 class SchemeForm(ModelForm):
     class Meta:
         model = Scheme
@@ -35,42 +55,3 @@ class SchemeForm(ModelForm):
             Field('link', css_class='col-sm-2'),
         )
 
-
-# форма для выбора нескольких объектов оборудования
-class EquipmentListForm(Form):
-    equipment = MultipleChoiceField(label="")
-    def __init__(self, *args, **kwargs):
-        super(EquipmentListForm, self).__init__(*args, **kwargs)
-        self.fields['equipment'].choices = self.templates_as_choices()
-        self.fields['equipment'].widget.attrs['class'] = 'js-example-basic-multiple'
-        self.fields['equipment'].widget.attrs['id'] = 'disease'
-
-    def templates_as_choices(self):
-        templates = []
-        for i in range(Equipment.EQUIPMENT_TYPE_COUNT-1):
-            lst = []
-            for eq in Equipment.objects.filter(equipmentType=i).order_by('name'):
-                lst.append([eq.id, eq.name])
-            templates.append([Equipment.EQUIPMENT_LABELS[i], lst])
-
-        return templates
-
-# форма для выбора нескольких объектов оборудования
-class EquipmentStandartWorkListForm(Form):
-    equipment = MultipleChoiceField()
-    def __init__(self, *args, **kwargs):
-        super(EquipmentListForm, self).__init__(*args, **kwargs)
-        self.fields['equipment'].choices = self.templates_as_choices()
-        self.fields['equipment'].widget.attrs['class'] = 'js-example-basic-multiple'
-        self.fields['equipment'].widget.attrs['id'] = 'disease'
-        self.fields['equipment'].lable = 'disease'
-
-    def templates_as_choices(self):
-        templates = []
-        for i in range(Equipment.EQUIPMENT_TYPE_COUNT):
-            lst = []
-            for eq in Equipment.objects.filter(equipmentType=i).order_by('name'):
-                lst.append([eq.id, eq.name])
-            templates.append([Equipment.EQUIPMENT_LABELS[i], lst])
-
-        return templates
