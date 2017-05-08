@@ -11,45 +11,6 @@ from constructors.models import Equipment
 from stock.models import MoveEquipment
 
 
-class EquipmentForm(ModelForm):
-    class Meta:
-        model = Equipment
-        fields = {'name', 'dimension', 'code', 'scheme', 'needVIK'}
-        widgets = {
-            'name': TextInput(attrs={'placeholder': 'Изделие'}),
-            'dimension': TextInput(attrs={'placeholder': 'шт.'}),
-        }
-
-        labels = {
-            'name': 'Название',
-            'dimension': 'Единица измерения',
-            'code': 'Шифр',
-            'scheme': 'Чертежи',
-            'needVIK': 'Приёмка ОТК'
-        }
-
-        error_messages = {
-            'name': {'invalid': '', 'invalid_choice': ''},
-            'dimension': {'required': ''},
-        }
-
-    def __init__(self, *args, **kwargs):
-        # first call parent's constructor
-        super(EquipmentForm, self).__init__(*args, **kwargs)
-        # there's a `fields` property now
-        self.fields['scheme'].required = False
-        self.fields['dimension'].required = False
-        self.fields['code'].required = False
-        self.fields['needVIK'].required = False
-        self.helper = FormHelper()
-        self.helper.layout = Layout(
-            Field('name', css_class='col-sm-2', ),
-            Field('dimension', css_class='col-sm-2'),
-            Field('code', css_class='col-sm-2'),
-            Field('sheme', css_class='col-sm-2'),
-            Field('needVIK', wrapper_class='i-checks'),
-        )
-
 
 class MoveForm(ModelForm):
     class Meta:

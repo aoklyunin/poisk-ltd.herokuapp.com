@@ -2,11 +2,42 @@
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field
 from django.forms import ModelForm, Form, MultipleChoiceField, ModelMultipleChoiceField, ChoiceField, ModelChoiceField, \
-    TextInput, Textarea, CharField
+    TextInput, Textarea, CharField, IntegerField, FloatField
 
 from constructors.models import Equipment
 from plan.models import Scheme
 
+from django.db.models.fields import BLANK_CHOICE_DASH
+
+# олучить список чертежей
+def getShemes():
+    shemes = []
+    for sh in Scheme.objects.all().order_by('code'):
+        shemes.append([sh.id, str(sh)])
+
+    return shemes+BLANK_CHOICE_DASH
+
+# получить список конструкторского оборудования
+def getConstructorEquipment():
+    equipments = []
+    for i in Equipment.CONSTRUCTOR_ENABLED:
+        lst = []
+        for eq in Equipment.objects.filter(equipmentType=i).order_by('name'):
+            lst.append([eq.id, str(eq)])
+        equipments.append([Equipment.EQUIPMENT_LABELS[i], lst])
+
+    return equipments+BLANK_CHOICE_DASH
+
+# получить список оборудования
+def getEquipment():
+    equipments = []
+    for i in range(Equipment.EQUIPMENT_TYPE_COUNT):
+        lst = []
+        for eq in Equipment.objects.filter(equipmentType=i).order_by('name'):
+            lst.append([eq.id, str(eq)])
+        equipments.append([Equipment.EQUIPMENT_LABELS[i], lst])
+
+    return equipments+BLANK_CHOICE_DASH
 
 # форма для выбора нескольких объектов оборудования
 class EquipmentListForm(Form):
@@ -14,40 +45,49 @@ class EquipmentListForm(Form):
 
     def __init__(self, *args, **kwargs):
         super(EquipmentListForm, self).__init__(*args, **kwargs)
-        self.fields['equipment'].choices = self.templates_as_choices()
+        self.fields['equipment'].choices = getEquipment()
         self.fields['equipment'].widget.attrs['class'] = 'js-example-basic-multiple'
         self.fields['equipment'].widget.attrs['id'] = 'disease'
 
-    def templates_as_choices(self):
-        templates = []
-        for i in range(Equipment.EQUIPMENT_TYPE_COUNT - 1):
-            lst = []
-            for eq in Equipment.objects.filter(equipmentType=i).order_by('name'):
-                lst.append([eq.id, eq.name])
-            templates.append([Equipment.EQUIPMENT_LABELS[i], lst])
-
-        return templates
 
 
-# форма для выбора изделий для редактирования
+# форма для выбора одного изделия
+class EquipmentSingleForm(Form):
+    equipment = ChoiceField(label="")
+
+    def __init__(self, *args, **kwargs):
+        super(EquipmentSingleForm, self).__init__(*args, **kwargs)
+        self.fields['equipment'].choices = self.getEquipment()
+        self.fields['equipment'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['equipment'].widget.attrs['id'] = 'disease'
+
+
+# форма для выбора одного изделия с кол-вом
+class EquipmentSingleWithCtnForm(Form):
+    equipment = ChoiceField(label="")
+    cnt = FloatField(label="")
+
+    def __init__(self, *args, **kwargs):
+        super(EquipmentSingleWithCtnForm, self).__init__(*args, **kwargs)
+        self.fields['equipment'].choices = getEquipment()
+        self.fields['equipment'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['equipment'].widget.attrs['id'] = 'disease'
+
+        self.fields['equipment'].initial = None
+        self.fields['cnt'].initial = 0
+        self.fields['equipment'].required = False
+        self.fields['cnt'].required = False
+
+
+# форма для выбора изделия для редактирования  конструктором
 class EquipmentConstructorSingleForm(Form):
     equipment = ChoiceField(label="")
 
     def __init__(self, *args, **kwargs):
         super(EquipmentConstructorSingleForm, self).__init__(*args, **kwargs)
-        self.fields['equipment'].choices = self.templates_as_choices()
+        self.fields['equipment'].choices = getConstructorEquipment()
         self.fields['equipment'].widget.attrs['class'] = 'js-example-basic-multiple'
         self.fields['equipment'].widget.attrs['id'] = 'disease'
-
-    def templates_as_choices(self):
-        templates = []
-        for i in Equipment.CONSTRUCTOR_ENABLED:
-            lst = []
-            for eq in Equipment.objects.filter(equipmentType=i).order_by('name'):
-                lst.append([eq.id, eq.name])
-            templates.append([Equipment.EQUIPMENT_LABELS[i], lst])
-
-        return templates
 
 
 # форма для добавления новых изделий
@@ -58,7 +98,56 @@ class AddEquipmentForm(Form):
 
     def __init__(self, *args, **kwargs):
         super(AddEquipmentForm, self).__init__(*args, **kwargs)
-        self.fields['tp'].choices=Equipment.CONSTRUCTOR_CHOICES
+        self.fields['tp'].choices = Equipment.CONSTRUCTOR_CHOICES
+
+# форма оборудования
+class EquipmentForm(ModelForm):
+    equipmentType = ChoiceField(label='Тип')
+
+    class Meta:
+        model = Equipment
+        fields = {'name', 'dimension', 'code', 'scheme', 'needVIK'}
+        widgets = {
+            'name': TextInput(attrs={'placeholder': 'Изделие'}),
+            'dimension': TextInput(attrs={'placeholder': 'шт.'}),
+        }
+
+        labels = {
+            'name': 'Название',
+            'dimension': 'Единица измерения',
+            'code': 'Шифр',
+            'scheme': 'Чертежи',
+            'needVIK': 'Приёмка ОТК',
+            'equipmentType': '',
+        }
+
+        error_messages = {
+            'name': {'invalid': '', 'invalid_choice': ''},
+            'dimension': {'required': ''},
+        }
+
+    def __init__(self, *args, **kwargs):
+        # first call parent's constructor
+        super(EquipmentForm, self).__init__(*args, **kwargs)
+        # there's a `fields` property now
+        self.fields['scheme'].required = False
+        self.fields['dimension'].required = False
+        self.fields['code'].required = False
+        self.fields['needVIK'].required = False
+        self.fields['equipmentType'].choices = Equipment.CONSTRUCTOR_CHOICES
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Field('name', css_class='col-sm-2', ),
+            Field('dimension', css_class='col-sm-2'),
+            Field('code', css_class='col-sm-2'),
+            Field('scheme', css_class='col-sm-2'),
+            Field('needVIK', wrapper_class='i-checks'),
+        )
+        self.fields['scheme'].choices = getShemes()
+        self.fields['scheme'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['scheme'].widget.attrs['id'] = 'disease2'
+
+
 
 
 class SchemeForm(ModelForm):

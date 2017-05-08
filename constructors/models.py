@@ -25,8 +25,7 @@ class NeedStruct(models.Model):
     def __str__(self):
         if self.equipment != None:
             return str(self.equipment) + " " + str(self.cnt)
-        else:
-            return str(self.standartWork) + " " + str(self.cnt)
+        return ""
 
 
 class Equipment(models.Model):
@@ -50,7 +49,21 @@ class Equipment(models.Model):
     # длительность
     duration = models.FloatField(default=0)
 
-    def generateDataFromNeedStructs(self, NeedEquipmentType):
+    def getSchemeChoices(self):
+        lst = []
+        for sch in self.scheme.all():
+            lst.append(str(sch.pk))
+        return lst
+
+    def generateDataFromNeedStructs(self):
+        arr = []
+        for ns in self.needStruct.all():
+            if (ns.equipment != None):
+                arr.append({'equipment': str(ns.equipment.pk),
+                            'cnt': str(ns.cnt)})
+        return arr
+
+    def generateDataFromNeedStructsNET(self, NeedEquipmentType):
         arr = []
         for ns in self.needStruct.all():
             if (ns.equipment != None) and (ns.equipment.equipmentType == NeedEquipmentType):
@@ -62,7 +75,10 @@ class Equipment(models.Model):
         return arr
 
     def __str__(self):
-        return self.name + "(" + self.dimension + ")"
+        s = self.name + "("
+        if self.equipmentType == self.TYPE_STANDART_WORK:
+            s += " "+str(self.duration)+" "
+        return s+self.dimension + ")"
 
     def __unicode__(self):
         return self.name + "(" + self.dimension + ")"
@@ -75,14 +91,18 @@ class Equipment(models.Model):
 
         if formset.is_valid():
             for form in formset.forms:
-                d = form.cleaned_data
-                if (len(d) > 0) and \
-                        (("equipment" in d) and (not d["equipment"] is None) and (d["equipment"] != self) or (
-                                    ("standartWork" in d) and (not d["standartWork"] is None))):
-                    print(d)
-                    ns = NeedStruct.objects.create(**d)
-                    ns.save()
-                    self.needStruct.add(ns)
+                if form.is_valid:
+                    d = form.cleaned_data
+                    if (len(d) > 0) and  ("cnt" in d) and (float(d["cnt"])>0) and\
+                            (("equipment" in d) and (not d["equipment"] is None) and (d["equipment"] != self)):
+
+                        ns = NeedStruct.objects.create(equipment=Equipment.objects.get(pk=int(d["equipment"])),
+                                                   cnt=float(d["cnt"]))
+                        print(ns)
+                        ns.save()
+                        self.needStruct.add(ns)
+                else:
+                    print("for is not valid")
 
     # константы
     # стандартные работы обязательно должны быть последними
@@ -108,7 +128,10 @@ class Equipment(models.Model):
     CONSTRUCTOR_CHOICES = []
     for i in CONSTRUCTOR_ENABLED:
         CONSTRUCTOR_CHOICES.append((str(i), EQUIPMENT_LABELS[i]))
-
+    # формируем общий список
+    CHOICES = []
+    for i in range(EQUIPMENT_TYPE_COUNT):
+        CHOICES.append((str(i), EQUIPMENT_LABELS[i]))
 
 
 class MyEquipment(models.Model):

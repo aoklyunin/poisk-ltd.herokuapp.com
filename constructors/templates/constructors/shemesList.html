@@ -22,12 +22,12 @@
 {% endblock %}
 
 {% block navigating %}
-<a href="/constructors/equipment/list/0/" class="btn btn-default">Оснастка</a>
-<a href="/constructors/material/list/0/" class="btn btn-default">Материалы</a>
-<a href="/constructors/detail/list/0/" class="btn btn-default">Детали</a>
-<a href="/constructors/assembly/list/0/" class="btn btn-default">Сборочные единицы</a>
-<a href="/constructors/standartWork/list/" class="btn btn-default">Стандартные работы</a>
-<a href="/constructors/shemes/list/" class="btn btn-info">Чертежи</a>
+<a href="/constructors/" class="btn btn-info">Главная</a>
+<a href="/constructors/stock_balance/{{area_id}}/" class="btn btn-default">Баланс на складе</a>
+
+<a href="/constructors/tehnology/" class="btn btn-default">Технология</a>
+<a href="/constructors/shemes/" class="btn btn-default">Чертежи</a>
+<a href="/constructors/workReports/" class="btn btn-default">Наряды</a>
 {% endblock %}
 
 

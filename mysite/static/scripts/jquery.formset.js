@@ -12,6 +12,7 @@
 ;(function($) {
     $.fn.formset = function(opts)
     {
+
         var options = $.extend({}, $.fn.formset.defaults, opts),
             flatExtraClasses = options.extraClasses.join(' '),
             totalForms = $('#id_' + options.prefix + '-TOTAL_FORMS'),
@@ -52,6 +53,7 @@
                     (minForms.val() == '' || (totalForms.val() - minForms.val() > 0));
             },
 
+            // добавить кнопку удаления
             insertDeleteLink = function(row) {
                 var delCssSelector = $.trim(options.deleteCssClass).replace(/\s+/g, '.'),
                     addCssSelector = $.trim(options.addCssClass).replace(/\s+/g, '.');
@@ -143,6 +145,7 @@
         });
 
         if ($$.length) {
+
             var hideAddButton = !showAddButton(),
                 addButton, template;
             if (options.formTemplate) {
@@ -188,7 +191,9 @@
 
                 if (hideAddButton) addButton.hide();
             }
+            // обработка нажатия кнопки "добавить"
             addButton.click(function() {
+
                 var formCount = parseInt(totalForms.val()),
                     row = options.formTemplate.clone(true).removeClass('formset-custom-template'),
                     buttonRow = $($(this).parents('tr.' + options.formCssClass + '-add').get(0) || this)
@@ -210,6 +215,7 @@
                 if (!showAddButton()) buttonRow.hide();
                 // If a post-add callback was supplied, call it with the added form:
                 if (options.added) options.added(row);
+
                 return false;
             });
         }
@@ -229,5 +235,6 @@
         keepFieldValues: '',             // jQuery selector for fields whose values should be kept when the form is cloned
         added: null,                     // Function called each time a new form is added
         removed: null                    // Function called each time a form is deleted
+
     };
 })(jQuery);

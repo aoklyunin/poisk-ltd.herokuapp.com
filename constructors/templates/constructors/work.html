@@ -33,8 +33,7 @@
 <a href="/constructors/" class="btn btn-default">Главная</a>
 <a href="/constructors/stock_balance/{{area_id}}/" class="btn btn-default">Баланс на складе</a>
 
-<a href="/constructors/work/" class="btn btn-info">Конструкторское дело</a>
-<a href="/constructors/sWorks/" class="btn btn-default">Стандартные работы</a>
+<a href="/constructors/tehnology/" class="btn btn-info">Технология</a>
 <a href="/constructors/shemes/" class="btn btn-default">Чертежи</a>
 <a href="/constructors/workReports/" class="btn btn-default">Наряды</a>
 {% endblock %}
@@ -87,7 +86,7 @@
 
 <br>
 
-<form method="post" align="center" action="/constructors/work/">
+<form method="post" align="center" action="/constructors/tehnology/">
     {% csrf_token %}
     {{ eq_form.management_form }}
     {{ eq_form}}
