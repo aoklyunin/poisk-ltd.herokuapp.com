@@ -7,6 +7,8 @@ import plan.views
 import plan.auth
 
 # автоопределение администратора
+from myTest.models import BookAutocomplete
+
 admin.autodiscover()
 
 urlpatterns = [
@@ -23,6 +25,14 @@ urlpatterns = [
     url(r'^otk/$', include('otk.urls')),
     url(r'^orders/list/$', plan.views.orderList),
     url('^searchableselect/', include('searchableselect.urls')),
+    url(r'^test/', include('myTest.urls')),
+    url(
+        r'^country-autocomplete/$',
+        BookAutocomplete.as_view(),
+        name='country-autocomplete',
+    ),
+
     url(r'^', plan.auth.index, name='index'),
+
 
 ]

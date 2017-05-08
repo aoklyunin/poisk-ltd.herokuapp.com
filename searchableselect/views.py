@@ -13,13 +13,6 @@ from django.http import JsonResponse
 from django.contrib.admin.views.decorators import staff_member_required
 
 
-def test(request):
-    template = 'searchableselct/index.html'
-    context = {
-
-    }
-    return render(request, template, context)
-
 @staff_member_required
 def filter_models(request):
     model_name = request.GET.get('model')

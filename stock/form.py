@@ -3,6 +3,9 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Field
 from django.forms import ModelForm, BaseFormSet, TextInput
 from django import forms
+from django_select2.forms import Select2Widget
+
+from searchableselect.widgets import SearchableSelect
 
 from constructors.models import Equipment
 from stock.models import MoveEquipment
@@ -92,7 +95,7 @@ class MoveForm(ModelForm):
         model = MoveEquipment
         fields = {'cnt', 'equipment'}
         widgets = {
-
+            'equipment': Select2Widget
         }
 
         labels = {
