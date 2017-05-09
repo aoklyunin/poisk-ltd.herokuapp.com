@@ -41,14 +41,17 @@
 
         <tr>
             <td>{% bootstrap_field form.name %}</td>
-            <td>{% bootstrap_field form.dimension %}</td>
+            {% ifequal tsw eqType %}
+            <td>{% bootstrap_field form.duration %}</td>
+            {% else %}
             <td>{% bootstrap_field form.code %}</td>
+            {% endifequal %}
             <td>{% bootstrap_field form.equipmentType %}</td>
 
         </tr>
 
         <tr>
-            <td colspan="3">{% bootstrap_field form.scheme %}</td>
+            <td colspan="2">{% bootstrap_field form.scheme %}</td>
             <td> {% bootstrap_field form.needVIK %}</td>
         </tr>
     </table>
@@ -76,7 +79,7 @@
         <div class="placeForAddBtn"></div>
     </table>
     <div align="center">
-        <a href="constructors/work/" class="btn btn-default">Назад</a>
+        <a href="/constructors/tehnology/" class="btn btn-default">Назад</a>
         <a href='/constructors/delete/{{eq_id}}/'  class="btn btn-danger" onclick="YNconfirm(); return false;">Удалить</a>
         <input align="center" class="btn btn-primary" type="submit" value="Сохранить" class="button"/>
     </div>

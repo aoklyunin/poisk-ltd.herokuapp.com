@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
 from constructors.form import SchemeForm, EquipmentListForm, EquipmentConstructorSingleForm, AddEquipmentForm, \
-    EquipmentSingleWithCtnForm, EquipmentForm, SchemeSingleForm
+    EquipmentSingleWithCtnForm, SchemeSingleForm, EquipmentListWithoutSWForm, EquipmentConstructorForm
 from plan.forms import LoginForm, subdict
 from plan.models import Area, Scheme
 from .models import StockStruct, Equipment
@@ -58,7 +58,7 @@ def stockBalance(request, area_id):
         'area_id': int(area_id),  # иначе не сравнить с id площадки при переборе
         'areas': Area.objects.all().order_by('name'),
         'login_form': LoginForm(),
-        'form': EquipmentListForm(prefix="main_form")
+        'form': EquipmentListWithoutSWForm(prefix="main_form")
     }
     return render(request, "constructors/stockBalance.html", c)
 
@@ -80,7 +80,7 @@ def tehnology(request):
         'area_id': Area.objects.first().pk,
 
     }
-    return render(request, "constructors/work.html", c)
+    return render(request, "constructors/tehnology.html", c)
 
 
 # добавление оборудования
@@ -94,6 +94,10 @@ def addEquipment(request):
             d["name"] = form.cleaned_data["name"]
             d["equipmentType"] = form.cleaned_data["tp"]
             eq = Equipment.objects.create()
+            if d["equipmentType"] == Equipment.TYPE_STANDART_WORK:
+                d["dimension"] = "час"
+            else:
+                d["dimension"] = "шт."
             for area in Area.objects.all():
                 s = StockStruct.objects.create(area=area)
                 eq.stockStruct.add(s)
@@ -111,19 +115,31 @@ def detailEquipment(request, eq_id):
 
     if request.method == 'POST':
         # строим форму на основе запроса
-        form = EquipmentForm(request.POST, prefix='main_form')
+        form = EquipmentConstructorForm(request.POST, prefix='main_form')
         # если форма заполнена корректно
         if form.is_valid():
-            d = subdict(form, ("name", "dimension", "code", "needVIK", "equipmentType"))
+            d = subdict(form, ("name", "needVIK", "equipmentType"))
             Equipment.objects.filter(pk=eq_id).update(**d)
-            Equipment.objects.get(pk=eq_id).scheme.clear()
+            eq = Equipment.objects.get(pk=eq_id)
+            if eq.equipmentType == Equipment.TYPE_STANDART_WORK:
+                try:
+                    eq.duration = form.cleaned_data["duration"]
+                except:
+                    messages.error("Не получилось задать длительность работы")
+            else:
+                try:
+                    eq.code = form.cleaned_data["code"]
+                except:
+                    messages.error("Не получилось задать шифр изделия")
+            eq.scheme.clear()
             for e in form.cleaned_data["scheme"]:
                 eq.scheme.add(e)
-
+            eq.save()
         equipment_formset = EquipmentFormset(request.POST, request.FILES, prefix='equipment')
         eq.addFromFormset(equipment_formset, True)
 
-    ef = EquipmentForm(instance=Equipment.objects.get(pk=eq_id),initial={'scheme':eq.getSchemeChoices()}, prefix="main_form")
+    ef = EquipmentConstructorForm(instance=Equipment.objects.get(pk=eq_id), initial={'scheme': eq.getSchemeChoices()},
+                                  prefix="main_form")
     ef.fields["equipmentType"].initial = eq.equipmentType
 
     c = {'equipment_formset': EquipmentFormset(initial=eq.generateDataFromNeedStructs(), prefix='equipment'),
@@ -131,7 +147,8 @@ def detailEquipment(request, eq_id):
          'one': '1',
          'form': ef,
          'eqType': eq.equipmentType,
-         'eq_id':eq_id,
+         'tsw': Equipment.TYPE_STANDART_WORK,
+         'eq_id': eq_id,
          'area_id': Area.objects.first().pk,
          }
     return render(request, "constructors/detail.html", c)
@@ -144,11 +161,12 @@ def deleteConstructorEquipment(request, eq_id):
     eq.delete()
     return HttpResponseRedirect('/constructors/tehnology/')
 
+
 # список чертежей
 def shemes(request):
     if request.method == 'POST':
         # строим форму на основе запроса
-        form = SchemeSingleForm(request.POST,prefix="single-scheme")
+        form = SchemeSingleForm(request.POST, prefix="single-scheme")
         # если форма заполнена корректно
         if form.is_valid():
             return HttpResponseRedirect('/constructors/sheme/detail/' + str(form.cleaned_data["scheme"]) + '/')
@@ -161,6 +179,7 @@ def shemes(request):
         'singleForm': SchemeSingleForm(prefix="single-scheme"),
         'area_id': Area.objects.first().pk,
     })
+
 
 # Добавить чертеж
 def addScheme(request):
@@ -180,7 +199,7 @@ def addScheme(request):
 
 
 # Детализация чертежа
-def shemeDetail(request,sh_id):
+def shemeDetail(request, sh_id):
     if request.method == "POST":
         # форма добавления оборужования
         form = SchemeForm(request.POST)
@@ -193,7 +212,6 @@ def shemeDetail(request,sh_id):
             if (code is not None):
                 sch.code = code
             sch.save()
-
 
     return render(request, "constructors/shemesDetail.html", {
         'login_form': LoginForm(),

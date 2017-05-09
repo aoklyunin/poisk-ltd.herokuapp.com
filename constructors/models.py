@@ -50,7 +50,7 @@ class Equipment(models.Model):
     needStruct = models.ManyToManyField(NeedStruct, blank=True, default=None,
                                         related_name="needStructStandartWork12")
     # длительность
-    duration = models.FloatField(default=0)
+    duration = models.FloatField(default=0, null=True, blank=True)
     # поставщикик
     providers = models.ManyToManyField(Provider)
 

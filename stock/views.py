@@ -4,11 +4,10 @@ from django.forms.formsets import BaseFormSet, formset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
-from constructors.form import EquipmentForm
 from constructors.models import Equipment, StockStruct
 from plan.forms import LoginForm
 from plan.models import Area
-from stock.form import MoveEquipmentForm,  MoveMaterialForm, MoveDetailForm, MoveAssemblyForm
+from stock.form import MoveEquipmentForm, MoveMaterialForm, MoveDetailForm, MoveAssemblyForm, EquipmentForm
 from stock.models import MoveEquipment
 from plan.forms import RequiredFormSet
 

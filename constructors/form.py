@@ -39,6 +39,18 @@ def getEquipment():
 
     return equipments+BLANK_CHOICE_DASH
 
+# получить список оборудования без стандартных работ
+def getEquipmentWithoutSW():
+    equipments = []
+    for i in range(Equipment.EQUIPMENT_TYPE_COUNT):
+        if i!=Equipment.TYPE_STANDART_WORK:
+            lst = []
+            for eq in Equipment.objects.filter(equipmentType=i).order_by('name'):
+                lst.append([eq.id, str(eq)])
+            equipments.append([Equipment.EQUIPMENT_LABELS[i], lst])
+
+    return equipments+BLANK_CHOICE_DASH
+
 
 # получить список сотрудников по категориям
 def getWorkers():
@@ -62,6 +74,16 @@ class EquipmentListForm(Form):
         self.fields['equipment'].widget.attrs['class'] = 'js-example-basic-multiple'
         self.fields['equipment'].widget.attrs['id'] = 'disease'
 
+
+# форма для выбора нескольких объектов оборудования без стандартных работ
+class EquipmentListWithoutSWForm(Form):
+        equipment = MultipleChoiceField(label="")
+
+        def __init__(self, *args, **kwargs):
+            super(EquipmentListWithoutSWForm, self).__init__(*args, **kwargs)
+            self.fields['equipment'].choices = getEquipmentWithoutSW()
+            self.fields['equipment'].widget.attrs['class'] = 'js-example-basic-multiple'
+            self.fields['equipment'].widget.attrs['id'] = 'disease'
 
 
 # форма для выбора одного изделия
@@ -113,21 +135,22 @@ class AddEquipmentForm(Form):
         super(AddEquipmentForm, self).__init__(*args, **kwargs)
         self.fields['tp'].choices = Equipment.CONSTRUCTOR_CHOICES
 
+
 # форма оборудования
-class EquipmentForm(ModelForm):
+class EquipmentConstructorForm(ModelForm):
     equipmentType = ChoiceField(label='Тип')
 
     class Meta:
         model = Equipment
-        fields = {'name', 'dimension', 'code', 'scheme', 'needVIK'}
+        fields = {'name', 'duration', 'code', 'scheme', 'needVIK'}
         widgets = {
             'name': TextInput(attrs={'placeholder': 'Изделие'}),
-            'dimension': TextInput(attrs={'placeholder': 'шт.'}),
+            'duration': TextInput(attrs={'placeholder': '0.5'}),
         }
 
         labels = {
             'name': 'Название',
-            'dimension': 'Единица измерения',
+            'duration': 'Длительность(час)',
             'code': 'Шифр',
             'scheme': 'Чертежи',
             'needVIK': 'Приёмка ОТК',
@@ -136,15 +159,15 @@ class EquipmentForm(ModelForm):
 
         error_messages = {
             'name': {'invalid': '', 'invalid_choice': ''},
-            'dimension': {'required': ''},
+            'duration': {'required': ''},
         }
 
     def __init__(self, *args, **kwargs):
         # first call parent's constructor
-        super(EquipmentForm, self).__init__(*args, **kwargs)
+        super(EquipmentConstructorForm, self).__init__(*args, **kwargs)
         # there's a `fields` property now
         self.fields['scheme'].required = False
-        self.fields['dimension'].required = False
+        self.fields['duration'].required = False
         self.fields['code'].required = False
         self.fields['needVIK'].required = False
         self.fields['equipmentType'].choices = Equipment.CONSTRUCTOR_CHOICES
