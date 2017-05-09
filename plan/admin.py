@@ -2,7 +2,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Agreement, WorkPlace, Attestation, WorkerPosition, Rationale, Area, Customer, Scheme
+from .models import Agreement, WorkPlace, Attestation, WorkerPosition, Rationale, Area, Customer, Scheme, InfoText
 
 admin.site.register(Agreement)
 admin.site.register(Customer)
@@ -12,3 +12,4 @@ admin.site.register(WorkerPosition)
 admin.site.register(Rationale)
 admin.site.register(Area)
 admin.site.register(Scheme)
+admin.site.register(InfoText)

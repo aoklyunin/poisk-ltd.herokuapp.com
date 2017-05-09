@@ -135,3 +135,14 @@ class Area(models.Model):
 
     def __unicode__(self):
         return self.name
+
+
+class InfoText(models.Model):
+    text = models.TextField(max_length=100000, null=True, blank=True)
+    subText = models.TextField(max_length=100000, null=True, blank=True)
+    appendText = models.TextField(max_length=100000, null=True, blank=True)
+    caption = models.TextField(max_length=100000, null=True, blank=True)
+    pageName = models.TextField(max_length=100000, null=True, blank=True)
+
+    def __str__(self):
+        return self.pageName

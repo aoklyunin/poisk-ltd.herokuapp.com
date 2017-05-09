@@ -7,7 +7,7 @@ from django.shortcuts import render
 from constructors.form import SchemeForm, EquipmentListForm, EquipmentConstructorSingleForm, AddEquipmentForm, \
     EquipmentSingleWithCtnForm, SchemeSingleForm, EquipmentListWithoutSWForm, EquipmentConstructorForm
 from plan.forms import LoginForm, subdict
-from plan.models import Area, Scheme
+from plan.models import Area, Scheme, InfoText
 from .models import StockStruct, Equipment
 
 
@@ -16,6 +16,7 @@ def index(request):
     c = {
         'area_id': Area.objects.first().pk,
         'login_form': LoginForm(),
+        'it': InfoText.objects.get(pageName="constructor_index")
     }
     return render(request, "constructors/index.html", c)
 
