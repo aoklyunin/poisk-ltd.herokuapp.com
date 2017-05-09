@@ -8,6 +8,9 @@ from plan.models import WorkerPosition, Scheme, Area
 
 
 # Что хранится на складе
+from stock.models import Provider
+
+
 class StockStruct(models.Model):
     cnt = models.FloatField(default=0)
     area = models.ForeignKey(Area)
@@ -48,6 +51,8 @@ class Equipment(models.Model):
                                         related_name="needStructStandartWork12")
     # длительность
     duration = models.FloatField(default=0)
+    # поставщикик
+    providers = models.ManyToManyField(Provider)
 
     def getSchemeChoices(self):
         lst = []
@@ -133,22 +138,3 @@ class Equipment(models.Model):
     for i in range(EQUIPMENT_TYPE_COUNT):
         CHOICES.append((str(i), EQUIPMENT_LABELS[i]))
 
-
-class MyEquipment(models.Model):
-    equipment = models.ManyToManyField("constructors.Equipment")
-
-    def __str__(self):
-        return str(self.equipment) + ":" + str(self.cnt)
-
-    def accept(self, area_id):
-        if int(area_id) == 0:
-            area = Area.objects.get(name="Красное село")
-        else:
-            area = Area.objects.get(name="Малахит")
-
-        ss = self.equipment.stockStruct.get(area=area)
-        if self.flgAcceptance:
-            ss.cnt += self.cnt
-        else:
-            ss.cnt -= self.cnt
-        ss.save()

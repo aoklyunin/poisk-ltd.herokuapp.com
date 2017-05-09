@@ -39,6 +39,19 @@ def getEquipment():
 
     return equipments+BLANK_CHOICE_DASH
 
+
+# получить список сотрудников по категориям
+def getWorkers():
+    workers = []
+    for i in range(Equipment.EQUIPMENT_TYPE_COUNT):
+        lst = []
+        for eq in Equipment.objects.filter(equipmentType=i).order_by('name'):
+            lst.append([eq.id, str(eq)])
+        workers.append([Equipment.EQUIPMENT_LABELS[i], lst])
+
+    return workers + BLANK_CHOICE_DASH
+
+
 # форма для выбора нескольких объектов оборудования
 class EquipmentListForm(Form):
     equipment = MultipleChoiceField(label="")
@@ -148,17 +161,20 @@ class EquipmentForm(ModelForm):
         self.fields['scheme'].widget.attrs['id'] = 'disease2'
 
 
-
-
+# Форма чертежа
 class SchemeForm(ModelForm):
     class Meta:
         model = Scheme
         fields = {'author', 'code', 'link'}
 
         labels = {
-            'author': 'Автор',
-            'code': 'Шифр',
-            'link': 'Ссылка',
+            'author': '',
+            'code': '',
+            'link': '',
+        }
+        widgets = {
+            'link': TextInput(attrs={'placeholder': 'Ссылка'}),
+            'code': TextInput(attrs={'placeholder': 'Шифр'}),
         }
 
         error_messages = {
@@ -177,3 +193,21 @@ class SchemeForm(ModelForm):
             Field('code', css_class='col-sm-2'),
             Field('link', css_class='col-sm-2'),
         )
+    #   self.fields['author'].choices = getWorkers()
+        self.fields['author'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['author'].widget.attrs['id'] = 'disease2'
+        self.fields['code'].widget.attrs['placeholder'] = 'Шифр'
+        self.fields['link'].widget.attrs['placeholder'] = 'Ссылка'
+
+
+# форма для выбора одного чертежа
+class SchemeSingleForm(Form):
+    scheme = ChoiceField(label="")
+
+    def __init__(self, *args, **kwargs):
+        super(SchemeSingleForm, self).__init__(*args, **kwargs)
+        self.fields['scheme'].choices = getShemes()
+        self.fields['scheme'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['scheme'].widget.attrs['id'] = 'disease'
+
+

@@ -5,12 +5,9 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
 from constructors.form import SchemeForm, EquipmentListForm, EquipmentConstructorSingleForm, AddEquipmentForm, \
-    EquipmentSingleForm, EquipmentSingleWithCtnForm, EquipmentForm
+    EquipmentSingleWithCtnForm, EquipmentForm, SchemeSingleForm
 from plan.forms import LoginForm, subdict
-from plan.models import Area, WorkerPosition, Scheme
-from stock.form import MoveEquipmentForm, MoveMaterialForm, MoveDetailForm, \
-    MoveAssemblyForm, MoveStandartWorkForm
-from stock.views import listEquipmentByType
+from plan.models import Area, Scheme
 from .models import StockStruct, Equipment
 
 
@@ -79,7 +76,9 @@ def tehnology(request):
     c = {
         'login_form': LoginForm(),
         'eq_form': EquipmentConstructorSingleForm(prefix="eq_form"),
-        'form': AddEquipmentForm(prefix="main_form")
+        'form': AddEquipmentForm(prefix="main_form"),
+        'area_id': Area.objects.first().pk,
+
     }
     return render(request, "constructors/work.html", c)
 
@@ -133,6 +132,7 @@ def detailEquipment(request, eq_id):
          'form': ef,
          'eqType': eq.equipmentType,
          'eq_id':eq_id,
+         'area_id': Area.objects.first().pk,
          }
     return render(request, "constructors/detail.html", c)
 
@@ -148,7 +148,25 @@ def deleteConstructorEquipment(request, eq_id):
 def shemes(request):
     if request.method == 'POST':
         # строим форму на основе запроса
-        form = SchemeForm(request.POST)
+        form = SchemeSingleForm(request.POST,prefix="single-scheme")
+        # если форма заполнена корректно
+        if form.is_valid():
+            return HttpResponseRedirect('/constructors/sheme/detail/' + str(form.cleaned_data["scheme"]) + '/')
+
+    return render(request, "constructors/shemesList.html", {
+        'login_form': LoginForm(),
+        'schs': Scheme.objects.all(),
+        'one': '1',
+        'addForm': SchemeForm(prefix="add-scheme"),
+        'singleForm': SchemeSingleForm(prefix="single-scheme"),
+        'area_id': Area.objects.first().pk,
+    })
+
+# Добавить чертеж
+def addScheme(request):
+    if request.method == "POST":
+        # форма добавления оборужования
+        form = SchemeForm(request.POST, prefix='add-scheme')
         # если форма заполнена корректно
         if form.is_valid():
             code = form.cleaned_data["code"]
@@ -157,10 +175,28 @@ def shemes(request):
             if (code is not None):
                 sch.code = code
                 sch.save()
+            return HttpResponseRedirect('/constructors/sheme/detail/' + str(sch.pk) + '/')
+    return HttpResponseRedirect('/constructors/work/')
 
-    return render(request, "constructors/shemesList.html", {
+
+# Детализация чертежа
+def shemeDetail(request,sh_id):
+    if request.method == "POST":
+        # форма добавления оборужования
+        form = SchemeForm(request.POST)
+        # если форма заполнена корректно
+        if form.is_valid():
+            sch = Scheme.objects.get(pk=sh_id)
+            code = form.cleaned_data["code"]
+            sch.link = form.cleaned_data["link"]
+            sch.author = form.cleaned_data["author"]
+            if (code is not None):
+                sch.code = code
+            sch.save()
+
+
+    return render(request, "constructors/shemesDetail.html", {
         'login_form': LoginForm(),
-        'schs': Scheme.objects.all(),
-        'one': '1',
-        'form': SchemeForm(),
+        'form': SchemeForm(instance=Scheme.objects.get(pk=sh_id)),
+        'area_id': Area.objects.first().pk,
     })

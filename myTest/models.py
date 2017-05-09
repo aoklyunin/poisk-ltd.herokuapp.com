@@ -9,16 +9,3 @@ from plan.models import Area
 
 
 
-
-# Create your models here.
-class Book(models.Model):
-    name = models.CharField(max_length=200)
-
-    def __str__(self):
-        return self.name
-
-
-class BookChoose(models.Model):
-    cnt = models.IntegerField(default=0)
-    book = models.ManyToManyField(Book)
-

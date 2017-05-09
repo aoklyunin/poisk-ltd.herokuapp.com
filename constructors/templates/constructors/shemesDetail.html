@@ -33,16 +33,22 @@
 {% block sub_content %}
 
 <br>
-<form method="post" action="/constructors/addSheme/">
+<br>
+<br>
+<form method="post">
      {% csrf_token %}
-      {{  addForm.management_form }}
 
 <table align="center" width="80%">
+      <tr>
+        <td align="center">Составил</td>
+        <td align="center">Шифр</td>
+        <td align="center">Ссылка</td>
+    </tr>
     <tr>
-        <td valign= "center"> {%  bootstrap_field addForm.author %}</td>
-        <td valign= "center"> {%  bootstrap_field addForm.code %}</td>
-        <td valign= "center"> {%  bootstrap_field addForm.link %}</td>
-        <td valign= "top"> <input  align="center" class="btn btn-primary" type="submit" value="Добавить Чертёж" class="button"/></td>
+        <td valign= "center"> {%  bootstrap_field form.author %}</td>
+        <td valign= "center"> {%  bootstrap_field form.code %}</td>
+        <td valign= "center"> {%  bootstrap_field form.link %}</td>
+        <td valign= "top"> <input  align="center" class="btn btn-primary" type="submit" value="Сохранить" class="button"/></td>
     </tr>
 </table>
 
@@ -51,9 +57,7 @@
 
 <br>
 <br>
-
-<H3 align="center"> Выберите, что нужно редактировать</H3>
- <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
     <link rel="stylesheet" type="text/css"
           href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-css/1.4.6/select2-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
@@ -69,14 +73,6 @@
 </script>
 
 
-<br>
-
-<form method="post" align="center" action="/constructors/shemes/">
-    {% csrf_token %}
-    {{ singleForm.management_form }}
-    {{ singleForm}}
-     <input align="center" class="btn btn-primary" type="submit" value="Редактировать" class="button"/>
-</form>
 
 
 <script src="https://code.jquery.com/jquery-3.1.1.min.js"
@@ -84,19 +80,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
 <script>
         $(document).ready(function (){
-           $("#disease").select2({
+           $("#disease2").select2({
              allowClear:true,
              placeholder: 'Поиск чертежа'
            });
         })
-$(document).ready(function (){
-           $("#disease2").select2({
-             allowClear:true,
-             placeholder: 'Поиск сотрудника'
-           });
-        })
 
 </script>
+
 
 
 {% endblock %}
