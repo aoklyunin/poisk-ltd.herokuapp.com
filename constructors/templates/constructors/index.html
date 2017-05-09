@@ -42,8 +42,11 @@
     <table width="70%" align="center">
     <tr><td >
         <div class="panel panel-primary ">
-            <div class="panel-heading">Информация</div>
-            <div class="panel-body"  align="justify">{{ it.text |linebreaks }}</div>
+            <div class="panel-heading">{{it.caption}}</div>
+            <div class="panel-body"  align="justify">
+                <H3>{{ it.text }}</H3>
+                {{ it.subText |linebreaks }}
+            </div>
         </div>
     </td></tr>
     </table>
