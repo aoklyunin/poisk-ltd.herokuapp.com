@@ -92,7 +92,7 @@ class EquipmentSingleForm(Form):
 
     def __init__(self, *args, **kwargs):
         super(EquipmentSingleForm, self).__init__(*args, **kwargs)
-        self.fields['equipment'].choices = self.getEquipment()
+        self.fields['equipment'].choices = getEquipment()
         self.fields['equipment'].widget.attrs['class'] = 'js-example-basic-multiple'
         self.fields['equipment'].widget.attrs['id'] = 'disease'
 

@@ -143,6 +143,8 @@ def detailEquipment(request, eq_id):
                                   prefix="main_form")
     ef.fields["equipmentType"].initial = eq.equipmentType
 
+    print(eq.generateDataFromNeedStructs())
+    print( EquipmentFormset(initial=eq.generateDataFromNeedStructs(), prefix='equipment'))
     c = {'equipment_formset': EquipmentFormset(initial=eq.generateDataFromNeedStructs(), prefix='equipment'),
          'login_form': LoginForm(),
          'one': '1',

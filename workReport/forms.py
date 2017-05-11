@@ -5,10 +5,60 @@ import datetime
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Div, Field
 from django import forms
-from django.forms import ModelForm, BaseFormSet
+from django.forms import ModelForm, BaseFormSet, Form, ChoiceField, FloatField, CharField, TimeField
 
 from constructors.models import Equipment
-from .models import WorkerPosition, Worker, WorkPart, Reject, NeedStruct
+from plan.models import Rationale, WorkPlace
+from .models import WorkerPosition, Worker, WorkPart, Reject, NeedStruct, WorkReport
+
+from django.db.models.fields import BLANK_CHOICE_DASH
+
+
+# получить список оборудования
+def getCreatedReports():
+    reports = []
+    for wr in WorkReport.objects.filter(state=WorkReport.STATE_CREATED):
+        reports.append([wr.id, str(wr)])
+
+    return reports + BLANK_CHOICE_DASH
+
+
+# получить список стандартных работ
+def getStandartWorks():
+    reports = []
+    for wr in Equipment.objects.filter(equipmentType=Equipment.TYPE_STANDART_WORK):
+        reports.append([wr.id, str(wr)])
+
+    return reports + BLANK_CHOICE_DASH
+
+
+# получить список оборудования
+def getRationales():
+    reports = []
+    for wr in Rationale.objects.all():
+        reports.append([wr.id, str(wr)])
+
+    return reports + BLANK_CHOICE_DASH
+
+
+# получить список оборудования
+def getWorkPlaces():
+    reports = []
+    for wr in WorkPlace.objects.all():
+        reports.append([wr.id, str(wr)])
+
+    return reports + BLANK_CHOICE_DASH
+
+
+# форма для выбора одного изделия
+class CreatedReportSingleForm(Form):
+    report = ChoiceField(label="")
+
+    def __init__(self, *args, **kwargs):
+        super(CreatedReportSingleForm, self).__init__(*args, **kwargs)
+        self.fields['report'].choices = getCreatedReports()
+        self.fields['report'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['report'].widget.attrs['id'] = 'disease'
 
 
 # форма для отчёта
@@ -39,13 +89,27 @@ class ReportForm(forms.Form):
 
     VIKDate = forms.DateField(initial=datetime.date.today, label='Дата ВИК')
 
-    note = forms.CharField(widget=forms.Textarea(attrs={'rows': 4, 'cols': 20, 'placeholder': 'Что довавить'}),
+    note = forms.CharField(widget=forms.Textarea(attrs={'rows': 2, 'cols': 20, 'placeholder': 'Что довавить'}),
                            label="Примечание", required=False)
-
 
     def __init__(self, *args, **kwargs):
         super(ReportForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
+        self.fields['VIKer'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['VIKer'].widget.attrs['id'] = 'disease2'
+        self.fields['reportMaker'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['reportMaker'].widget.attrs['id'] = 'disease2'
+        self.fields['reportChecker'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['reportChecker'].widget.attrs['id'] = 'disease2'
+        self.fields['worker'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['worker'].widget.attrs['id'] = 'disease2'
+        self.fields['supervisor'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['supervisor'].widget.attrs['id'] = 'disease2'
+        self.fields['stockMan'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['stockMan'].widget.attrs['id'] = 'disease2'
+
+        self.fields['adate'].widget.attrs['id'] = 'datepicker'
+        self.fields['VIKDate'].widget.attrs['id'] = 'datepicker2'
         self.helper.layout = Layout(
             Div('supervisor', css_class='col-xs-4', ),
             Div('VIKer', css_class='col-xs-4', ),
@@ -59,6 +123,42 @@ class ReportForm(forms.Form):
             Submit('submit', u'Сохранить', css_class='btn btn-primary center-me center-children'),
         )
 
+
+# форма для выбора одного изделия с кол-вом
+class MyWorkPartForm(Form):
+    comment = CharField(label="", max_length=100)
+    startTime = TimeField(label="")
+    endTime = TimeField(label="")
+    standartWork = ChoiceField(label="")
+    workPlace = ChoiceField(label="")
+    rationale = ChoiceField(label="")
+
+    def __init__(self, *args, **kwargs):
+        super(MyWorkPartForm, self).__init__(*args, **kwargs)
+        self.fields['standartWork'].choices = getStandartWorks()
+        self.fields['rationale'].choices = getRationales()
+        self.fields['workPlace'].choices = getWorkPlaces()
+
+        self.fields['workPlace'].required = False
+        self.fields['rationale'].required = False
+        self.fields['startTime'].required = False
+        self.fields['endTime'].required = False
+        self.fields['comment'].required = False
+        self.fields['standartWork'].required = False
+
+        self.fields['standartWork'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['standartWork'].widget.attrs['id'] = 'disease2'
+
+        self.fields['startTime'].error_messages['invalid'] = ''
+        self.fields['endTime'].error_messages['invalid'] = ''
+        self.fields['workPlace'].error_messages['invalid'] = ''
+        self.fields['rationale'].error_messages['invalid'] = ''
+        self.fields['standartWork'].error_messages['invalid'] = ''
+        self.fields['standartWork'].error_messages['invalid_choice'] = ''
+        self.fields['comment'].error_messages['invalid'] = ''
+
+        self.fields['startTime'].widget.attrs['class'] = 'timepicker123'
+        self.fields['endTime'].widget.attrs['class'] = 'timepicker123'
 
 class WorkPartForm(ModelForm):
     class Meta:

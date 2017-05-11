@@ -3,7 +3,7 @@ import datetime
 
 from django.db import models
 
-from constructors.models import     NeedStruct, Equipment
+from constructors.models import NeedStruct, Equipment
 from orders.models import Order
 from plan.models import Agreement, Scheme, WorkerPosition, WorkPlace, Rationale, Worker, Area
 from plan.models import Customer
@@ -22,7 +22,6 @@ class StockReportStruct(models.Model):
     dustCnt = models.FloatField(default=0)
     # возвращено
     returnCnt = models.FloatField(default=0)
-
 
 
 # Часть наряда
@@ -107,6 +106,95 @@ class WorkReport(models.Model):
     needVIK = models.BooleanField(default=False)
     # площадка
     area = models.IntegerField(default=0)
+    # состояние нарада
+    state = models.IntegerField(default=0)
+
+    STATE_CREATED = 0
+    STATE_PLAN_HARDWARE_CALCULATED = 1
+    STATE_GETTED_FROM_STOCK = 2
+    STATE_LEAVED_TO_STOCK = 3
+    STATE_CLOSED = 4
+    STATE_OTK_ACCEPTED = 5
+
+    # сохранить стандартные работы
+    def saveWorkPartFromFormset(formset, workPart):
+        workPart.clear()
+        for form in formset.forms:
+            d = form.cleaned_data
+            if (len(d) > 0) and ("standartWork" in d) and (not d["standartWork"] is None) and\
+                    (form.cleaned_data["standartWork"]!=""):
+                #print(form.cleaned_data)
+                sw = Equipment.objects.get(pk=int(form.cleaned_data["standartWork"]))
+                if form.cleaned_data["workPlace"] == "":
+                    wp = None
+                else:
+                    wp = WorkPlace.objects.get(pk=int(form.cleaned_data["workPlace"]))
+
+                if form.cleaned_data["rationale"] == "":
+                    r = None
+                else:
+                    r = Rationale.objects.get(pk=int(form.cleaned_data["rationale"]))
+
+                if len(WorkPart.objects.filter(startTime=form.cleaned_data["startTime"],
+                                               endTime=form.cleaned_data["endTime"],
+                                               standartWork=sw,
+                                               workPlace=wp,
+                                               rationale=r,
+                                               comment=form.cleaned_data["comment"])) > 1:
+                    w = WorkPart.objects.filter(startTime=form.cleaned_data["startTime"],
+                                                endTime=form.cleaned_data["endTime"],
+                                                standartWork=sw,
+                                                workPlace=wp,
+                                                rationale=r,
+                                                comment=form.cleaned_data["comment"]).first()
+                else:
+                    w, created = WorkPart.objects.get_or_create(startTime=form.cleaned_data["startTime"],
+                                                                endTime=form.cleaned_data["endTime"],
+                                                                standartWork=sw,
+                                                                workPlace=wp,
+                                                                rationale=r,
+                                                                comment=form.cleaned_data["comment"])
+                w.save()
+                workPart.add(w)
+
+    def getMainReportData(self):
+        return {
+            'supervisor': self.supervisor,
+            'VIKer': self.VIKer,
+            'reportMaker': self.reportMaker,
+            'reportChecker': self.reportChecker,
+            'worker': self.worker,
+            'stockMan': self.stockMan,
+            'adate': self.adate,
+            'VIKDate': self.VIKDate,
+            'note': self.note,
+        }
+
+
+    def generateWorkPartData(self):
+        # member_data = list(self.workPart.all().values())
+        # return list(member_data)
+        arr = []
+        for wp in self.workPart.all().order_by('startTime'):
+            if wp.workPlace is None:
+                strWorkPlace = ""
+            else:
+                strWorkPlace = str(wp.workPlace.pk)
+
+            if wp.rationale is None:
+                strRationale = ""
+            else:
+                strRationale = str(wp.rationale.pk)
+
+            arr.append({
+                'comment': str(wp.comment),
+                'startTime': wp.startTime,
+                'endTime': wp.endTime,
+                'standartWork': str(wp.standartWork.pk),
+                'workPlace': strWorkPlace,
+                'rationale': strRationale,
+            })
+        return arr
 
     def generateDoc(self):
         wp = []

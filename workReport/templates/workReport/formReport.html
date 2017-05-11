@@ -1,0 +1,88 @@
+{% extends "plan/base.html" %}
+{% load staticfiles %}
+{# Load the tag library #}
+{% load bootstrap3 %}
+{% load crispy_forms_tags %}
+{% load crispy_forms_tags %}
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% bootstrap_messages %}
+
+{% block style_block %}
+    .centering{
+        text-align: center;
+    }
+    td {
+    padding: 5px;
+    }
+{% endblock %}
+
+{% block title %}НПО Поиск{% endblock %}
+
+{% block content %}
+<h1>Конструкторам</h1>
+{% if user.is_authenticated == False %}
+<p>Для доступа к системе Вам надо войти или зарегистрироваться</p>
+{% else %}
+
+{% endif %}
+{% endblock %}
+
+{% block navigating %}
+<a href="/workReport/" class="btn btn-default">Главная</a>
+<a href="/workReport/formReport/" class="btn btn-info">Формирование наряда</a>
+<a href="/workReport/equipment/" class="btn btn-default">Выдача оборудования</a>
+<a href="/workReport/closeReport/" class="btn btn-default">Закрытие наряда</a>
+<a href="/workReport/otk/" class="btn btn-default">ОТК</a>
+<a href="/workReport/archive/" class="btn btn-default">Архив</a>
+{% endblock %}
+
+{% block sub_content %}
+<br><br>
+    <a href="/workReport/create/" class="btn btn-primary">Сформировать наряд</a>
+
+    <H3 align="center"> Выберите наряд для редактирования</H3>
+ <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-css/1.4.6/select2-bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
+    <style>
+        #disease{
+            width: 50%;  position: relative;top: 220px; left: 182px;
+         }
+
+    </style>
+
+<script type="text/javascript">
+          $(".js-example-basic-multiple").select2();
+</script>
+
+
+<br>
+
+<form method="post" align="center">
+    {% csrf_token %}
+    {{ reportForm.management_form }}
+    {{ reportForm}}
+     <input align="center" class="btn btn-primary" type="submit" value="Редактировать" class="button"/>
+</form>
+
+
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"
+        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+<script>
+        $(document).ready(function (){
+           $("#disease").select2({
+             allowClear:true,
+             placeholder: 'Поиск наряда'
+           });
+        })
+
+</script>
+
+{% endblock %}
+
+{% block error_messages %}
+{% endblock %}

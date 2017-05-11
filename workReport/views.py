@@ -14,9 +14,124 @@ from django.urls import reverse
 
 from constructors.models import Equipment
 from plan.forms import LoginForm, RequiredFormSet
-from workReport.forms import ReportForm, WorkPartForm, NeedStructForm, RejectForm
-from workReport.models import WorkReport, WorkPart, Reject,  Worker, \
+from plan.models import Area, InfoText, WorkPlace, Rationale
+from workReport.forms import ReportForm, WorkPartForm, NeedStructForm, RejectForm, CreatedReportSingleForm, \
+    MyWorkPartForm
+from workReport.models import WorkReport, WorkPart, Reject, Worker, \
     WorkerPosition, NeedStruct
+
+
+# главная страница раздела нарядов
+def index(request):
+    c = {
+        'login_form': LoginForm(),
+        'it': InfoText.objects.get(pageName="workReport_index")
+    }
+    return render(request, "workReport/index.html", c)
+
+
+# главная страница раздела нарядов
+def formReport(request):
+    if request.method == 'POST':
+        # строим форму на основе запроса
+        form = CreatedReportSingleForm(request.POST)
+        # если форма заполнена корректно
+        if form.is_valid():
+            return HttpResponseRedirect("/workReport/detailCratedWorkReport/" + form.cleaned_data["report"] + "/")
+
+    c = {
+        'login_form': LoginForm(),
+        'reportForm': CreatedReportSingleForm(),
+    }
+    return render(request, "workReport/formReport.html", c)
+
+
+# редактирование созданного наряда
+def detailCratedWorkReport(request, workReport_id):
+    work_report = WorkReport.objects.get(pk=workReport_id)
+    ReportFormset = formset_factory(MyWorkPartForm, max_num=10)
+    # если post запрос
+    if request.method == 'POST':
+        # обработка данных о наряде
+        form = ReportForm(request.POST, prefix="reportForm")
+        # если форма заполнена корректно
+        if form.is_valid():
+            work_report.supervisor = form.cleaned_data["supervisor"]
+            work_report.VIKer = form.cleaned_data["VIKer"]
+            work_report.reportMaker = form.cleaned_data["reportMaker"]
+            work_report.reportChecker = form.cleaned_data["reportChecker"]
+            work_report.worker = form.cleaned_data["worker"]
+            work_report.stockMan = form.cleaned_data["stockMan"]
+            work_report.adate = form.cleaned_data["adate"]
+            work_report.VIKDate = form.cleaned_data["VIKDate"]
+            work_report.note = form.cleaned_data["note"]
+            work_report.save()
+
+        report_formset = ReportFormset(request.POST, request.FILES, prefix="formset")
+        print(report_formset)
+        if report_formset.is_valid():
+            WorkReport.saveWorkPartFromFormset(report_formset, work_report.workPart)
+    else:
+        report_formset = ReportFormset(initial=work_report.generateWorkPartData(), prefix="formset")
+        form = ReportForm(initial=work_report.getMainReportData(), prefix="reportForm")
+    c = {
+        'form': form,
+        'login_form': LoginForm(),
+        'pk': workReport_id,
+        'link_formset': report_formset,
+    }
+
+    return render(request, "workReport/detailCratedWorkReport.html", c)
+
+
+def createWorkReport(request):
+    w = WorkReport()
+    wPos = WorkerPosition.objects.get(name='Контролёр ОТК')
+    w.VIKer = Worker.objects.filter(position=wPos).first()
+    w.reportMaker = Worker.objects.all().first()
+    w.reportChecker = Worker.objects.all().first()
+    w.worker = Worker.objects.all().first()
+    wPos = WorkerPosition.objects.get(name='Начальник смены')
+    w.supervisor = Worker.objects.filter(position=wPos).first()
+    wPos = WorkerPosition.objects.get(name='Кладовщик')
+    w.stockMan = Worker.objects.filter(position=wPos).first()
+    w.area = Area.objects.first().pk
+    w.save()
+
+    # заявленные работы
+    wp = WorkPart.objects.create(startTime=time(hour=8, minute=30),
+                                 endTime=time(hour=8, minute=45),
+                                 standartWork=Equipment.objects.get(
+                                     name='Получение наряда и ТМЦ для выполнения работ'),
+                                 )
+    w.workPart.add(wp)
+    wp = WorkPart.objects.create(startTime=time(hour=16, minute=45),
+                                 endTime=time(hour=17, minute=00),
+                                 standartWork=Equipment.objects.get(name='Уборка рабочего места'),
+                                 )
+    w.workPart.add(wp)
+    # фактически выполненные работы
+    wp = WorkPart.objects.create(startTime=time(hour=8, minute=30),
+                                 endTime=time(hour=8, minute=45),
+                                 standartWork=Equipment.objects.get(
+                                     name='Получение наряда и ТМЦ для выполнения работ'),
+                                 )
+    w.factWorkPart.add(wp)
+    wp = WorkPart.objects.create(startTime=time(hour=16, minute=30),
+                                 endTime=time(hour=16, minute=45),
+                                 standartWork=Equipment.objects.get(
+                                     name='Отчет о выполненных работах перед РП и ознакомление со сменным нарядом на следующий рабочий день, проверка инструмента, сдача ТМЦ'),
+                                 )
+    w.factWorkPart.add(wp)
+
+    wp = WorkPart.objects.create(startTime=time(hour=16, minute=45),
+                                 endTime=time(hour=17, minute=00),
+                                 standartWork=Equipment.objects.get(
+                                     name='Уборка рабочего места'),
+                                 )
+    w.factWorkPart.add(wp)
+
+    return HttpResponseRedirect('/workReport/page1/' + str(w.pk) + '/')
 
 
 def workReportPage1(request, workReport_id):
@@ -215,27 +330,27 @@ def workReportPage4(request, workReport_id):
                     # print ("empty form line")
                     continue
                 if len(NeedStruct.objects.filter(equipment=form.cleaned_data["equipment"],
-                                                        material=form.cleaned_data["material"],
-                                                        usedCnt=form.cleaned_data["usedCnt"],
-                                                        getCnt=form.cleaned_data["getCnt"],
-                                                        rejectCnt=form.cleaned_data["rejectCnt"],
-                                                        dustCnt=form.cleaned_data["dustCnt"],
-                                                        remainCnt=form.cleaned_data["remainCnt"])) > 1:
+                                                 material=form.cleaned_data["material"],
+                                                 usedCnt=form.cleaned_data["usedCnt"],
+                                                 getCnt=form.cleaned_data["getCnt"],
+                                                 rejectCnt=form.cleaned_data["rejectCnt"],
+                                                 dustCnt=form.cleaned_data["dustCnt"],
+                                                 remainCnt=form.cleaned_data["remainCnt"])) > 1:
                     w = NeedStruct.objects.filter(equipment=form.cleaned_data["equipment"],
-                                                         material=form.cleaned_data["material"],
-                                                         usedCnt=form.cleaned_data["usedCnt"],
-                                                         getCnt=form.cleaned_data["getCnt"],
-                                                         rejectCnt=form.cleaned_data["rejectCnt"],
-                                                         dustCnt=form.cleaned_data["dustCnt"],
-                                                         remainCnt=form.cleaned_data["remainCnt"]).first()
+                                                  material=form.cleaned_data["material"],
+                                                  usedCnt=form.cleaned_data["usedCnt"],
+                                                  getCnt=form.cleaned_data["getCnt"],
+                                                  rejectCnt=form.cleaned_data["rejectCnt"],
+                                                  dustCnt=form.cleaned_data["dustCnt"],
+                                                  remainCnt=form.cleaned_data["remainCnt"]).first()
                 else:
                     w, created = NeedStruct.objects.get_or_create(equipment=form.cleaned_data["equipment"],
-                                                                         material=form.cleaned_data["material"],
-                                                                         usedCnt=form.cleaned_data["usedCnt"],
-                                                                         getCnt=form.cleaned_data["getCnt"],
-                                                                         rejectCnt=form.cleaned_data["rejectCnt"],
-                                                                         dustCnt=form.cleaned_data["dustCnt"],
-                                                                         remainCnt=form.cleaned_data["remainCnt"])
+                                                                  material=form.cleaned_data["material"],
+                                                                  usedCnt=form.cleaned_data["usedCnt"],
+                                                                  getCnt=form.cleaned_data["getCnt"],
+                                                                  rejectCnt=form.cleaned_data["rejectCnt"],
+                                                                  dustCnt=form.cleaned_data["dustCnt"],
+                                                                  remainCnt=form.cleaned_data["remainCnt"])
                 w.save()
                 wr.planHardware.add(w)
     else:
@@ -294,27 +409,27 @@ def workReportPage5(request, workReport_id):
                     # print ("empty form line")
                     continue
                 if len(NeedStruct.objects.filter(equipment=form.cleaned_data["equipment"],
-                                                        material=form.cleaned_data["material"],
-                                                        usedCnt=form.cleaned_data["usedCnt"],
-                                                        getCnt=form.cleaned_data["getCnt"],
-                                                        rejectCnt=form.cleaned_data["rejectCnt"],
-                                                        dustCnt=form.cleaned_data["dustCnt"],
-                                                        remainCnt=form.cleaned_data["remainCnt"])) > 1:
+                                                 material=form.cleaned_data["material"],
+                                                 usedCnt=form.cleaned_data["usedCnt"],
+                                                 getCnt=form.cleaned_data["getCnt"],
+                                                 rejectCnt=form.cleaned_data["rejectCnt"],
+                                                 dustCnt=form.cleaned_data["dustCnt"],
+                                                 remainCnt=form.cleaned_data["remainCnt"])) > 1:
                     w = NeedStruct.objects.filter(equipment=form.cleaned_data["equipment"],
-                                                         material=form.cleaned_data["material"],
-                                                         usedCnt=form.cleaned_data["usedCnt"],
-                                                         getCnt=form.cleaned_data["getCnt"],
-                                                         rejectCnt=form.cleaned_data["rejectCnt"],
-                                                         dustCnt=form.cleaned_data["dustCnt"],
-                                                         remainCnt=form.cleaned_data["remainCnt"]).first()
+                                                  material=form.cleaned_data["material"],
+                                                  usedCnt=form.cleaned_data["usedCnt"],
+                                                  getCnt=form.cleaned_data["getCnt"],
+                                                  rejectCnt=form.cleaned_data["rejectCnt"],
+                                                  dustCnt=form.cleaned_data["dustCnt"],
+                                                  remainCnt=form.cleaned_data["remainCnt"]).first()
                 else:
                     w, created = NeedStruct.objects.get_or_create(equipment=form.cleaned_data["equipment"],
-                                                                         material=form.cleaned_data["material"],
-                                                                         usedCnt=form.cleaned_data["usedCnt"],
-                                                                         getCnt=form.cleaned_data["getCnt"],
-                                                                         rejectCnt=form.cleaned_data["rejectCnt"],
-                                                                         dustCnt=form.cleaned_data["dustCnt"],
-                                                                         remainCnt=form.cleaned_data["remainCnt"])
+                                                                  material=form.cleaned_data["material"],
+                                                                  usedCnt=form.cleaned_data["usedCnt"],
+                                                                  getCnt=form.cleaned_data["getCnt"],
+                                                                  rejectCnt=form.cleaned_data["rejectCnt"],
+                                                                  dustCnt=form.cleaned_data["dustCnt"],
+                                                                  remainCnt=form.cleaned_data["remainCnt"])
                 w.save()
                 wr.noPlanHardware.add(w)
     else:
@@ -410,64 +525,13 @@ def workReportPage6(request, workReport_id):
     return render(request, 'workReport/workReportFormsetRejected.html', c)
 
 
-
-def workReports(request,area_id):
+def workReports(request, area_id):
     return render(request, 'workReport/workReportList.html',
                   {'reports':
                        WorkReport.objects.filter(area=int(area_id)).order_by('-adate'),
-                   'one':'1',
-                   'area_id':area_id,
-                  })
-
-
-def createWorkReport(request,area_id):
-    w = WorkReport()
-    wPos = WorkerPosition.objects.get(name='Контролёр ОТК')
-    w.VIKer = Worker.objects.filter(position=wPos).first()
-    w.reportMaker = Worker.objects.all().first()
-    w.reportChecker = Worker.objects.all().first()
-    w.worker = Worker.objects.all().first()
-    wPos = WorkerPosition.objects.get(name='Начальник смены')
-    w.supervisor = Worker.objects.filter(position=wPos).first()
-    wPos = WorkerPosition.objects.get(name='Кладовщик')
-    w.stockMan = Worker.objects.filter(position=wPos).first()
-    w.area = int(area_id)
-    w.save()
-
-    # заявленные работы
-    wp = WorkPart.objects.create(startTime=time(hour=8, minute=30),
-                                 endTime=time(hour=8, minute=45),
-                                 standartWork=Equipment.objects.get(
-                                     name='Получение наряда и ТМЦ для выполнения работ'),
-                                 )
-    w.workPart.add(wp)
-    wp = WorkPart.objects.create(startTime=time(hour=16, minute=45),
-                                 endTime=time(hour=17, minute=00),
-                                 standartWork=Equipment.objects.get(name='Уборка рабочего места'),
-                                 )
-    w.workPart.add(wp)
-    # фактически выполненные работы
-    wp = WorkPart.objects.create(startTime=time(hour=8, minute=30),
-                                 endTime=time(hour=8, minute=45),
-                                 standartWork=Equipment.objects.get(
-                                     name='Получение наряда и ТМЦ для выполнения работ'),
-                                 )
-    w.factWorkPart.add(wp)
-    wp = WorkPart.objects.create(startTime=time(hour=16, minute=30),
-                                 endTime=time(hour=16, minute=45),
-                                 standartWork=Equipment.objects.get(
-                                     name='Отчет о выполненных работах перед РП и ознакомление со сменным нарядом на следующий рабочий день, проверка инструмента, сдача ТМЦ'),
-                                 )
-    w.factWorkPart.add(wp)
-
-    wp = WorkPart.objects.create(startTime=time(hour=16, minute=45),
-                                 endTime=time(hour=17, minute=00),
-                                 standartWork=Equipment.objects.get(
-                                     name='Уборка рабочего места'),
-                                 )
-    w.factWorkPart.add(wp)
-
-    return HttpResponseRedirect('/workReport/page1/' + str(w.pk) + '/')
+                   'one': '1',
+                   'area_id': area_id,
+                   })
 
 
 def deleteReport(request, workReport_id):
@@ -484,3 +548,43 @@ def printReport(request, workReport_id):
     document.save(response)
 
     return response
+
+
+# главная страница раздела нарядов
+def equipment(request):
+    c = {
+        'area_id': Area.objects.first().pk,
+        'login_form': LoginForm(),
+        'it': InfoText.objects.get(pageName="workReport_index")
+    }
+    return render(request, "workReport/equipment.html", c)
+
+
+# главная страница раздела нарядов
+def closeReport(request):
+    c = {
+        'area_id': Area.objects.first().pk,
+        'login_form': LoginForm(),
+        'it': InfoText.objects.get(pageName="workReport_index")
+    }
+    return render(request, "workReport/closeReport.html", c)
+
+
+# главная страница раздела нарядов
+def otk(request):
+    c = {
+        'area_id': Area.objects.first().pk,
+        'login_form': LoginForm(),
+        'it': InfoText.objects.get(pageName="workReport_index")
+    }
+    return render(request, "workReport/otk.html", c)
+
+
+# главная страница раздела нарядов
+def archive(request):
+    c = {
+        'area_id': Area.objects.first().pk,
+        'login_form': LoginForm(),
+        'it': InfoText.objects.get(pageName="workReport_index")
+    }
+    return render(request, "workReport/otk.html", c)
