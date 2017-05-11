@@ -46,6 +46,49 @@ def formReport(request):
     return render(request, "workReport/formReport.html", c)
 
 
+# изменить
+def saveWorkPartFromFormset(formset, work_report):
+    work_report.workPart.clear()
+    for form in formset.forms:
+        d = form.cleaned_data
+        if (len(d) > 0) and  ("standartWork" in d) and (not d["standartWork"] is None):
+            print(form.cleaned_data)
+            sw = Equipment.objects.get(pk=int(form.cleaned_data["standartWork"]))
+            if form.cleaned_data["workPlace"] == "":
+                wp = None
+            else:
+                wp = WorkPlace.objects.get(pk=int(form.cleaned_data["workPlace"]))
+
+            if form.cleaned_data["rationale"] == "":
+                r = None
+            else:
+                r = Rationale.objects.get(pk=int(form.cleaned_data["rationale"]))
+
+            if len(WorkPart.objects.filter(startTime=form.cleaned_data["startTime"],
+                                           endTime=form.cleaned_data["endTime"],
+                                           standartWork=sw,
+                                           workPlace=wp,
+                                           rationale=r,
+                                           comment=form.cleaned_data["comment"])) > 1:
+                w = WorkPart.objects.filter(startTime=form.cleaned_data["startTime"],
+                                            endTime=form.cleaned_data["endTime"],
+                                            standartWork=sw,
+                                            workPlace=wp,
+                                            rationale=r,
+                                            comment=form.cleaned_data["comment"]).first()
+            else:
+                w, created = WorkPart.objects.get_or_create(startTime=form.cleaned_data["startTime"],
+                                                            endTime=form.cleaned_data["endTime"],
+                                                            standartWork=sw,
+                                                            workPlace=wp,
+                                                            rationale=r,
+                                                            comment=form.cleaned_data["comment"])
+            print(w)
+            w.save()
+            work_report.workPart.add(w)
+        work_report.save()
+
+
 # редактирование созданного наряда
 def detailCratedWorkReport(request, workReport_id):
     work_report = WorkReport.objects.get(pk=workReport_id)
@@ -68,17 +111,16 @@ def detailCratedWorkReport(request, workReport_id):
             work_report.save()
 
         report_formset = ReportFormset(request.POST, request.FILES, prefix="formset")
-        print(report_formset)
         if report_formset.is_valid():
-            WorkReport.saveWorkPartFromFormset(report_formset, work_report.workPart)
-    else:
-        report_formset = ReportFormset(initial=work_report.generateWorkPartData(), prefix="formset")
-        form = ReportForm(initial=work_report.getMainReportData(), prefix="reportForm")
+            # print(report_formset)
+            saveWorkPartFromFormset(report_formset, work_report)
+
+
     c = {
-        'form': form,
+        'form': ReportForm(initial=work_report.getMainReportData(), prefix="reportForm"),
         'login_form': LoginForm(),
         'pk': workReport_id,
-        'link_formset': report_formset,
+        'link_formset': ReportFormset(initial=work_report.generateWorkPartData(), prefix="formset"),
     }
 
     return render(request, "workReport/detailCratedWorkReport.html", c)
