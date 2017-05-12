@@ -6,19 +6,10 @@ import sys
 import urllib
 
 from datetime import time
-from io import BytesIO
-import sys
-
-import pythoncom
-from django.core.checks import messages
-from django.db import IntegrityError
-from django.db import transaction
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, render_to_response, redirect
 from django.forms import formset_factory, BaseFormSet
-from django.urls import reverse
-from django.utils.encoding import iri_to_uri
 
 from constructors.form import EquipmentSingleWithCtnForm, EquipmentListWithoutSWForm, EquipmentCntWithoutSWForm
 from constructors.models import Equipment
