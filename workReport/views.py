@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
 import datetime
 import re
+import os
+import sys
+import urllib
 
 from datetime import time
+from io import BytesIO
+
+import pythoncom
 from django.core.checks import messages
 from django.db import IntegrityError
 from django.db import transaction
@@ -11,17 +17,25 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, render_to_response, redirect
 from django.forms import formset_factory, BaseFormSet
 from django.urls import reverse
+from django.utils.encoding import iri_to_uri
+from win32com import client
 
 from constructors.form import EquipmentSingleWithCtnForm, EquipmentListWithoutSWForm, EquipmentCntWithoutSWForm
 from constructors.models import Equipment
+from mysite import settings
 from plan.forms import LoginForm, RequiredFormSet
 from plan.models import Area, InfoText, WorkPlace, Rationale
-from workReport.forms import ReportForm, WorkPartForm, NeedStructForm, RejectForm, CreatedReportSingleForm
+from workReport.forms import ReportForm, WorkPartForm, NeedStructForm, RejectForm, CreatedReportSingleForm, \
+    CloseReportSingleForm
 from workReport.models import WorkReport, WorkPart, Reject, Worker, \
     WorkerPosition, NeedStruct, StockReportStruct
 
 
+
+
 # главная страница раздела нарядов
+
+
 def index(request):
     c = {
         'login_form': LoginForm(),
@@ -71,7 +85,7 @@ def detailCratedWorkReport(request, workReport_id):
             work_report.adate = form.cleaned_data["adate"]
             work_report.VIKDate = form.cleaned_data["VIKDate"]
             work_report.note = form.cleaned_data["note"]
-          #  print(form.cleaned_data["area"].pk)
+            #  print(form.cleaned_data["area"].pk)
             work_report.area = form.cleaned_data["area"].pk
             work_report.save()
 
@@ -213,12 +227,47 @@ def stockReady(request, workReport_id):
 
 # главная страница раздела нарядов
 def closeReport(request):
+    if request.method == 'POST':
+        # строим форму на основе запроса
+        form = CloseReportSingleForm(request.POST)
+        # если форма заполнена корректно
+        if form.is_valid():
+            return HttpResponseRedirect("/workReport/detailCloseWorkReport/" + form.cleaned_data["report"] + "/")
+
     c = {
-        'area_id': Area.objects.first().pk,
         'login_form': LoginForm(),
-        'it': InfoText.objects.get(pageName="workReport_index")
+        'reportForm': CloseReportSingleForm(),
     }
     return render(request, "workReport/closeReport.html", c)
+
+
+# главная страница раздела нарядов
+def doCloseReport(request, workReport_id):
+    wr = WorkReport.objects.get(pk=workReport_id)
+    print(wr)
+    return HttpResponseRedirect("/workReport/closeReport/")
+
+
+# редактирование созданного наряда
+def detailCloseWorkReport(request, workReport_id):
+    work_report = WorkReport.objects.get(pk=workReport_id)
+    ReportFormset = formset_factory(WorkPartForm)
+    # если post запрос
+    if request.method == 'POST':
+        report_formset = ReportFormset(request.POST, request.FILES, prefix="formset")
+        #   print(report_formset)
+        if report_formset.is_valid():
+            # print(report_formset)
+            WorkReport.saveWorkPartFromFormset(report_formset, work_report.factWorkPart)
+
+    c = {
+        'login_form': LoginForm(),
+        'pk': workReport_id,
+        'workReport_id': workReport_id,
+        'link_formset': ReportFormset(initial=work_report.generateFactWorkPartData(), prefix="formset"),
+    }
+
+    return render(request, "workReport/detailCloseWorkReport.html", c)
 
 
 # главная страница раздела нарядов
@@ -246,11 +295,28 @@ def deleteReport(request, workReport_id):
     return HttpResponseRedirect('/workReport/list/0/')
 
 
-def printReport(request, workReport_id):
+def printReport(request, tp, workReport_id):
     wr = WorkReport.objects.get(pk=workReport_id)
     document = wr.generateDoc()
-
-    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-    response['Content-Disposition'] = 'attachment; filename=report.docx'
-    document.save(response)
-    return response
+    if int(tp) == 0:
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+        original_filename = str(wr)+u".doc"
+        filename_header = 'filename*=UTF-8\'\'%s' % urllib.parse.quote(original_filename.encode('utf-8'))
+        response['Content-Disposition'] = "attachment; "+filename_header
+        document.save(response)
+        return response
+    else:
+        tmpPath = str(settings.PROJECT_ROOT)+"\\tempFiles\\"
+        document.save(tmpPath+"tmp.docx")
+        pythoncom.CoInitialize()
+        word = client.DispatchEx("Word.Application")
+        worddoc = word.Documents.Open(tmpPath+"tmp.docx")
+        worddoc.SaveAs(tmpPath+"tmp.pdf", FileFormat=17)
+        worddoc.Close()
+        test_file = open(tmpPath+"tmp.pdf", 'rb')
+        response = HttpResponse(content=test_file)
+        response['Content-Type'] = 'application/pdf'
+        original_filename = str(wr) + u".pdf"
+        filename_header = 'filename*=UTF-8\'\'%s' % urllib.parse.quote(original_filename.encode('utf-8'))
+        response['Content-Disposition'] = "attachment; " + filename_header
+        return response

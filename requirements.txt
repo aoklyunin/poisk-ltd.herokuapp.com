@@ -18,3 +18,4 @@ Django-Select2==5.10.0
 django-select2-forms==2.0.1
 django-autocomplete-light==3.2.7
 django_querysetsequence==0.7.2
+pypiwin32==219

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
-
+import time
 from django.db import models
 
 from constructors.models import NeedStruct, Equipment
@@ -119,6 +119,47 @@ class WorkReport(models.Model):
     STATE_CLOSED = 4
     STATE_OTK_ACCEPTED = 5
 
+    def generateAcceptanceData(self):
+        arr = []
+        for ph in self.planHardware.all().order_by('equipment'):
+            arr.append({
+                'cnt': ph.cnt,
+                'equipment': ph.equipment.name,
+                'ss': ph,
+                'rejectCnt': ph.rejectCnt,
+                'dustCnt': ph.dustCnt,
+                'returnCnt': ph.returnCnt,
+            })
+        for ph in self.noPlanHardware.all().order_by('equipment'):
+            arr.append({
+                'cnt': ph.cnt,
+                'equipment': ph.equipment.name,
+                'ss': ph,
+                'rejectCnt': ph.rejectCnt,
+                'dustCnt': ph.dustCnt,
+                'returnCnt': ph.returnCnt,
+            })
+        return arr
+
+
+    def processAcceptanceFormset(self, formset):
+        # без вывода почему-то выдаёт ошибку, что не может обратиться к cleaned_data
+        print(formset)
+        if formset.is_valid:
+            for form in formset.forms:
+                if form.is_valid:
+                    d = form.cleaned_data
+                    if 'ss' in d:
+                        # print(form.cleaned_data)
+                        ss = d['ss']
+                        ss.rejectCnt = d["rejectCnt"]
+                        ss.dustCnt = d["dustCnt"]
+                        ss.returnCnt = d["returnCnt"]
+                        ss.save()
+
+            self.state = self.STATE_LEAVED_TO_STOCK
+            self.save()
+
     def extraditionEquipment(self):
         for e in self.planHardware.all():
             if (e.cnt is not None):
@@ -132,9 +173,9 @@ class WorkReport(models.Model):
         for e in self.noPlanHardware.all():
             if (e.cnt is not None):
                 e = MoveEquipment.objects.create(
-                        equipment=e.equipment,
-                        cnt=e.cnt,
-                        flgAcceptance=False,
+                    equipment=e.equipment,
+                    cnt=e.cnt,
+                    flgAcceptance=False,
                 )
                 e.save()
                 e.acceptMoving(self.area)
@@ -159,6 +200,7 @@ class WorkReport(models.Model):
                 else:
                     print("for is not valid")
 
+
     # список планового оборудования
     def generatePlanHardwareVals(self):
         arr = []
@@ -170,6 +212,8 @@ class WorkReport(models.Model):
                            )
         return arr
 
+
+    # список всего оборудования с указание остатка на складе
     def generateHardwareVals(self):
         pE = self.generatePlanHardwareVals()
         nPE = self.generateNonPlanHardwareVals()
@@ -201,6 +245,7 @@ class WorkReport(models.Model):
 
         return arr
 
+
     # список внепланового оборудования
     def generateNonPlanHardwareVals(self):
         arr = []
@@ -211,6 +256,7 @@ class WorkReport(models.Model):
                             })
         return arr
 
+
     # список внепланового оборудования
     def generateNonPlanHardware(self):
         arr = []
@@ -219,6 +265,7 @@ class WorkReport(models.Model):
                 arr.append({'equipment': str(ns.equipment.pk),
                             'cnt': str(ns.cnt)})
         return arr
+
 
     # сохранить стандартные работы
     def saveWorkPartFromFormset(formset, workPart):
@@ -262,6 +309,9 @@ class WorkReport(models.Model):
                 w.save()
                 workPart.add(w)
 
+
+
+    # получить основные данные отчёта
     def getMainReportData(self):
         return {
             'supervisor': self.supervisor,
@@ -276,11 +326,13 @@ class WorkReport(models.Model):
             'area': self.area,
         }
 
-    def generateWorkPartData(self):
+
+    # генерируем планируемые работы
+    def generateFactWorkPartData(self):
         # member_data = list(self.workPart.all().values())
         # return list(member_data)
         arr = []
-        for wp in self.workPart.all().order_by('startTime'):
+        for wp in self.factWorkPart.all().order_by('startTime'):
             if wp.workPlace is None:
                 strWorkPlace = ""
             else:
@@ -301,6 +353,33 @@ class WorkReport(models.Model):
             })
         return arr
 
+    # генерируем фактически выполненные работы
+    def generateWorkPartData(self):
+            # member_data = list(self.workPart.all().values())
+            # return list(member_data)
+            arr = []
+            for wp in self.workPart.all().order_by('startTime'):
+                if wp.workPlace is None:
+                    strWorkPlace = ""
+                else:
+                    strWorkPlace = str(wp.workPlace.pk)
+
+                if wp.rationale is None:
+                    strRationale = ""
+                else:
+                    strRationale = str(wp.rationale.pk)
+
+                arr.append({
+                    'comment': str(wp.comment),
+                    'startTime': wp.startTime,
+                    'endTime': wp.endTime,
+                    'standartWork': str(wp.standartWork.pk),
+                    'workPlace': strWorkPlace,
+                    'rationale': strRationale,
+                })
+            return arr
+
+    # генерируем отчёт
     def generateDoc(self):
         wp = []
         i = 0
@@ -311,7 +390,7 @@ class WorkReport(models.Model):
             else:
                 wpname = wPart.workPlace.name
             wp.append(
-                [str(i), wpname, wPart.standartWork.text + " " + wPart.comment, wPart.startTime.strftime("%H:%M"),
+                [str(i), wpname, wPart.standartWork.name + " " + wPart.comment, wPart.startTime.strftime("%H:%M"),
                  wPart.endTime.strftime("%H:%M")])
 
         fwp = []
@@ -323,7 +402,7 @@ class WorkReport(models.Model):
             else:
                 wpname = wPart.workPlace.name
             fwp.append(
-                [str(i), wpname, wPart.standartWork.text + " " + wPart.comment, wPart.startTime.strftime("%H:%M"),
+                [str(i), wpname, wPart.standartWork.name + " " + wPart.comment, wPart.startTime.strftime("%H:%M"),
                  wPart.endTime.strftime("%H:%M")])
 
         note = "Примечание 1 (обязательное):\nМаксимальный срок проведения ВИК (входного контроля) до " \
@@ -338,8 +417,8 @@ class WorkReport(models.Model):
                 e = [equip.material.name, equip.material.code, equip.material.dimension]
             else:
                 e = [equip.equipment.name, equip.equipment.code, equip.equipment.dimension]
-            for l in [str(equip.getCnt), str(equip.usedCnt), str(equip.rejectCnt), str(equip.dustCnt),
-                      str(equip.remainCnt)]:
+            for l in [str(equip.cnt), str(equip.cnt-equip.returnCnt), str(equip.rejectCnt), str(equip.dustCnt),
+                      str(equip.returnCnt)]:
                 e.append(l)
             planEquipment.append(e)
 
@@ -350,8 +429,8 @@ class WorkReport(models.Model):
                 e = [equip.material.name, equip.material.code, equip.material.dimension]
             else:
                 e = [equip.equipment.name, equip.equipment.code, equip.equipment.dimension]
-            for l in [str(equip.getCnt), str(equip.usedCnt), str(equip.rejectCnt), str(equip.dustCnt),
-                      str(equip.remainCnt)]:
+            for l in [str(equip.cnt), str(equip.cnt-equip.returnCnt), str(equip.rejectCnt), str(equip.dustCnt),
+                      str(equip.returnCnt)]:
                 e.append(l)
             # print(e)
             nonPlanEquipment.append(e)
@@ -379,6 +458,7 @@ class WorkReport(models.Model):
                               self.reportChecker.getShort(), self.VIKer.getShort(), note,
                               attestation, dust, planEquipment, nonPlanEquipment)
 
+
     def getRationales(self):
         i = 0
         d = {}
@@ -393,6 +473,7 @@ class WorkReport(models.Model):
         for key, value in d.items():
             rationales.append([str(value), key])
         return rationales
+
 
     def __str__(self):
         # return "sad"
@@ -411,6 +492,7 @@ class WorkReport(models.Model):
         else:
             s += str(self.adate)
         return s
+
 
     def __unicode__(self):
         # return "sad"

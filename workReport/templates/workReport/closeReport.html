@@ -40,18 +40,46 @@
 
 {% block sub_content %}
 <br><br>
-    <table width="70%" align="center">
-    <tr><td >
-        <div class="panel panel-primary ">
-            <div class="panel-heading">{{it.caption}}</div>
-            <div class="panel-body"  align="justify">
-                <H3>{{ it.text }}</H3>
-                {{ it.subText |linebreaks }}
-            </div>
-        </div>
-    </td></tr>
-    </table>
 
+    <H3 align="center"> Выберите наряд для закрытия</H3>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-css/1.4.6/select2-bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
+    <style>
+        #disease{
+            width: 50%;  position: relative;top: 220px; left: 182px;
+         }
+
+    </style>
+
+<script type="text/javascript">
+          $(".js-example-basic-multiple").select2();
+</script>
+
+
+<br>
+
+<form method="post" align="center">
+    {% csrf_token %}
+    {{ reportForm.management_form }}
+    {{ reportForm}}
+     <input align="center" class="btn btn-primary" type="submit" value="Закрытие" class="button"/>
+</form>
+
+
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"
+        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+<script>
+        $(document).ready(function (){
+           $("#disease").select2({
+             allowClear:true,
+             placeholder: 'Поиск наряда'
+           });
+        })
+
+</script>
 
 {% endblock %}
 

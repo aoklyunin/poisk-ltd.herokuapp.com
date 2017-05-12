@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Field
-from django.forms import ModelForm, BaseFormSet, TextInput, ChoiceField, Form
+from django.forms import ModelForm, BaseFormSet, TextInput, ChoiceField, Form, FloatField, CharField, ModelChoiceField
 from django import forms
 from django_select2.forms import Select2Widget
 
@@ -12,7 +12,7 @@ from constructors.models import Equipment
 from stock.models import MoveEquipment
 
 # получить список оборудования
-from workReport.models import WorkReport
+from workReport.models import WorkReport, StockReportStruct
 from django.db.models.fields import BLANK_CHOICE_DASH
 
 
@@ -22,6 +22,14 @@ def getStockReadyReport():
         reports.append([wr.id, str(wr)])
 
     return reports + BLANK_CHOICE_DASH
+
+
+def getStockReportStruct():
+    reports = []
+    for wr in StockReportStruct.objects.filter():
+        reports.append([wr.id, str(wr)])
+    return reports
+
 
 def getStockLeaveReport():
     reports = []
@@ -51,6 +59,31 @@ class StockLeaveReportSingleForm(Form):
         self.fields['report'].choices = getStockLeaveReport()
         self.fields['report'].widget.attrs['class'] = 'js-example-basic-multiple'
         self.fields['report'].widget.attrs['id'] = 'disease'
+
+
+# форма для выбора одного изделия
+class StockLeaveReportForm(Form):
+    # брак
+    rejectCnt = FloatField(initial=0, label="")
+    # утиль
+    dustCnt = FloatField(initial=0, label="")
+    # возвращено
+    returnCnt = FloatField(initial=0, label="")
+    # структура склада
+    ss = ModelChoiceField(queryset=StockReportStruct.objects.all())
+    # оборудование
+    equipment = CharField(initial="", label="")
+    # получено
+    cnt = FloatField(initial="", label="")
+
+    def __init__(self, *args, **kwargs):
+        super(StockLeaveReportForm, self).__init__(*args, **kwargs)
+        self.fields['ss'].required = False
+        self.fields['ss'].widget.attrs['class'] = 'hidden'
+        self.fields['equipment'].required = False
+        self.fields['ss'].required = False
+        self.fields['cnt'].required = False
+        self.fields['returnCnt'].required = False
 
 
 # форма оборудования

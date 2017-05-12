@@ -31,41 +31,30 @@
 
 {% block navigating %}
 <a href="/stock/" class="btn btn-default">Главная</a>
-<a href="/stock/stock_balance/{{area_id}}/" class="btn btn-info">Баланс на складе</a>
+<a href="/stock/stock_balance/{{area_id}}/" class="btn btn-default">Баланс на складе</a>
 <a href="/stock/wrExtradition/{{area_id}}/" class="btn btn-default">Выдача по наряду</a>
 <a href="/stock/wrAcceptance/{{area_id}}/" class="btn btn-default">Приёмка по наряду</a>
 <a href="/stock/acceptance/{{area_id}}/" class="btn btn-default">Поставка</a>
-<a href="/stock/providers/{{area_id}}/" class="btn btn-default">Поставщики</a>
+<a href="/stock/providers/" class="btn btn-info">Поставщики</a>
 <a href="/stock/equipment/" class="btn btn-default">Оборудование</a>
+
 {% endblock %}
 
 {% block sub_content %}
-<br>
-
-
-<div class="btn-group centering" >
-    {% for area in areas %}
-        <a href="/stock/stock_balance/{{area.pk}}/" class="btn
-        {% ifnotequal area_id area.pk %}btn-default {%else%}btn-info {%endifnotequal%} ">{{area.name}}</a>
-    {% endfor %}
-</div>
 <br><br>
-<table width="60%" align="center">
-    <thead>
-        <td><b>Оборудование</b></td>
-        <td><b>Кол-во</b></td>
-    </thead>
-{%for l in lst %}
-    <tr>
-
-        <td>{{l|first}}</td>
-        <td>{{l|last}}</td>
-
-    </tr>
-{%endfor%}
+    <table width="70%" align="center">
+    <tr><td >
+        <div class="panel panel-primary ">
+            <div class="panel-heading">{{it.caption}}</div>
+            <div class="panel-body"  align="justify">
+                <H3>{{ it.text }}</H3>
+                {{ it.subText |linebreaks }}
+            </div>
+        </div>
+    </td></tr>
     </table>
-<br>
-<a align="center" href="/constructors/stock_balance/{{area_id}}/" class="btn btn-default">Назад</a>
+
+
 {% endblock %}
 
 {% block error_messages %}

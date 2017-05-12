@@ -138,3 +138,5 @@ class Equipment(models.Model):
     for i in range(EQUIPMENT_TYPE_COUNT):
         CHOICES.append((str(i), EQUIPMENT_LABELS[i]))
 
+    class Meta:
+        ordering = ['name']

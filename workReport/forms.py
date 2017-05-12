@@ -22,6 +22,14 @@ def getCreatedReports():
 
     return reports + BLANK_CHOICE_DASH
 
+# получить список оборудования
+def getCloseReports():
+    reports = []
+    for wr in WorkReport.objects.filter(state=WorkReport.STATE_LEAVED_TO_STOCK):
+        reports.append([wr.id, str(wr)])
+
+    return reports + BLANK_CHOICE_DASH
+
 
 # получить список стандартных работ
 def getStandartWorks():
@@ -57,6 +65,16 @@ class CreatedReportSingleForm(Form):
     def __init__(self, *args, **kwargs):
         super(CreatedReportSingleForm, self).__init__(*args, **kwargs)
         self.fields['report'].choices = getCreatedReports()
+        self.fields['report'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['report'].widget.attrs['id'] = 'disease'
+
+
+class CloseReportSingleForm(Form):
+    report = ChoiceField(label="")
+
+    def __init__(self, *args, **kwargs):
+        super(CloseReportSingleForm, self).__init__(*args, **kwargs)
+        self.fields['report'].choices = getCloseReports()
         self.fields['report'].widget.attrs['class'] = 'js-example-basic-multiple'
         self.fields['report'].widget.attrs['id'] = 'disease'
 

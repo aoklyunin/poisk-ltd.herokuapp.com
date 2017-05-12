@@ -10,10 +10,9 @@ from constructors.models import Equipment, StockStruct
 from plan.forms import LoginForm
 from plan.models import Area, InfoText
 from stock.form import MoveEquipmentForm, MoveMaterialForm, MoveDetailForm, MoveAssemblyForm, EquipmentForm, \
-    StockReadyReportSingleForm, StockLeaveReportSingleForm
+    StockReadyReportSingleForm, StockLeaveReportSingleForm, StockLeaveReportForm
 from stock.models import MoveEquipment
 from plan.forms import RequiredFormSet
-
 
 # главная страница раздела нарядов
 from workReport.models import WorkReport
@@ -105,18 +104,19 @@ def detailWrExtradition(request, workReport_id):
     c = {
         'pE': pE,
         'login_form': LoginForm(),
-        'area_id':  Area.objects.first().pk,
+        'area_id': Area.objects.first().pk,
         'areas': Area.objects.all().order_by('name'),
         'reportForm': StockReadyReportSingleForm(),
         'wr': wr,
     }
     return render(request, "stock/detailWrExtradition.html", c)
 
+
 def doWrExtradition(request, workReport_id):
     wr = WorkReport.objects.get(pk=workReport_id)
     wr.extraditionEquipment()
 
-    return HttpResponseRedirect("/stock/wrExtradition/"+str(Area.objects.first().pk)+"/")
+    return HttpResponseRedirect("/stock/wrExtradition/" + str(Area.objects.first().pk) + "/")
 
 
 # главная страница раздела нарядов
@@ -140,22 +140,20 @@ def wrAcceptance(request, area_id):
 # выдача по конкретному наряду
 def detailWrAcceptance(request, workReport_id):
     wr = WorkReport.objects.get(pk=workReport_id)
-
+    EquipmentFormset = formset_factory(StockLeaveReportForm)
     if request.method == 'POST':
-        # строим форму на основе запроса
-        form = StockReadyReportSingleForm(request.POST)
-        # если форма заполнена корректно
-        if form.is_valid():
-            return HttpResponseRedirect("/stock/wrAcceptance/" + form.cleaned_data["report"] + "/")
+        equipment_formset = EquipmentFormset(request.POST, request.FILES, prefix='equipment')
+        if equipment_formset.is_valid():
+            wr.processAcceptanceFormset(equipment_formset)
+            return HttpResponseRedirect("/stock/wrAcceptance/"+str(wr.area)+"/")
 
-    pE = wr.generateHardwareVals()
-
+    data = wr.generateAcceptanceData()
     c = {
-        'pE': pE,
+        'link_formset': EquipmentFormset(initial=data, prefix='equipment'),
+        'formset_length': len(data),
         'login_form': LoginForm(),
-        'area_id':  Area.objects.first().pk,
+        'area_id': Area.objects.first().pk,
         'areas': Area.objects.all().order_by('name'),
-        'reportForm': StockReadyReportSingleForm(),
         'wr': wr,
     }
     return render(request, "stock/detailWrAcceptance.html", c)
@@ -171,7 +169,6 @@ def acceptance(request, area_id):
     return render(request, "stock/index.html", c)
 
 
-
 # главная страница раздела нарядов
 def providers(request):
     c = {
@@ -180,3 +177,13 @@ def providers(request):
         'area_id': Area.objects.first().pk,
     }
     return render(request, "stock/index.html", c)
+
+
+# главная страница раздела нарядов
+def equipment(request, area_id):
+    c = {
+        'login_form': LoginForm(),
+        'it': InfoText.objects.get(pageName="stock_index"),
+        'area_id': Area.objects.first().pk,
+    }
+    return render(request, "stock/equipment.html", c)
