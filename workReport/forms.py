@@ -157,8 +157,11 @@ class MyWorkPartForm(Form):
         self.fields['standartWork'].error_messages['invalid_choice'] = ''
         self.fields['comment'].error_messages['invalid'] = ''
 
+        self.fields['startTime'].widget = forms.TimeInput(format='%H:%M')
+        self.fields['endTime'].widget = forms.TimeInput(format='%H:%M')
         self.fields['startTime'].widget.attrs['class'] = 'timepicker123'
         self.fields['endTime'].widget.attrs['class'] = 'timepicker123'
+
 
 class WorkPartForm(ModelForm):
     class Meta:

@@ -72,7 +72,7 @@ padding: 5px;
 <H3 align="center"> Редактирование наряда</H3>
 
 
-<form method="post">
+<form  method="post" class="formset_form">
     {% csrf_token %}
     {{ form.management_form }}
     <table align="center">
@@ -149,7 +149,7 @@ padding: 5px;
         integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
-<script src="{% static '/scripts/jquery.select.formset.centered.js' %}"></script>
+<script src="{% static '/scripts/formset.centered.js' %}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/locale/ru.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.js"></script>
 <script>
@@ -182,7 +182,7 @@ padding: 5px;
     $('.link_formset').formset({
         addText: 'Добавить',
         deleteText: 'Удалить',
-        prefix:'equipment',
+        prefix:'formset',
 
     });
 

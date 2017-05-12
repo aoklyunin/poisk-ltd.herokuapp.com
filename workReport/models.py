@@ -120,10 +120,11 @@ class WorkReport(models.Model):
     def saveWorkPartFromFormset(formset, workPart):
         workPart.clear()
         for form in formset.forms:
+        #    print(form.cleaned_data)
             d = form.cleaned_data
             if (len(d) > 0) and ("standartWork" in d) and (not d["standartWork"] is None) and\
                     (form.cleaned_data["standartWork"]!=""):
-                #print(form.cleaned_data)
+
                 sw = Equipment.objects.get(pk=int(form.cleaned_data["standartWork"]))
                 if form.cleaned_data["workPlace"] == "":
                     wp = None
