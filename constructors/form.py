@@ -9,13 +9,15 @@ from plan.models import Scheme
 
 from django.db.models.fields import BLANK_CHOICE_DASH
 
+
 # олучить список чертежей
 def getShemes():
     shemes = []
     for sh in Scheme.objects.all().order_by('code'):
         shemes.append([sh.id, str(sh)])
 
-    return shemes+BLANK_CHOICE_DASH
+    return shemes + BLANK_CHOICE_DASH
+
 
 # получить список конструкторского оборудования
 def getConstructorEquipment():
@@ -26,7 +28,8 @@ def getConstructorEquipment():
             lst.append([eq.id, str(eq)])
         equipments.append([Equipment.EQUIPMENT_LABELS[i], lst])
 
-    return equipments+BLANK_CHOICE_DASH
+    return equipments + BLANK_CHOICE_DASH
+
 
 # получить список оборудования
 def getEquipment():
@@ -37,19 +40,20 @@ def getEquipment():
             lst.append([eq.id, str(eq)])
         equipments.append([Equipment.EQUIPMENT_LABELS[i], lst])
 
-    return equipments+BLANK_CHOICE_DASH
+    return equipments + BLANK_CHOICE_DASH
+
 
 # получить список оборудования без стандартных работ
 def getEquipmentWithoutSW():
     equipments = []
     for i in range(Equipment.EQUIPMENT_TYPE_COUNT):
-        if i!=Equipment.TYPE_STANDART_WORK:
+        if i != Equipment.TYPE_STANDART_WORK:
             lst = []
             for eq in Equipment.objects.filter(equipmentType=i).order_by('name'):
                 lst.append([eq.id, str(eq)])
             equipments.append([Equipment.EQUIPMENT_LABELS[i], lst])
 
-    return equipments+BLANK_CHOICE_DASH
+    return equipments + BLANK_CHOICE_DASH
 
 
 # получить список сотрудников по категориям
@@ -77,14 +81,29 @@ class EquipmentListForm(Form):
 
 # форма для выбора нескольких объектов оборудования без стандартных работ
 class EquipmentListWithoutSWForm(Form):
-        equipment = MultipleChoiceField(label="")
+    equipment = MultipleChoiceField(label="")
 
-        def __init__(self, *args, **kwargs):
-            super(EquipmentListWithoutSWForm, self).__init__(*args, **kwargs)
-            self.fields['equipment'].choices = getEquipmentWithoutSW()
-            self.fields['equipment'].widget.attrs['class'] = 'js-example-basic-multiple'
-            self.fields['equipment'].widget.attrs['id'] = 'disease'
+    def __init__(self, *args, **kwargs):
+        super(EquipmentListWithoutSWForm, self).__init__(*args, **kwargs)
+        self.fields['equipment'].choices = getEquipmentWithoutSW()
+        self.fields['equipment'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['equipment'].widget.attrs['id'] = 'disease'
 
+
+# форма для выбора нескольких объектов оборудования без стандартных работ
+class EquipmentCntWithoutSWForm(Form):
+    equipment = ChoiceField(label="")
+    cnt = FloatField(label="")
+
+    def __init__(self, *args, **kwargs):
+        super(EquipmentCntWithoutSWForm, self).__init__(*args, **kwargs)
+        self.fields['equipment'].choices = getEquipmentWithoutSW()
+        self.fields['equipment'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['equipment'].widget.attrs['id'] = 'disease'
+        self.fields['equipment'].initial = None
+        self.fields['cnt'].initial = 0
+        self.fields['equipment'].required = False
+        self.fields['cnt'].required = False
 
 # форма для выбора одного изделия
 class EquipmentSingleForm(Form):
@@ -216,7 +235,7 @@ class SchemeForm(ModelForm):
             Field('code', css_class='col-sm-2'),
             Field('link', css_class='col-sm-2'),
         )
-    #   self.fields['author'].choices = getWorkers()
+        #   self.fields['author'].choices = getWorkers()
         self.fields['author'].widget.attrs['class'] = 'js-example-basic-multiple'
         self.fields['author'].widget.attrs['id'] = 'disease2'
         self.fields['code'].widget.attrs['placeholder'] = 'Шифр'
@@ -232,5 +251,3 @@ class SchemeSingleForm(Form):
         self.fields['scheme'].choices = getShemes()
         self.fields['scheme'].widget.attrs['class'] = 'js-example-basic-multiple'
         self.fields['scheme'].widget.attrs['id'] = 'disease'
-
-

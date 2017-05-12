@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Field
-from django.forms import ModelForm, BaseFormSet, TextInput, ChoiceField
+from django.forms import ModelForm, BaseFormSet, TextInput, ChoiceField, Form
 from django import forms
 from django_select2.forms import Select2Widget
 
@@ -10,6 +10,30 @@ from searchableselect.widgets import SearchableSelect
 from constructors.form import getShemes
 from constructors.models import Equipment
 from stock.models import MoveEquipment
+
+# получить список оборудования
+from workReport.models import WorkReport
+from django.db.models.fields import BLANK_CHOICE_DASH
+
+def getStockReadyReport():
+    reports = []
+    for wr in WorkReport.objects.filter(state=WorkReport.STATE_STOCK_READY):
+        reports.append([wr.id, str(wr)])
+
+    return reports + BLANK_CHOICE_DASH
+
+
+# форма для выбора одного изделия
+class StockReadyReportSingleForm(Form):
+    report = ChoiceField(label="")
+
+    def __init__(self, *args, **kwargs):
+        super(StockReadyReportSingleForm, self).__init__(*args, **kwargs)
+        self.fields['report'].choices = getStockReadyReport()
+        self.fields['report'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['report'].widget.attrs['id'] = 'disease'
+
+
 
 # форма оборудования
 class EquipmentForm(ModelForm):

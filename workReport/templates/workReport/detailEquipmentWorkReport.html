@@ -25,7 +25,10 @@ padding: 5px;
             width: 50%;  position: relative;top: 220px; left: 182px;
          }
 
-
+.inactiveLink {
+   pointer-events: none;
+   cursor: default;
+}
 </style>
 <link rel="stylesheet" type="text/css" href="bootstrap.min.css">
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -60,8 +63,8 @@ padding: 5px;
 
 {% block navigating %}
 <a href="/workReport/" class="btn btn-default">Главная</a>
-<a href="/workReport/formReport/" class="btn btn-info">Формирование наряда</a>
-<a href="/workReport/equipment/" class="btn btn-default">Выдача оборудования</a>
+<a href="/workReport/formReport/" class="btn btn-default">Формирование наряда</a>
+<a href="/workReport/equipment/" class="btn btn-info">Выдача оборудования</a>
 <a href="/workReport/closeReport/" class="btn btn-default">Закрытие наряда</a>
 <a href="/workReport/otk/" class="btn btn-default">ОТК</a>
 <a href="/workReport/archive/" class="btn btn-default">Архив</a>
@@ -69,77 +72,72 @@ padding: 5px;
 
 {% block sub_content %}
 
-<H3 align="center"> Редактирование наряда</H3>
+<table width="100%"><tr><td valign="top" width="50%">
+<H3 align="center"> Выполняемые работы</H3>
 
+<ul align="left">
+{% for sw in standartWorks %}
+    <li>
+    {{sw.standartWork.name}}
+
+    </li>
+{%endfor%}
+</ul>
+</td><td valign="top">
+<H3 align="center"> Плановая выдача оборудования:</H3>
+    <table width="50%" align="center">
+    <thead>
+        <tr>
+            <td><b>Оборудование</b></td>
+            <td><b>Кол-во</b></td>
+        </tr>
+    </thead>
+{% for fe in factEquipments %}
+    <tr>
+        <td>{{fe.equipment}}</td>
+        <td>{{fe.cnt}}</td>
+    </tr>
+{%endfor%}
+</table>
+
+    </td></tr></table>
+
+<br>
+
+<div align="center" >
+    <a class="btn {% if flgCalculate %}btn-primary{%else%}btn-default inactiveLink{%endif%} " href="/workReport/stockReady/{{workReport_id}}/" >Отправить на склад</a>
+
+    <a class="btn btn-info" href="/workReport/calculateEquipment/{{workReport_id}}/">Пересчитать плановую выдачу</a>
+
+</div>
+<br>
+
+<H3 align="center"> Внеплановая выдача оборудования:</H3>
 
 <form  method="post" class="formset_form">
     {% csrf_token %}
-    {{ form.management_form }}
-    <table align="center">
-        <tr>
-            <td> {% bootstrap_field form.supervisor%}</td>
-            <td> {% bootstrap_field form.VIKer%}</td>
-            <td> {% bootstrap_field form.reportMaker%}</td>
-            <td> {% bootstrap_field form.VIKDate%}</td>
-        </tr>
-        <tr>
-            <td> {% bootstrap_field form.reportChecker%}</td>
-            <td> {% bootstrap_field form.worker%}</td>
-            <td> {% bootstrap_field form.stockMan%}</td>
-            <td> {% bootstrap_field form.adate%}</td>
-        </tr>
-        <tr>
-            <td > {% bootstrap_field form.area%}</td>
-            <td colspan="3"> {% bootstrap_field form.note%}</td>
-        </tr>
-        <tr>
-
-        </tr>
-
-    </table>
 
     <br>
     {{ link_formset.management_form }}
-    <table cellspacing="3" cellpadding="7" width="95%" align="center">
+    <table cellspacing="3" cellpadding="7" width="60%" align="center">
         <thead>
         <tr>
-            <td align="center">Время</td>
-            <td align="center">Коментарий</td>
-            <td align="center">Стандартные работы</td>
-            <td align="center">Рабочее место</td>
-            <td align="center">Обоснование</td>
+            <td align="center">Оборудование</td>
+            <td align="center">Кол-во</td>
         </tr>
         </thead>
         <tr></tr>
         {% for link_form in link_formset %}
         <tr class="link_formset">
-            <td valign="center" width="19%">
-                <table>
-                    <tr>
-                        <td>Начало
-                            <div class="col-xs-6">{% bootstrap_field link_form.startTime %}</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Конец
-                            <div class="col-xs-6"> {% bootstrap_field link_form.endTime %}</div>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-            <td valign="center">{% bootstrap_field link_form.comment %}</td>
-            <td valign="center" width="45%">{% bootstrap_field link_form.standartWork %}</td>
-            <td valign="center">{% bootstrap_field link_form.workPlace %}</td>
-            <td valign="center">{% bootstrap_field link_form.rationale %}</td>
+            <td valign="center">{% bootstrap_field link_form.equipment %}</td>
+            <td valign="center">{% bootstrap_field link_form.cnt %}</td>
         </tr>
         {% endfor %}
         <div class="placeForAddBtn"></div>
     </table>
 
     <div align="center">
-        <a href="/constructors/formReport/" class="btn btn-default">Назад</a>
-        <a href='/constructors/delete/{{eq_id}}/' class="btn btn-danger"
-           onclick="YNconfirm(); return false;">Удалить</a>
+        <a href="/workReport/equipment/" class="btn btn-default">Назад</a>
         <input align="center" class="btn btn-primary" type="submit" value="Сохранить" class="button"/>
     </div>
 </form>
@@ -156,11 +154,11 @@ padding: 5px;
         $(document).ready(function (){
            $("#disease").select2({
              allowClear:true,
-             placeholder: 'Поиск наряда'
+             placeholder: 'Поиск оборудования'
            });
            $("#disease2").select2({
              allowClear:true,
-             placeholder: 'Поиск наряда'
+             placeholder: 'Поиск оборудования'
            });
 		    $( "#datepicker" ).datepicker({dateFormat: 'yy-mm-dd'});
             $( "#datepicker2" ).datepicker({dateFormat: 'yy-mm-dd'});
@@ -182,7 +180,7 @@ padding: 5px;
     $('.link_formset').formset({
         addText: 'Добавить',
         deleteText: 'Удалить',
-        prefix:'formset',
+        prefix:'equipment',
 
     });
 

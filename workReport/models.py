@@ -14,6 +14,8 @@ from workReport.workReportGenerator import generateReport
 class StockReportStruct(models.Model):
     # оборудование
     equipment = models.ForeignKey('constructors.Equipment', blank=True)
+    # должно быть выдано
+    cnt = models.FloatField(default=0)
     # выдано
     getCnt = models.FloatField(default=0)
     # брак
@@ -110,20 +112,98 @@ class WorkReport(models.Model):
     state = models.IntegerField(default=0)
 
     STATE_CREATED = 0
-    STATE_PLAN_HARDWARE_CALCULATED = 1
+    STATE_STOCK_READY = 1
     STATE_GETTED_FROM_STOCK = 2
     STATE_LEAVED_TO_STOCK = 3
     STATE_CLOSED = 4
     STATE_OTK_ACCEPTED = 5
 
+    # сохранить внеплановое оборудование
+    def saveNoPlanHardware(self, formset):
+        if formset.is_valid():
+            self.noPlanHardware.clear()
+            for form in formset.forms:
+                if form.is_valid:
+                    d = form.cleaned_data
+                    if (len(d) > 0) and ("cnt" in d) and (float(d["cnt"]) > 0) and \
+                            (("equipment" in d) and (not d["equipment"] is None) and (d["equipment"] != self)):
+                        print(d)
+                        ss = StockReportStruct.objects.create(equipment=Equipment.objects.get(pk=int(d["equipment"])),
+                                                              cnt=float(d["cnt"]))
+                        ss.save()
+                        self.noPlanHardware.add(ss)
+                else:
+                    print("for is not valid")
+
+    # список планового оборудования
+    def generatePlanHardwareVals(self):
+        arr = []
+        for ns in self.planHardware.all():
+            if (ns.equipment != None):
+                print(self.area)
+                arr.append({'equipment': ns.equipment,
+                            'cnt': ns.cnt}
+                           )
+        return arr
+
+    def generateHardwareVals(self):
+        pE = self.generatePlanHardwareVals()
+        nPE = self.generateNonPlanHardwareVals()
+        d = {}
+        for e in pE:
+            d[e["equipment"]] = {
+                "plan": e["cnt"],
+                "nonPlan": 0
+            }
+
+        for e in nPE:
+            if e["equipment"] in d:
+                d[e["equipment"]]["nonPlan"] = e["cnt"]
+            else:
+                d[e["equipment"]] = {
+                    "plan": 0,
+                    "nonPlan": e["cnt"]
+                }
+        arr = []
+        for key, value in d.items():
+            tmp = {
+                "equipment": key,
+                "plan": d[key]["plan"],
+                "nonPlan": d[key]["nonPlan"],
+            }
+            tmp["remain"] = key.stockStruct.get(area=Area.objects.get(pk=self.area)).cnt
+            tmp["sum"] = d[key]["plan"] + d[key]["nonPlan"]
+            arr.append(tmp)
+
+        return arr
+
+    # список внепланового оборудования
+    def generateNonPlanHardwareVals(self):
+        arr = []
+        for ns in self.noPlanHardware.all():
+            if (ns.equipment != None):
+                arr.append({'equipment': ns.equipment,
+                            'cnt': ns.cnt,
+                            })
+        return arr
+
+    # список внепланового оборудования
+    def generateNonPlanHardware(self):
+        arr = []
+        for ns in self.noPlanHardware.all():
+            if (ns.equipment != None):
+                arr.append({'equipment': str(ns.equipment.pk),
+                            'cnt': str(ns.cnt)})
+        return arr
+
     # сохранить стандартные работы
     def saveWorkPartFromFormset(formset, workPart):
         workPart.clear()
         for form in formset.forms:
-        #    print(form.cleaned_data)
+            #    print(form.cleaned_data)
             d = form.cleaned_data
-            if (len(d) > 0) and ("standartWork" in d) and (not d["standartWork"] is None) and\
-                    (form.cleaned_data["standartWork"]!=""):
+            if (len(d) > 0) and ("standartWork" in d) and (not d["standartWork"] is None) and \
+                    (form.cleaned_data["standartWork"] != ""):
 
                 sw = Equipment.objects.get(pk=int(form.cleaned_data["standartWork"]))
                 if form.cleaned_data["workPlace"] == "":
@@ -169,8 +249,8 @@ class WorkReport(models.Model):
             'adate': self.adate,
             'VIKDate': self.VIKDate,
             'note': self.note,
+            'area': self.area,
         }
-
 
     def generateWorkPartData(self):
         # member_data = list(self.workPart.all().values())

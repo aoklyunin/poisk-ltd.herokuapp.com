@@ -1,0 +1,60 @@
+{% extends "plan/base.html" %}
+{% load staticfiles %}
+{# Load the tag library #}
+{% load bootstrap3 %}
+{% load crispy_forms_tags %}
+{% load crispy_forms_tags %}
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% bootstrap_messages %}
+
+{% block style_block %}
+    .centering{
+        text-align: center;
+    }
+    td {
+    padding: 5px;
+    }
+{% endblock %}
+
+{% block title %}НПО Поиск{% endblock %}
+
+{% block content %}
+<h1>Склад</h1>
+{% if user.is_authenticated == False %}
+<p>Для доступа к системе Вам надо войти или зарегистрироваться</p>
+{% else %}
+
+{% endif %}
+{% endblock %}
+
+{% block navigating %}
+<a href="/stock/" class="btn btn-info">Главная</a>
+<a href="/stock/stock_balance/{{area_id}}/" class="btn btn-default">Баланс на складе</a>
+<a href="/stock/wrExtradition/{{area_id}}/" class="btn btn-default">Выдача по наряду</a>
+<a href="/stock/wrAcceptance/{{area_id}}/" class="btn btn-default">Приёмка по наряду</a>
+<a href="/stock/acceptance/{{area_id}}/" class="btn btn-default">Поставка</a>
+<a href="/stock/providers/" class="btn btn-default">Поставщики</a>
+
+{% endblock %}
+
+{% block sub_content %}
+<br><br>
+    <table width="70%" align="center">
+    <tr><td >
+        <div class="panel panel-primary ">
+            <div class="panel-heading">{{it.caption}}</div>
+            <div class="panel-body"  align="justify">
+                <H3>{{ it.text }}</H3>
+                {{ it.subText |linebreaks }}
+            </div>
+        </div>
+    </td></tr>
+    </table>
+
+
+{% endblock %}
+
+{% block error_messages %}
+{% endblock %}

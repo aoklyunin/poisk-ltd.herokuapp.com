@@ -1,181 +1,149 @@
 # -*- coding: utf-8 -*-
+from django.contrib import messages
 from django.forms import TextInput
 from django.forms.formsets import BaseFormSet, formset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
+from constructors.form import EquipmentListWithoutSWForm, EquipmentListForm
 from constructors.models import Equipment, StockStruct
 from plan.forms import LoginForm
-from plan.models import Area
-from stock.form import MoveEquipmentForm, MoveMaterialForm, MoveDetailForm, MoveAssemblyForm, EquipmentForm
+from plan.models import Area, InfoText
+from stock.form import MoveEquipmentForm, MoveMaterialForm, MoveDetailForm, MoveAssemblyForm, EquipmentForm, \
+    StockReadyReportSingleForm
 from stock.models import MoveEquipment
 from plan.forms import RequiredFormSet
 
 
-# список оборудования по типу оборудования
-def listEquipmentByType(request, area_id, tp, template):
-    if request.method == 'POST':
-        # строим форму на основе запроса
-        form = EquipmentForm(request.POST)
-        # если форма заполнена корректно
-        if form.is_valid():
-            d = {}
-            d["name"] = form.cleaned_data["name"]
-            d["dimension"] = form.cleaned_data["dimension"]
-            d["equipmentType"] = tp
-            eq = Equipment.objects.create()
-            ms = StockStruct.objects.create(area=Area.objects.get(name="Малахит"))
-            ks = StockStruct.objects.create(area=Area.objects.get(name="Красное село"))
-            eq.stockStruct.add(ms)
-            eq.stockStruct.add(ks)
-            eq.save()
-            Equipment.objects.filter(pk=eq.pk).update(**d)
+# главная страница раздела нарядов
+from workReport.models import WorkReport
 
-    if int(area_id) == 0:
-        area = Area.objects.get(name="Красное село")
-    else:
-        area = Area.objects.get(name="Малахит")
 
-    arr = []
-    for l in Equipment.objects.filter(equipmentType=tp):
-        arr.append({
-            "name": l.name,
-            "dimension": l.dimension,
-            "cnt": 0 if l.equipmentType == Equipment.TYPE_STANDART_WORK else l.stockStruct.get(area=area).cnt,
-            "id": l.pk
-        })
-    ef = EquipmentForm()
-
-    ef.fields["name"].label = ""
-
-    if tp == Equipment.TYPE_STANDART_WORK:
-        ef.fields["name"].widget = TextInput(attrs={'placeholder': 'Сварка'})
-    elif tp == Equipment.TYPE_DETAIL:
-        ef.fields["name"].widget = TextInput(attrs={'placeholder': 'Деталь 1'})
-    elif tp == Equipment.TYPE_ASSEMBLY_UNIT:
-        ef.fields["name"].widget = TextInput(attrs={'placeholder': 'Сборка 1'})
-
-    return render(request, template, {
-        'area_id': area_id,
+def index(request):
+    c = {
         'login_form': LoginForm(),
-        'eqs': arr,
-        'one': '1',
-        'form': ef,
-    })
+        'it': InfoText.objects.get(pageName="stock_index"),
+        'area_id': Area.objects.first().pk,
+    }
+    return render(request, "stock/index.html", c)
 
 
-# список оснастки
-def equipmentList(request, area_id):
-    return listEquipmentByType(request, area_id, Equipment.TYPE_INSTUMENT, "stock/equipmentList.html")
-
-
-# список материалов
-def materialList(request, area_id):
-    return listEquipmentByType(request, area_id, Equipment.TYPE_MATERIAL, "stock/materialList.html")
-
-
-# список деталей
-def detailList(request, area_id):
-    return listEquipmentByType(request, area_id, Equipment.TYPE_DETAIL, "stock/detailList.html")
-
-
-# список Сборочных единиц
-def assemblyList(request, area_id):
-    return listEquipmentByType(request, area_id, Equipment.TYPE_ASSEMBLY_UNIT, "stock/assemblyList.html")
-
-
-# детализация по оборудованию на складе
-def detailStockEquipment(request, equipment_id):
-    if request.method == 'POST':
+# баланс на складе
+def stockBalance(request, area_id):
+    if request.method == "POST":
         # строим форму на основе запроса
-        form = EquipmentForm(request.POST)
+        form = EquipmentListForm(request.POST, prefix='main_form')
         # если форма заполнена корректно
         if form.is_valid():
-            eq = Equipment.objects.get(pk=equipment_id)
-            eq.name = form.cleaned_data["name"]
-            eq.dimension = form.cleaned_data["dimension"]
-            eq.code = form.cleaned_data["code"]
-            eq.scheme = form.cleaned_data["scheme"]
-            eq.needVIK = form.cleaned_data["needVIK"]
-            eq.save()
-            if eq.equipmentType == Equipment.TYPE_INSTUMENT:
-                return HttpResponseRedirect('/stock/equipment/list/0/')
-            else:
-                return HttpResponseRedirect('/stock/material/list/0/')
+            # получаем объект площадки
+            area = Area.objects.get(pk=area_id)
+            # формируем список оборудования, у которого есть данные об этой площадке
+            lst = []
+            for e in form.cleaned_data['equipment']:
+                try:
+                    eq = Equipment.objects.get(pk=e)
+                    flg = True
+                    for ss in eq.stockStruct.all():
+                        if ss.area == area:
+                            lst.append([eq, ss.cnt])
+                            flg = False
+                    if flg:
+                        messages.error(request, "На этой площадке не найдено складской структуры " + eq.name)
+                except:
+                    messages.error(request, "Оборудования с таким id не найдено")
+            # если списокнепустой
+            if len(lst) > 0:
+                # формируем страницу со списком
+                c = {
+                    'area_id': int(area_id),  # иначе не сравнить с id площадки при переборе
+                    'login_form': LoginForm(),
+                    'lst': lst,
+                    'areas': Area.objects.all().order_by('name'),
+                }
+                return render(request, "stock/stockList.html", c)
 
-    return render(request, "stock/detailEquipment.html", {
-        'form': EquipmentForm(instance=Equipment.objects.get(pk=equipment_id)),
-    })
+    c = {
+        'area_id': int(area_id),  # иначе не сравнить с id площадки при переборе
+        'areas': Area.objects.all().order_by('name'),
+        'login_form': LoginForm(),
+        'form': EquipmentListWithoutSWForm(prefix="main_form")
+    }
+    return render(request, "stock/stockBalance.html", c)
 
 
-# обработать формсет движения оборудования(приёмка/выдача)
-def processMovingFomset(formset, flgAcceptance, area_id):
-    if formset.is_valid():
-        for form in formset.forms:
-            if ("equipment" in form.cleaned_data.keys()) and ("cnt" in form.cleaned_data.keys()):
-                print(form.cleaned_data)
-                eq = form.cleaned_data["equipment"]
-                cnt = form.cleaned_data["cnt"]
-                if (cnt is not None):
-                    e = MoveEquipment.objects.create(
-                        equipment=eq,
-                        cnt=cnt,
-                        flgAcceptance=flgAcceptance,
-                    )
-                    e.save()
-                    e.accept(area_id)
-
-
-def moving(request, area_id, flgAcceptance, template):
-    EquipmentFormset = formset_factory(MoveEquipmentForm, formset=RequiredFormSet)
-    MaterialFormset = formset_factory(MoveMaterialForm, formset=RequiredFormSet)
-    DetailFormset = formset_factory(MoveDetailForm, formset=RequiredFormSet)
-    AssemblyFormset = formset_factory(MoveAssemblyForm, formset=RequiredFormSet)
+# Выдача нарядов
+def wrExtradition(request, area_id):
     if request.method == 'POST':
-        processMovingFomset(EquipmentFormset(request.POST, request.FILES, prefix='equipment'), flgAcceptance, area_id)
-        processMovingFomset(MaterialFormset(request.POST, request.FILES, prefix='material'), flgAcceptance, area_id)
-        processMovingFomset(DetailFormset(request.POST, request.FILES, prefix='detail'), flgAcceptance, area_id)
-        processMovingFomset(AssemblyFormset(request.POST, request.FILES, prefix='assembly'), flgAcceptance, area_id)
+        # строим форму на основе запроса
+        form = StockReadyReportSingleForm(request.POST)
+        # если форма заполнена корректно
+        if form.is_valid():
+            return HttpResponseRedirect("/stock/detailWrExtradition/" + form.cleaned_data["report"] + "/")
 
-    c = {'equipment_formset': EquipmentFormset(prefix='equipment'),
-         'material_formset': MaterialFormset(prefix='material'),
-         'detail_formset': DetailFormset(prefix='detail'),
-         'assembly_formset': AssemblyFormset(prefix='assembly'),
-         'login_form': LoginForm(),
-         'area_id': area_id,
-         'one': '1'
-         }
-    return render(request, template, c)
-
-
-# выдача
-def extradition(request, area_id):
-    return moving(request, area_id, False, 'stock/extradition.html')
+    c = {
+        'login_form': LoginForm(),
+        'area_id': int(area_id),
+        'areas': Area.objects.all().order_by('name'),
+        'reportForm': StockReadyReportSingleForm(),
+    }
+    return render(request, "stock/wrExtradition.html", c)
 
 
-# приёмка
+# выдача по конкретному наряду
+def detailWrExtradition(request, workReport_id):
+    wr = WorkReport.objects.get(pk=workReport_id)
+
+    if request.method == 'POST':
+        # строим форму на основе запроса
+        form = StockReadyReportSingleForm(request.POST)
+        # если форма заполнена корректно
+        if form.is_valid():
+            return HttpResponseRedirect("/stock/wrExtradition/" + form.cleaned_data["report"] + "/")
+
+    pE = wr.generateHardwareVals()
+
+    c = {
+        'pE': pE,
+        'login_form': LoginForm(),
+        'area_id':  Area.objects.first().pk,
+        'areas': Area.objects.all().order_by('name'),
+        'reportForm': StockReadyReportSingleForm(),
+        'wr': wr,
+    }
+    return render(request, "stock/detailWrExtradition.html", c)
+
+def doWrExtradition(request, workReport_id):
+    print(workReport_id)
+    return HttpResponseRedirect("/stock/detailWrExtradition/")
+
+
+
+# главная страница раздела нарядов
+def wrAcceptance(request, area_id):
+    c = {
+        'login_form': LoginForm(),
+        'it': InfoText.objects.get(pageName="stock_index"),
+        'area_id': Area.objects.first().pk,
+    }
+    return render(request, "stock/index.html", c)
+
+
+# главная страница раздела нарядов
 def acceptance(request, area_id):
-    return moving(request, area_id, True, 'stock/acceptance.html')
-
-
-# удаление оборудования
-def removeStockEquipment(request, equipment_id):
-    eq = Equipment.objects.get(pk=equipment_id)
-    tp = eq.equipmentType
-    eq.stockStruct.clear()
-    eq.delete()
-
-    if tp == Equipment.TYPE_INSTUMENT:
-        return HttpResponseRedirect('/stock/equipment/list/0/')
-    else:
-        return HttpResponseRedirect('/stock/material/list/0/')
-
-
-# список нарядов
-def reportList(request, area_id):
-    return render(request, "stock/reportList.html", {
+    c = {
         'login_form': LoginForm(),
-        'area_id': area_id,
+        'it': InfoText.objects.get(pageName="stock_index"),
+        'area_id': Area.objects.first().pk,
+    }
+    return render(request, "stock/index.html", c)
 
-        'one': '1'
-    })
+
+
+# главная страница раздела нарядов
+def providers(request):
+    c = {
+        'login_form': LoginForm(),
+        'it': InfoText.objects.get(pageName="stock_index"),
+        'area_id': Area.objects.first().pk,
+    }
+    return render(request, "stock/index.html", c)

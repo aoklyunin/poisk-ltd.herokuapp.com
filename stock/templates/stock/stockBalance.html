@@ -21,7 +21,7 @@
 {% block title %}НПО Поиск{% endblock %}
 
 {% block content %}
-<h1>Конструкторам</h1>
+<h1>Склад</h1>
 {% if user.is_authenticated == False %}
 <p>Для доступа к системе Вам надо войти или зарегистрироваться</p>
 {% else %}
@@ -30,25 +30,36 @@
 {% endblock %}
 
 {% block navigating %}
-<a href="/workReport/" class="btn btn-default">Главная</a>
-<a href="/workReport/formReport/" class="btn btn-default">Формирование наряда</a>
-<a href="/workReport/equipment/" class="btn btn-info">Выдача оборудования</a>
-<a href="/workReport/closeReport/" class="btn btn-default">Закрытие наряда</a>
-<a href="/workReport/otk/" class="btn btn-default">ОТК</a>
-<a href="/workReport/archive/" class="btn btn-default">Архив</a>
+<a href="/stock/" class="btn btn-default">Главная</a>
+<a href="/stock/stock_balance/{{area_id}}/" class="btn btn-info">Баланс на складе</a>
+<a href="/stock/wrExtradition/{{area_id}}/" class="btn btn-default">Выдача по наряду</a>
+<a href="/stock/wrAcceptance/{{area_id}}/" class="btn btn-default">Приёмка по наряду</a>
+<a href="/stock/acceptance/{{area_id}}/" class="btn btn-default">Поставка</a>
+<a href="/stock/providers/" class="btn btn-default">Поставщики</a>
 {% endblock %}
 
 {% block sub_content %}
-<br><br>
+<br>
 
-    <H3 align="center"> Выберите наряд для редактирования</H3>
+
+<div class="btn-group centering" >
+    {% for area in areas %}
+        <a href="/stock/stock_balance/{{area.pk}}/" class="btn
+        {% ifnotequal area_id area.pk %}btn-default {%else%}btn-info {%endifnotequal%} ">{{area.name}}</a>
+    {% endfor %}
+</div>
+
+<br>
+<H3 align="center"> Выберите оборудование, баланс которого на сладе надо отобразить</H3>
+<br>
+
  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
     <link rel="stylesheet" type="text/css"
           href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-css/1.4.6/select2-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
     <style>
-        #disease{
-            width: 50%;  position: relative;top: 220px; left: 182px;
+        .js-example-basic-multiple{
+            width: 70%;  position: relative;top: 220px; left: 182px;
          }
 
     </style>
@@ -62,9 +73,9 @@
 
 <form method="post" align="center">
     {% csrf_token %}
-    {{ reportForm.management_form }}
-    {{ reportForm}}
-     <input align="center" class="btn btn-primary" type="submit" value="Редактировать" class="button"/>
+    {{ form.management_form }}
+    {{ form}}
+     <input align="center" class="btn btn-primary" type="submit" value="Показать" class="button"/>
 </form>
 
 
@@ -75,7 +86,7 @@
         $(document).ready(function (){
            $("#disease").select2({
              allowClear:true,
-             placeholder: 'Поиск наряда'
+             placeholder: 'Поиск оборудования'
            });
         })
 

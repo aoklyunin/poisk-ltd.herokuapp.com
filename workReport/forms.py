@@ -8,7 +8,7 @@ from django import forms
 from django.forms import ModelForm, BaseFormSet, Form, ChoiceField, FloatField, CharField, TimeField
 
 from constructors.models import Equipment
-from plan.models import Rationale, WorkPlace
+from plan.models import Rationale, WorkPlace, Area
 from .models import WorkerPosition, Worker, WorkPart, Reject, NeedStruct, WorkReport
 
 from django.db.models.fields import BLANK_CHOICE_DASH
@@ -92,6 +92,8 @@ class ReportForm(forms.Form):
     note = forms.CharField(widget=forms.Textarea(attrs={'rows': 2, 'cols': 20, 'placeholder': 'Что довавить'}),
                            label="Примечание", required=False)
 
+    area = forms.ModelChoiceField(queryset=Area.objects.all(), label='Площадка')
+
     def __init__(self, *args, **kwargs):
         super(ReportForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
@@ -125,7 +127,7 @@ class ReportForm(forms.Form):
 
 
 # форма для выбора одного изделия с кол-вом
-class MyWorkPartForm(Form):
+class WorkPartForm(Form):
     comment = CharField(label="", max_length=100)
     startTime = TimeField(label="")
     endTime = TimeField(label="")
@@ -134,7 +136,7 @@ class MyWorkPartForm(Form):
     rationale = ChoiceField(label="")
 
     def __init__(self, *args, **kwargs):
-        super(MyWorkPartForm, self).__init__(*args, **kwargs)
+        super(WorkPartForm, self).__init__(*args, **kwargs)
         self.fields['standartWork'].choices = getStandartWorks()
         self.fields['rationale'].choices = getRationales()
         self.fields['workPlace'].choices = getWorkPlaces()
@@ -161,71 +163,6 @@ class MyWorkPartForm(Form):
         self.fields['endTime'].widget = forms.TimeInput(format='%H:%M')
         self.fields['startTime'].widget.attrs['class'] = 'timepicker123'
         self.fields['endTime'].widget.attrs['class'] = 'timepicker123'
-
-
-class WorkPartForm(ModelForm):
-    class Meta:
-        model = WorkPart
-        fields = '__all__'
-        widgets = {
-            'comment': forms.Textarea(attrs={'cols': 80, 'rows': 1}),
-            'startTime': forms.TimeInput(format='%H:%M'),
-            'endTime': forms.TimeInput(format='%H:%M'),
-        }
-
-        labels = {
-            'comment': '',
-            'startTime': '',
-            'endTime': '',
-            'standartWork': '',
-            'workPlace': '',
-            'rationale': '',
-        }
-
-        error_messages = {
-            'startTime': {'invalid': ''},
-            'endTime': {'invalid': ''},
-            'workPlace': {'required': ''},
-            'rationale': {'invalid': '', 'invalid_choice': ''},
-            'standartWork': {'invalid_choice': ''}
-        }
-
-    def __init__(self, *args, **kwargs):
-        # first call parent's constructor
-        super(WorkPartForm, self).__init__(*args, **kwargs)
-        # there's a `fields` property now
-        self.fields['comment'].required = False
-        self.fields["standartWork"].queryset = Equipment.objects.filter(equipmentType=Equipment.TYPE_STANDART_WORK)
-        self.fields['workPlace'].required = False
-        self.fields['rationale'].required = False
-        self.helper = FormHelper()
-        self.helper.layout = Layout(
-            Div(
-                Div(
-                    Field('startTime', css_class='col-sm-2', ),
-                    Field('endTime', css_class='col-sm-2'),
-                    css_class='row'),
-                Field('standartWork', css_class='col-sm-2', ),
-                Field('workPlace', css_class='col-sm-2', ),
-                Field('comment', css_class='col-sm-2', ),
-                Field('rationale', css_class='col-sm-2', ),
-                css_class='row')
-        )
-
-
-class ExampleFormSetHelper(FormHelper):
-    def __init__(self, *args, **kwargs):
-        super(ExampleFormSetHelper, self).__init__(*args, **kwargs)
-        self.form_method = 'post'
-        self.layout = Layout(
-            Div('standartWork', css_class='col-xs-2', ),
-            Div('workPlace', css_class=' col-xs-2', ),
-            Div('startTime', css_class='col-xs-2', ),
-            Div('endTime', css_class=' col-xs-2', ),
-            Div('comment', css_class='col-xs-2', ),
-            Div('rationale', css_class='col-xs-2', ),
-        )
-        self.render_required_fields = True
 
 
 class RejectForm(ModelForm):
