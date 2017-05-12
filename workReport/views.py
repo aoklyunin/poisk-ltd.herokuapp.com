@@ -22,8 +22,6 @@ from workReport.models import WorkReport, WorkPart, Reject, Worker, \
     WorkerPosition, NeedStruct, StockReportStruct
 
 
-
-
 # главная страница раздела нарядов
 
 
