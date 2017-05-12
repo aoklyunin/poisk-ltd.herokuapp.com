@@ -296,7 +296,17 @@ def printReport(request, tp, workReport_id):
         return response
     else:
         tmpPath = str(settings.PROJECT_ROOT) + "\\tempFiles\\"
-        document.save(tmpPath + "tmp.docx")
+        document.save(tmpPath + "t.docx")
+        command = 'unoconv --format pdf ' + tmpPath + 't.docx'
+        print(command)
+        os.system(command)
+        test_file = open(tmpPath + "t.pdf", 'rb')
+        response = HttpResponse(content=test_file)
+        response['Content-Type'] = 'application/pdf'
+        original_filename = str(wr) + u".pdf"
+        filename_header = 'filename*=UTF-8\'\'%s' % urllib.parse.quote(original_filename.encode('utf-8'))
+        response['Content-Disposition'] = "attachment; " + filename_header
+        return response
 
        # if (str(sys.platform)=="win32") or (str(sys.platform)=="win64"):
             #pythoncom.CoInitialize()
@@ -305,24 +315,15 @@ def printReport(request, tp, workReport_id):
             #worddoc.SaveAs(tmpPath+"tmp.pdf", FileFormat=17)
             #worddoc.Close()
             #test_file = open(tmpPath+"tmp.pdf", 'rb')
-            #response = HttpResponse(content=test_file)
+            #response = HttpResponse()
             #response['Content-Type'] = 'application/pdf'
             # original_filename = str(wr) + u".pdf"
             #  filename_header = 'filename*=UTF-8\'\'%s' % urllib.parse.quote(original_filename.encode('utf-8'))
             # response['Content-Disposition'] = "attachment; " + filename_header
            # return response
         #else:
-        os.system("command")
-        response = HttpResponse()
-        response['Content-Type'] = 'application/pdf'
-        os.system("unoconv --format pdf --output "+tmpPath+" "+tmpPath+"tmp.doc")
-        response['Content-Type'] = 'application/pdf'
-        original_filename = str(wr) + u".pdf"
-        filename_header = 'filename*=UTF-8\'\'%s' % urllib.parse.quote(original_filename.encode('utf-8'))
-        response['Content-Disposition'] = "attachment; " + filename_header
-        return response
+
 
         # original_filename = str(wr) + u".pdf"
         #  filename_header = 'filename*=UTF-8\'\'%s' % urllib.parse.quote(original_filename.encode('utf-8'))
         # response['Content-Disposition'] = "attachment; " + filename_header
-        return response
