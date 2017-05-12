@@ -10,7 +10,7 @@ from constructors.models import Equipment, StockStruct
 from plan.forms import LoginForm
 from plan.models import Area, InfoText
 from stock.form import MoveEquipmentForm, MoveMaterialForm, MoveDetailForm, MoveAssemblyForm, EquipmentForm, \
-    StockReadyReportSingleForm
+    StockReadyReportSingleForm, StockLeaveReportSingleForm
 from stock.models import MoveEquipment
 from plan.forms import RequiredFormSet
 
@@ -113,19 +113,52 @@ def detailWrExtradition(request, workReport_id):
     return render(request, "stock/detailWrExtradition.html", c)
 
 def doWrExtradition(request, workReport_id):
-    print(workReport_id)
-    return HttpResponseRedirect("/stock/detailWrExtradition/")
+    wr = WorkReport.objects.get(pk=workReport_id)
+    wr.extraditionEquipment()
 
+    return HttpResponseRedirect("/stock/wrExtradition/"+str(Area.objects.first().pk)+"/")
 
 
 # главная страница раздела нарядов
 def wrAcceptance(request, area_id):
+    if request.method == 'POST':
+        # строим форму на основе запроса
+        form = StockLeaveReportSingleForm(request.POST)
+        # если форма заполнена корректно
+        if form.is_valid():
+            return HttpResponseRedirect("/stock/detailWrAcceptance/" + form.cleaned_data["report"] + "/")
+
     c = {
         'login_form': LoginForm(),
-        'it': InfoText.objects.get(pageName="stock_index"),
-        'area_id': Area.objects.first().pk,
+        'area_id': int(area_id),
+        'areas': Area.objects.all().order_by('name'),
+        'reportForm': StockLeaveReportSingleForm(),
     }
-    return render(request, "stock/index.html", c)
+    return render(request, "stock/wrAcceptance.html", c)
+
+
+# выдача по конкретному наряду
+def detailWrAcceptance(request, workReport_id):
+    wr = WorkReport.objects.get(pk=workReport_id)
+
+    if request.method == 'POST':
+        # строим форму на основе запроса
+        form = StockReadyReportSingleForm(request.POST)
+        # если форма заполнена корректно
+        if form.is_valid():
+            return HttpResponseRedirect("/stock/wrAcceptance/" + form.cleaned_data["report"] + "/")
+
+    pE = wr.generateHardwareVals()
+
+    c = {
+        'pE': pE,
+        'login_form': LoginForm(),
+        'area_id':  Area.objects.first().pk,
+        'areas': Area.objects.all().order_by('name'),
+        'reportForm': StockReadyReportSingleForm(),
+        'wr': wr,
+    }
+    return render(request, "stock/detailWrAcceptance.html", c)
 
 
 # главная страница раздела нарядов

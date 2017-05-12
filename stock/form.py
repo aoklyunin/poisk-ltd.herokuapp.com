@@ -15,9 +15,17 @@ from stock.models import MoveEquipment
 from workReport.models import WorkReport
 from django.db.models.fields import BLANK_CHOICE_DASH
 
+
 def getStockReadyReport():
     reports = []
     for wr in WorkReport.objects.filter(state=WorkReport.STATE_STOCK_READY):
+        reports.append([wr.id, str(wr)])
+
+    return reports + BLANK_CHOICE_DASH
+
+def getStockLeaveReport():
+    reports = []
+    for wr in WorkReport.objects.filter(state=WorkReport.STATE_GETTED_FROM_STOCK):
         reports.append([wr.id, str(wr)])
 
     return reports + BLANK_CHOICE_DASH
@@ -33,6 +41,16 @@ class StockReadyReportSingleForm(Form):
         self.fields['report'].widget.attrs['class'] = 'js-example-basic-multiple'
         self.fields['report'].widget.attrs['id'] = 'disease'
 
+
+# форма для выбора одного изделия
+class StockLeaveReportSingleForm(Form):
+    report = ChoiceField(label="")
+
+    def __init__(self, *args, **kwargs):
+        super(StockLeaveReportSingleForm, self).__init__(*args, **kwargs)
+        self.fields['report'].choices = getStockLeaveReport()
+        self.fields['report'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['report'].widget.attrs['id'] = 'disease'
 
 
 # форма оборудования
@@ -142,5 +160,3 @@ class MoveStandartWorkForm(MoveForm):
     def __init__(self, *args, **kwargs):
         super(MoveStandartWorkForm, self).__init__(*args, **kwargs)
         self.fields['equipment'].queryset = Equipment.objects.filter(equipmentType=Equipment.TYPE_STANDART_WORK)
-
-

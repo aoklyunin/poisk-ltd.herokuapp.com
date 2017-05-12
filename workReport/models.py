@@ -7,6 +7,7 @@ from constructors.models import NeedStruct, Equipment
 from orders.models import Order
 from plan.models import Agreement, Scheme, WorkerPosition, WorkPlace, Rationale, Worker, Area
 from plan.models import Customer
+from stock.models import MoveEquipment
 from workReport.workReportGenerator import generateReport
 
 
@@ -117,6 +118,29 @@ class WorkReport(models.Model):
     STATE_LEAVED_TO_STOCK = 3
     STATE_CLOSED = 4
     STATE_OTK_ACCEPTED = 5
+
+    def extraditionEquipment(self):
+        for e in self.planHardware.all():
+            if (e.cnt is not None):
+                e = MoveEquipment.objects.create(
+                    equipment=e.equipment,
+                    cnt=e.cnt,
+                    flgAcceptance=False,
+                )
+                e.save()
+                e.acceptMoving(self.area)
+        for e in self.noPlanHardware.all():
+            if (e.cnt is not None):
+                e = MoveEquipment.objects.create(
+                        equipment=e.equipment,
+                        cnt=e.cnt,
+                        flgAcceptance=False,
+                )
+                e.save()
+                e.acceptMoving(self.area)
+        self.state = self.STATE_GETTED_FROM_STOCK
+        self.save()
+
 
     # сохранить внеплановое оборудование
     def saveNoPlanHardware(self, formset):

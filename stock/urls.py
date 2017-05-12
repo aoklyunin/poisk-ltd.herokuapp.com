@@ -2,7 +2,7 @@
 from django.conf.urls import url
 
 from stock.views import stockBalance, wrExtradition, wrAcceptance, acceptance, providers, index, detailWrExtradition, \
-    doWrExtradition
+    doWrExtradition, detailWrAcceptance
 
 urlpatterns = [
     url(r'^stock_balance/(?P<area_id>[0-9]+)/$', stockBalance),
@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^wrAcceptance/(?P<area_id>[0-9]+)/$', wrAcceptance),
     url(r'^acceptance/(?P<area_id>[0-9]+)/$', acceptance),
     url(r'^detailWrExtradition/(?P<workReport_id>[0-9]+)/$', detailWrExtradition),
+    url(r'^detailWrAcceptance/(?P<workReport_id>[0-9]+)/$', detailWrAcceptance),
     url(r'^providers/$', providers),
 
     url(r'^', index, name='index'),

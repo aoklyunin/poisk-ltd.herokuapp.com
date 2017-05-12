@@ -19,12 +19,8 @@ class MoveEquipment(models.Model):
     def __str__(self):
         return str(self.equipment) + ":" + str(self.cnt)
 
-    def accept(self, area_id):
-        if int(area_id) == 0:
-            area = Area.objects.get(name="Красное село")
-        else:
-            area = Area.objects.get(name="Малахит")
-
+    def acceptMoving(self, area_id):
+        area = Area.objects.get(pk=area_id)
         ss = self.equipment.stockStruct.get(area=area)
         if self.flgAcceptance:
             ss.cnt += self.cnt
