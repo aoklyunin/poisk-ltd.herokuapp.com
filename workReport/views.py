@@ -315,7 +315,13 @@ def printReport(request, tp, workReport_id):
         os.system("command")
         response = HttpResponse()
         response['Content-Type'] = 'application/pdf'
-        os.system("unoconv --format pdf --output tmpPath "+tmpPath+"tmp.doc")
+        os.system("unoconv --format pdf --output "+tmpPath+" "+tmpPath+"tmp.doc")
+        response['Content-Type'] = 'application/pdf'
+        original_filename = str(wr) + u".pdf"
+        filename_header = 'filename*=UTF-8\'\'%s' % urllib.parse.quote(original_filename.encode('utf-8'))
+        response['Content-Disposition'] = "attachment; " + filename_header
+        return response
+
         # original_filename = str(wr) + u".pdf"
         #  filename_header = 'filename*=UTF-8\'\'%s' % urllib.parse.quote(original_filename.encode('utf-8'))
         # response['Content-Disposition'] = "attachment; " + filename_header
