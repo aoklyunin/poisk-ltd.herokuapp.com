@@ -7,6 +7,7 @@ import urllib
 
 from datetime import time
 from io import BytesIO
+import sys
 
 import pythoncom
 from django.core.checks import messages
@@ -18,7 +19,6 @@ from django.shortcuts import render, render_to_response, redirect
 from django.forms import formset_factory, BaseFormSet
 from django.urls import reverse
 from django.utils.encoding import iri_to_uri
-from win32com import client
 
 from constructors.form import EquipmentSingleWithCtnForm, EquipmentListWithoutSWForm, EquipmentCntWithoutSWForm
 from constructors.models import Equipment
@@ -306,17 +306,28 @@ def printReport(request, tp, workReport_id):
         document.save(response)
         return response
     else:
-        tmpPath = str(settings.PROJECT_ROOT)+"\\tempFiles\\"
-        document.save(tmpPath+"tmp.docx")
-        pythoncom.CoInitialize()
-        word = client.DispatchEx("Word.Application")
-        worddoc = word.Documents.Open(tmpPath+"tmp.docx")
-        worddoc.SaveAs(tmpPath+"tmp.pdf", FileFormat=17)
-        worddoc.Close()
-        test_file = open(tmpPath+"tmp.pdf", 'rb')
-        response = HttpResponse(content=test_file)
+        tmpPath = str(settings.PROJECT_ROOT) + "\\tempFiles\\"
+        document.save(tmpPath + "tmp.docx")
+
+       # if (str(sys.platform)=="win32") or (str(sys.platform)=="win64"):
+            #pythoncom.CoInitialize()
+            #word = client.DispatchEx("Word.Application")
+            #worddoc = word.Documents.Open(tmpPath+"tmp.docx")
+            #worddoc.SaveAs(tmpPath+"tmp.pdf", FileFormat=17)
+            #worddoc.Close()
+            #test_file = open(tmpPath+"tmp.pdf", 'rb')
+            #response = HttpResponse(content=test_file)
+            #response['Content-Type'] = 'application/pdf'
+            # original_filename = str(wr) + u".pdf"
+            #  filename_header = 'filename*=UTF-8\'\'%s' % urllib.parse.quote(original_filename.encode('utf-8'))
+            # response['Content-Disposition'] = "attachment; " + filename_header
+           # return response
+        #else:
+        os.system("command")
+        response = HttpResponse()
         response['Content-Type'] = 'application/pdf'
-        original_filename = str(wr) + u".pdf"
-        filename_header = 'filename*=UTF-8\'\'%s' % urllib.parse.quote(original_filename.encode('utf-8'))
-        response['Content-Disposition'] = "attachment; " + filename_header
+        os.system("unoconv --format pdf --output tmpPath "+tmpPath+"tmp.doc")
+        # original_filename = str(wr) + u".pdf"
+        #  filename_header = 'filename*=UTF-8\'\'%s' % urllib.parse.quote(original_filename.encode('utf-8'))
+        # response['Content-Disposition'] = "attachment; " + filename_header
         return response
