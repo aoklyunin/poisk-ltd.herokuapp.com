@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
-import datetime
-import re
-import os
-import sys
 import urllib
 
-if (str(sys.platform) == "win32") or (str(sys.platform) == "win64"):
-    from win32com import client
-    import pythoncom
+##if (str(sys.platform) == "win32") or (str(sys.platform) == "win64"):
+#    from win32com import client
+#    import pythoncom
 
 from datetime import time
 from django.http import HttpResponse
@@ -15,20 +11,17 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, render_to_response, redirect
 from django.forms import formset_factory, BaseFormSet
 
-from constructors.form import EquipmentSingleWithCtnForm, EquipmentListWithoutSWForm, EquipmentCntWithoutSWForm
+from constructors.form import EquipmentCntWithoutSWForm
 from constructors.models import Equipment
-from mysite import settings
-from plan.forms import LoginForm, RequiredFormSet
-from plan.models import Area, InfoText, WorkPlace, Rationale
-from workReport.forms import ReportForm, WorkPartForm, NeedStructForm, RejectForm, CreatedReportSingleForm, \
+from plan.forms import LoginForm
+from plan.models import Area, InfoText
+from workReport.forms import ReportForm, WorkPartForm, CreatedReportSingleForm, \
     CloseReportSingleForm
-from workReport.models import WorkReport, WorkPart, Reject, Worker, \
-    WorkerPosition, NeedStruct, StockReportStruct
+from workReport.models import WorkReport, WorkPart,  Worker, \
+    WorkerPosition, StockReportStruct
 
 
 # главная страница раздела нарядов
-
-
 def index(request):
     c = {
         'login_form': LoginForm(),
@@ -60,10 +53,13 @@ def detailCratedWorkReport(request, workReport_id):
     # если post запрос
     if request.method == 'POST':
         report_formset = ReportFormset(request.POST, request.FILES, prefix="formset")
+        flg = True
         #   print(report_formset)
         if report_formset.is_valid():
             # print(report_formset)
             WorkReport.saveWorkPartFromFormset(report_formset, work_report.workPart)
+        else:
+            flg = False
 
         # обработка данных о наряде
         form = ReportForm(request.POST, prefix="reportForm")
@@ -81,13 +77,16 @@ def detailCratedWorkReport(request, workReport_id):
             #  print(form.cleaned_data["area"].pk)
             work_report.area = form.cleaned_data["area"].pk
             work_report.save()
+        else:
+            flg = False
+        if flg:
+            return HttpResponseRedirect("/workReport/formReport/")
 
     c = {
         'form': ReportForm(initial=work_report.getMainReportData(), prefix="reportForm"),
         'login_form': LoginForm(),
         'pk': workReport_id,
         'link_formset': ReportFormset(initial=work_report.generateWorkPartData(), prefix="formset"),
-
     }
 
     return render(request, "workReport/detailCratedWorkReport.html", c)
@@ -107,7 +106,6 @@ def createWorkReport(request):
     w.stockMan = Worker.objects.filter(position=wPos).first()
     w.area = Area.objects.first().pk
     w.save()
-
     # заявленные работы
     wp = WorkPart.objects.create(startTime=time(hour=8, minute=30),
                                  endTime=time(hour=8, minute=45),
@@ -127,7 +125,6 @@ def createWorkReport(request):
                                  )
     w.workPart.add(wp)
     return HttpResponseRedirect('/workReport/detailCratedWorkReport/' + str(w.pk) + '/')
-
 
 
 # выдача оборудования
@@ -168,9 +165,7 @@ def detailEquipmentWorkReport(request, workReport_id):
         'flgCalculate': work_report.flgCalculateEquipment,
         'link_formset': EquipmentFormset(initial=work_report.generateNonPlanHardware(), prefix='equipment')
     }
-
     return render(request, "workReport/detailEquipmentWorkReport.html", c)
-
 
 # посчитать плановую выдачу оборудования
 def calculateEquipment(request, workReport_id):
@@ -194,7 +189,6 @@ def calculateEquipment(request, workReport_id):
     wr.save()
     return HttpResponseRedirect("/workReport/detailEquipmentWorkReport/" + workReport_id + "/")
 
-
 # главная страница раздела нарядов
 def stockReady(request, workReport_id):
     wr = WorkReport.objects.get(pk=workReport_id)
@@ -205,7 +199,6 @@ def stockReady(request, workReport_id):
         wr.genfactWorkPart()
 
     return HttpResponseRedirect("/workReport/equipment/")
-
 
 # главная страница раздела нарядов
 def closeReport(request):

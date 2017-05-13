@@ -5,13 +5,14 @@ from django.forms.formsets import BaseFormSet, formset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
-from constructors.form import EquipmentListWithoutSWForm, EquipmentListForm
+from constructors.form import EquipmentListWithoutSWForm, EquipmentListForm, EquipmentCntWithoutSWForm, \
+    EquipmentSingleWithCtnForm, EquipmentConstructorForm, EquipmentConstructorSingleForm, AddEquipmentForm
 from constructors.models import Equipment, StockStruct
-from plan.forms import LoginForm
+from plan.forms import LoginForm, subdict
 from plan.models import Area, InfoText
-from stock.form import MoveEquipmentForm, MoveMaterialForm, MoveDetailForm, MoveAssemblyForm, EquipmentForm, \
-    StockReadyReportSingleForm, StockLeaveReportSingleForm, StockLeaveReportForm
-from stock.models import MoveEquipment
+from stock.form import StockReadyReportSingleForm, StockLeaveReportSingleForm, StockLeaveReportForm, \
+    StockEquipmentListForm, StockEquipmentCntForm, ProviderSingleForm, AddProviderForm, ProviderForm
+from stock.models import MoveEquipment, Provider
 from plan.forms import RequiredFormSet
 
 # главная страница раздела нарядов
@@ -68,6 +69,27 @@ def stockBalance(request, area_id):
         'form': EquipmentListWithoutSWForm(prefix="main_form")
     }
     return render(request, "stock/stockBalance.html", c)
+
+
+def stockListAll(request, area_id):
+    lst = []
+    area = Area.objects.get(pk=area_id)
+    for eq in Equipment.objects.all().exclude(equipmentType=Equipment.TYPE_STANDART_WORK):
+        flg = True
+        for ss in eq.stockStruct.all():
+            if ss.area == area:
+                lst.append([eq, ss.cnt])
+                flg = False
+        if flg:
+            messages.error(request, "На этой площадке не найдено складской структуры " + eq.name)
+    # формируем страницу со списком
+    c = {
+        'area_id': int(area_id),  # иначе не сравнить с id площадки при переборе
+        'login_form': LoginForm(),
+        'lst': lst,
+        'areas': Area.objects.all().order_by('name'),
+    }
+    return render(request, "stock/stockList.html", c)
 
 
 # Выдача нарядов
@@ -144,8 +166,8 @@ def detailWrAcceptance(request, workReport_id):
     if request.method == 'POST':
         equipment_formset = EquipmentFormset(request.POST, request.FILES, prefix='equipment')
         if equipment_formset.is_valid():
-            wr.processAcceptanceFormset(equipment_formset)
-            return HttpResponseRedirect("/stock/wrAcceptance/"+str(wr.area)+"/")
+            wr.processAcceptanceFormset(equipment_formset, wr.area)
+            return HttpResponseRedirect("/stock/wrAcceptance/" + str(wr.area) + "/")
 
     data = wr.generateAcceptanceData()
     c = {
@@ -159,24 +181,94 @@ def detailWrAcceptance(request, workReport_id):
     return render(request, "stock/detailWrAcceptance.html", c)
 
 
-# главная страница раздела нарядов
+# обработать формсет движения оборудования(приёмка/выдача)
+def processMovingFomset(formset, flgAcceptance, area_id):
+    if formset.is_valid():
+        for form in formset.forms:
+            try:
+                if ("equipment" in form.cleaned_data.keys()) and ("cnt" in form.cleaned_data.keys()):
+                    eq = Equipment.objects.get(pk=int(form.cleaned_data["equipment"]))
+                    cnt = form.cleaned_data["cnt"]
+                    if (cnt is not None):
+                        e = MoveEquipment.objects.create(
+                            equipment=eq,
+                            cnt=cnt,
+                            flgAcceptance=flgAcceptance,
+                        )
+                        e.save()
+                        e.acceptMoving(area_id)
+            except:
+                print("acceptance: ошибка чтения формы")
+
+
+# приём поставки
 def acceptance(request, area_id):
+    EquipmentFormset = formset_factory(EquipmentCntWithoutSWForm)
+    if request.method == 'POST':
+        report_formset = EquipmentFormset(request.POST, request.FILES, prefix="equipment")
+        if report_formset.is_valid():
+            processMovingFomset(report_formset, True, area_id)
+
     c = {
         'login_form': LoginForm(),
-        'it': InfoText.objects.get(pageName="stock_index"),
-        'area_id': Area.objects.first().pk,
+        'area_id': int(area_id),
+        'link_formset': EquipmentFormset(prefix='equipment')
     }
-    return render(request, "stock/index.html", c)
+    return render(request, "stock/acceptance.html", c)
 
 
-# главная страница раздела нарядов
+# список поставщиков
 def providers(request):
+    if request.method == "POST":
+        # форма редактирования оборудования
+        eq_form = ProviderSingleForm(request.POST, prefix='eq_form')
+        # если форма заполнена корректно
+        if eq_form.is_valid():
+            pr = Provider.objects.get(pk=int(eq_form.cleaned_data['provider']))
+            return HttpResponseRedirect('/stock/detailProvider/' + str(pr.pk) + '/')
     c = {
         'login_form': LoginForm(),
-        'it': InfoText.objects.get(pageName="stock_index"),
+        'eq_form': ProviderSingleForm(prefix="eq_form"),
+        'form': AddProviderForm(prefix="main_form"),
         'area_id': Area.objects.first().pk,
     }
-    return render(request, "stock/index.html", c)
+    return render(request, "stock/providers.html", c)
+
+# создать поставщика
+def createProvider(request):
+    if request.method == "POST":
+        # форма редактирования оборудования
+        eq_form = AddProviderForm(request.POST, prefix='main_form')
+        # если форма заполнена корректно
+        if eq_form.is_valid():
+            pr = Provider.objects.create(name = eq_form.cleaned_data['name'])
+            return HttpResponseRedirect('/stock/detailProvider/' + str(pr.pk) + '/')
+
+    return HttpResponseRedirect('/stock/providers/')
+
+
+# детализация поставщика
+def detailProvider(request, provider_id):
+    provider = Provider.objects.get(pk = provider_id)
+    if request.method == 'POST':
+        provider_form = ProviderForm(request.POST, request.FILES, prefix='equipment')
+        if provider_form.is_valid():
+            Provider.objects.filter(pk=provider_id).update(**provider_form.cleaned_data)
+
+
+    c = {'form': ProviderForm(instance=provider, prefix='equipment'),
+         'login_form': LoginForm(),
+         'provider_id': provider_id,
+         'area_id': Area.objects.first().pk,
+         }
+    return render(request, "stock/detailProvider.html", c)
+
+
+def deleteProvider(request, provider_id):
+    Provider.objects.filter(pk=provider_id).delete()
+    return HttpResponseRedirect('/stock/providers/')
+
+
 
 
 # главная страница раздела нарядов

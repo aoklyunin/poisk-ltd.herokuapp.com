@@ -13,21 +13,11 @@ from .models import WorkerPosition, Worker, WorkPart, Reject, NeedStruct, WorkRe
 
 from django.db.models.fields import BLANK_CHOICE_DASH
 
-
-# получить список оборудования
-def getCreatedReports():
+# получить список оборудования с фильтром по состоянию (см. класс workReport.WorkReport)
+def getReport(wr_state):
     reports = []
-    for wr in WorkReport.objects.filter(state=WorkReport.STATE_CREATED):
+    for wr in WorkReport.objects.filter(state=wr_state):
         reports.append([wr.id, str(wr)])
-
-    return reports + BLANK_CHOICE_DASH
-
-# получить список оборудования
-def getCloseReports():
-    reports = []
-    for wr in WorkReport.objects.filter(state=WorkReport.STATE_LEAVED_TO_STOCK):
-        reports.append([wr.id, str(wr)])
-
     return reports + BLANK_CHOICE_DASH
 
 
@@ -58,25 +48,29 @@ def getWorkPlaces():
     return reports + BLANK_CHOICE_DASH
 
 
-# форма для выбора одного изделия
-class CreatedReportSingleForm(Form):
+
+
+# форма для выбора одного наряда
+class ReportSingleForm(Form):
     report = ChoiceField(label="")
 
+    def __init__(self, *args, **kwargs):
+        super(ReportSingleForm, self).__init__(*args, **kwargs)
+        self.fields['report'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['report'].widget.attrs['id'] = 'disease'
+
+
+# форма для выбора одного созданного
+class CreatedReportSingleForm(ReportSingleForm):
     def __init__(self, *args, **kwargs):
         super(CreatedReportSingleForm, self).__init__(*args, **kwargs)
-        self.fields['report'].choices = getCreatedReports()
-        self.fields['report'].widget.attrs['class'] = 'js-example-basic-multiple'
-        self.fields['report'].widget.attrs['id'] = 'disease'
+        self.fields['report'].choices = getReport(WorkReport.STATE_CREATED)
 
 
-class CloseReportSingleForm(Form):
-    report = ChoiceField(label="")
-
+class CloseReportSingleForm(ReportSingleForm):
     def __init__(self, *args, **kwargs):
         super(CloseReportSingleForm, self).__init__(*args, **kwargs)
-        self.fields['report'].choices = getCloseReports()
-        self.fields['report'].widget.attrs['class'] = 'js-example-basic-multiple'
-        self.fields['report'].widget.attrs['id'] = 'disease'
+        self.fields['report'].choices = getReport(WorkReport.STATE_LEAVED_TO_STOCK)
 
 
 # форма для отчёта
@@ -181,56 +175,3 @@ class WorkPartForm(Form):
         self.fields['endTime'].widget = forms.TimeInput(format='%H:%M')
         self.fields['startTime'].widget.attrs['class'] = 'timepicker123'
         self.fields['endTime'].widget.attrs['class'] = 'timepicker123'
-
-
-class RejectForm(ModelForm):
-    class Meta:
-        model = Reject
-        fields = '__all__'
-        widgets = {
-        }
-
-        labels = {
-            'cnt': '',
-            'equipment': '',
-            'material': '',
-
-        }
-
-        error_messages = {
-            'equipment': {'invalid_choice': ''},
-            'material': {'invalid_choice': ''},
-        }
-
-    def __init__(self, *args, **kwargs):
-        # first call parent's constructor
-        super(RejectForm, self).__init__(*args, **kwargs)
-        # there's a `fields` property now
-        self.fields['equipment'].required = False
-
-
-class NeedStructForm(ModelForm):
-    class Meta:
-        model = NeedStruct
-        fields = '__all__'
-        widgets = {
-        }
-
-        labels = {
-            'equipment': '',
-            'usedCnt': '',
-            'getCnt': '',
-            'rejectCnt': '',
-            'dustCnt': '',
-            'remainCnt': '',
-        }
-
-        error_messages = {
-            'equipment': {'invalid_choice': ''},
-        }
-
-    def __init__(self, *args, **kwargs):
-        # first call parent's constructor
-        super(NeedStructForm, self).__init__(*args, **kwargs)
-        # there's a `fields` property now
-        self.fields['equipment'].required = False

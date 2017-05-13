@@ -1,0 +1,128 @@
+{% extends "plan/base.html" %}
+{% load staticfiles %}
+{# Load the tag library #}
+{% load bootstrap3 %}
+{% load crispy_forms_tags %}
+{% load crispy_forms_tags %}
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% bootstrap_messages %}
+
+
+{% block title %}НПО Поиск{% endblock %}
+
+{% block content %}
+<h1>Конструкторам</h1>
+{% if user.is_authenticated == False %}
+<p>Для доступа к системе Вам надо войти или зарегистрироваться</p>
+{% else %}
+
+{% endif %}
+{% endblock %}
+
+{% block navigating %}
+<a href="/stock/" class="btn btn-default">Главная</a>
+<a href="/stock/stock_balance/{{area_id}}/" class="btn btn-default">Баланс на складе</a>
+<a href="/stock/wrExtradition/{{area_id}}/" class="btn btn-default">Выдача по наряду</a>
+<a href="/stock/wrAcceptance/{{area_id}}/" class="btn btn-default">Приёмка по наряду</a>
+<a href="/stock/acceptance/{{area_id}}/" class="btn btn-default">Поставка</a>
+<a href="/stock/providers/" class="btn btn-info">Поставщики</a>
+<a href="/stock/equipment/" class="btn btn-default">Оборудование</a>
+{% endblock %}
+
+
+{% block sub_content %}
+
+<br>
+<form method="post" class="formset_form" >
+    {% csrf_token %}
+
+    {{ form.management_form }}
+    <table width="40%" align="center">
+        <tr>
+            <td>{% bootstrap_field form.name %} </td>
+            <td>{% bootstrap_field form.mail %} </td>
+        </tr>
+        <tr>
+            <td>{% bootstrap_field form.contactPerson %} </td>
+            <td>{% bootstrap_field form.tel %} </td>
+        </tr>
+        <tr>
+            <td colspan="2">{% bootstrap_field form.comment %} </td>
+        </tr>
+    </table>
+
+
+    <div align="center">
+        <a href="/stock/providers/" class="btn btn-default">Назад</a>
+        <a href='/stock/deleteProvider/{{provider_id}}/'  class="btn btn-danger" onclick="YNconfirm(); return false;">Удалить</a>
+        <input align="center" class="btn btn-primary" type="submit" value="Сохранить" class="button"/>
+    </div>
+    <br>
+    <a href="/constructors/" hidden id="deleteLin123"></a>
+</form>
+
+ <link rel="stylesheet" type="text/css" href="bootstrap.min.css">
+
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"
+        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="{% static '/scripts/jquery.select.formset.js' %}"></script>
+<script>
+
+    $('.equipment-formset').formset({
+        addText: 'Добавить',
+        deleteText: 'Удалить',
+        prefix:'equipment',
+
+    });
+
+$('.gen_formset').formset({
+        addText: 'Добавить',
+        deleteText: 'Удалить',
+        prefix:'gen',
+
+    });
+
+</script>
+<script>
+
+    function YNconfirm() {
+ if (window.confirm('Вы уверены, что хотите удалить?'))
+ {
+   window.location.href = '/stock/deleteProvider/{{provider_id}}/';
+ }
+}
+</script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+<script>
+        $(document).ready(function (){
+           $("#disease").select2({
+             allowClear:true,
+             placeholder: 'Поиск оборудования'
+           });
+               $("#disease2").select2({
+             allowClear:true,
+             placeholder: 'Поиск чертежей'
+           });
+        })
+
+
+</script>
+
+
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
+<link rel="stylesheet" type="text/css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-css/1.4.6/select2-bootstrap.css">
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
+<script type="text/javascript">
+          $(".js-example-basic-multiple").select2();
+</script>
+
+{% endblock %}
+
+
+{% block error_messages %}
+{% endblock %}

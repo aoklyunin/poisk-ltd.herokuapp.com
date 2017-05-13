@@ -53,15 +53,17 @@ padding: 5px;
 
 
 {% block content %}
-<h1>Конструкторам</h1>
+<h1>Наряды</h1>
 {% if user.is_authenticated == False %}
 <p>Для доступа к системе Вам надо войти или зарегистрироваться</p>
 {% else %}
 
 {% endif %}
+
 {% endblock %}
 
 {% block navigating %}
+
 <a href="/workReport/" class="btn btn-default">Главная</a>
 <a href="/workReport/formReport/" class="btn btn-default">Формирование наряда</a>
 <a href="/workReport/equipment/" class="btn btn-info">Выдача оборудования</a>

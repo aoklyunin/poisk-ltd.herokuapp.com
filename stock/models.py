@@ -16,6 +16,7 @@ class MoveEquipment(models.Model):
     flgAcceptance = models.BooleanField(default=True)
     remainCnt = models.IntegerField(default=0)
 
+
     def __str__(self):
         return str(self.equipment) + ":" + str(self.cnt)
 
@@ -41,3 +42,5 @@ class Provider(models.Model):
     # комментарий
     comment = models.TextField(default="", max_length=10000)
 
+    def __str__(self):
+        return self.name + " (" + self.contactPerson+")"

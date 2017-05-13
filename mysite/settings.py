@@ -105,10 +105,6 @@ INSTALLED_APPS = (
     'constructors',
     'myTest',
     'otk',
-    'dal',
-    'select2',
-    'dal_select2',
-    'dal_queryset_sequence',
 )
 
 from django.contrib.messages import constants as messages

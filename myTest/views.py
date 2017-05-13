@@ -1,4 +1,4 @@
-import simplejson
+#import simplejson
 from django.shortcuts import render
 from django.http import HttpResponse
 

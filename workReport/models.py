@@ -146,9 +146,8 @@ class WorkReport(models.Model):
         return arr
 
 
-    def processAcceptanceFormset(self, formset):
+    def processAcceptanceFormset(self, formset, area_id):
         # без вывода почему-то выдаёт ошибку, что не может обратиться к cleaned_data
-        print(formset)
         if formset.is_valid:
             for form in formset.forms:
                 if form.is_valid:
@@ -160,6 +159,13 @@ class WorkReport(models.Model):
                         ss.dustCnt = d["dustCnt"]
                         ss.returnCnt = d["returnCnt"]
                         ss.save()
+                        e = MoveEquipment.objects.create(
+                            equipment=ss.equipment,
+                            cnt=ss.returnCnt,
+                            flgAcceptance=True,
+                        )
+                        e.save()
+                        e.acceptMoving(area_id)
 
             self.state = self.STATE_LEAVED_TO_STOCK
             self.save()
@@ -186,7 +192,6 @@ class WorkReport(models.Model):
         self.state = self.STATE_GETTED_FROM_STOCK
         self.save()
 
-
     # сохранить внеплановое оборудование
     def saveNoPlanHardware(self, formset):
         if formset.is_valid():
@@ -204,7 +209,6 @@ class WorkReport(models.Model):
                 else:
                     print("for is not valid")
 
-
     # список планового оборудования
     def generatePlanHardwareVals(self):
         arr = []
@@ -215,7 +219,6 @@ class WorkReport(models.Model):
                             'cnt': ns.cnt}
                            )
         return arr
-
 
     # список всего оборудования с указание остатка на складе
     def generateHardwareVals(self):
@@ -249,7 +252,6 @@ class WorkReport(models.Model):
 
         return arr
 
-
     # список внепланового оборудования
     def generateNonPlanHardwareVals(self):
         arr = []
@@ -260,7 +262,6 @@ class WorkReport(models.Model):
                             })
         return arr
 
-
     # список внепланового оборудования
     def generateNonPlanHardware(self):
         arr = []
@@ -270,50 +271,49 @@ class WorkReport(models.Model):
                             'cnt': str(ns.cnt)})
         return arr
 
-
     # сохранить стандартные работы
     def saveWorkPartFromFormset(formset, workPart):
         workPart.clear()
         for form in formset.forms:
-            #    print(form.cleaned_data)
-            d = form.cleaned_data
-            if (len(d) > 0) and ("standartWork" in d) and (not d["standartWork"] is None) and \
-                    (form.cleaned_data["standartWork"] != ""):
+            try:
+                d = form.cleaned_data
+                if (len(d) > 0) and ("standartWork" in d) and (not d["standartWork"] is None) and \
+                        (form.cleaned_data["standartWork"] != ""):
 
-                sw = Equipment.objects.get(pk=int(form.cleaned_data["standartWork"]))
-                if form.cleaned_data["workPlace"] == "":
-                    wp = None
-                else:
-                    wp = WorkPlace.objects.get(pk=int(form.cleaned_data["workPlace"]))
+                    sw = Equipment.objects.get(pk=int(form.cleaned_data["standartWork"]))
+                    if form.cleaned_data["workPlace"] == "":
+                        wp = None
+                    else:
+                        wp = WorkPlace.objects.get(pk=int(form.cleaned_data["workPlace"]))
 
-                if form.cleaned_data["rationale"] == "":
-                    r = None
-                else:
-                    r = Rationale.objects.get(pk=int(form.cleaned_data["rationale"]))
+                    if form.cleaned_data["rationale"] == "":
+                        r = None
+                    else:
+                        r = Rationale.objects.get(pk=int(form.cleaned_data["rationale"]))
 
-                if len(WorkPart.objects.filter(startTime=form.cleaned_data["startTime"],
-                                               endTime=form.cleaned_data["endTime"],
-                                               standartWork=sw,
-                                               workPlace=wp,
-                                               rationale=r,
-                                               comment=form.cleaned_data["comment"])) > 1:
-                    w = WorkPart.objects.filter(startTime=form.cleaned_data["startTime"],
-                                                endTime=form.cleaned_data["endTime"],
-                                                standartWork=sw,
-                                                workPlace=wp,
-                                                rationale=r,
-                                                comment=form.cleaned_data["comment"]).first()
-                else:
-                    w, created = WorkPart.objects.get_or_create(startTime=form.cleaned_data["startTime"],
-                                                                endTime=form.cleaned_data["endTime"],
-                                                                standartWork=sw,
-                                                                workPlace=wp,
-                                                                rationale=r,
-                                                                comment=form.cleaned_data["comment"])
-                w.save()
-                workPart.add(w)
-
-
+                    if len(WorkPart.objects.filter(startTime=form.cleaned_data["startTime"],
+                                                   endTime=form.cleaned_data["endTime"],
+                                                   standartWork=sw,
+                                                   workPlace=wp,
+                                                   rationale=r,
+                                                   comment=form.cleaned_data["comment"])) > 1:
+                        w = WorkPart.objects.filter(startTime=form.cleaned_data["startTime"],
+                                                    endTime=form.cleaned_data["endTime"],
+                                                    standartWork=sw,
+                                                    workPlace=wp,
+                                                    rationale=r,
+                                                    comment=form.cleaned_data["comment"]).first()
+                    else:
+                        w, created = WorkPart.objects.get_or_create(startTime=form.cleaned_data["startTime"],
+                                                                    endTime=form.cleaned_data["endTime"],
+                                                                    standartWork=sw,
+                                                                    workPlace=wp,
+                                                                    rationale=r,
+                                                                    comment=form.cleaned_data["comment"])
+                    w.save()
+                    workPart.add(w)
+            except:
+                print("def saveWorkPartFromFormset: Ошибка чтения формы " + str(form))
 
     # получить основные данные отчёта
     def getMainReportData(self):
@@ -329,7 +329,6 @@ class WorkReport(models.Model):
             'note': self.note,
             'area': self.area,
         }
-
 
     # генерируем планируемые работы
     def generateFactWorkPartData(self):
@@ -359,29 +358,29 @@ class WorkReport(models.Model):
 
     # генерируем фактически выполненные работы
     def generateWorkPartData(self):
-            # member_data = list(self.workPart.all().values())
-            # return list(member_data)
-            arr = []
-            for wp in self.workPart.all().order_by('startTime'):
-                if wp.workPlace is None:
-                    strWorkPlace = ""
-                else:
-                    strWorkPlace = str(wp.workPlace.pk)
+        # member_data = list(self.workPart.all().values())
+        # return list(member_data)
+        arr = []
+        for wp in self.workPart.all().order_by('startTime'):
+            if wp.workPlace is None:
+                strWorkPlace = ""
+            else:
+                strWorkPlace = str(wp.workPlace.pk)
 
-                if wp.rationale is None:
-                    strRationale = ""
-                else:
-                    strRationale = str(wp.rationale.pk)
+            if wp.rationale is None:
+                strRationale = ""
+            else:
+                strRationale = str(wp.rationale.pk)
 
-                arr.append({
-                    'comment': str(wp.comment),
-                    'startTime': wp.startTime,
-                    'endTime': wp.endTime,
-                    'standartWork': str(wp.standartWork.pk),
-                    'workPlace': strWorkPlace,
-                    'rationale': strRationale,
-                })
-            return arr
+            arr.append({
+                'comment': str(wp.comment),
+                'startTime': wp.startTime,
+                'endTime': wp.endTime,
+                'standartWork': str(wp.standartWork.pk),
+                'workPlace': strWorkPlace,
+                'rationale': strRationale,
+            })
+        return arr
 
     # генерируем отчёт
     def generateDoc(self):
@@ -421,7 +420,7 @@ class WorkReport(models.Model):
                 e = [equip.material.name, equip.material.code, equip.material.dimension]
             else:
                 e = [equip.equipment.name, equip.equipment.code, equip.equipment.dimension]
-            for l in [str(equip.cnt), str(equip.cnt-equip.returnCnt), str(equip.rejectCnt), str(equip.dustCnt),
+            for l in [str(equip.cnt), str(equip.cnt - equip.returnCnt), str(equip.rejectCnt), str(equip.dustCnt),
                       str(equip.returnCnt)]:
                 e.append(l)
             planEquipment.append(e)
@@ -433,7 +432,7 @@ class WorkReport(models.Model):
                 e = [equip.material.name, equip.material.code, equip.material.dimension]
             else:
                 e = [equip.equipment.name, equip.equipment.code, equip.equipment.dimension]
-            for l in [str(equip.cnt), str(equip.cnt-equip.returnCnt), str(equip.rejectCnt), str(equip.dustCnt),
+            for l in [str(equip.cnt), str(equip.cnt - equip.returnCnt), str(equip.rejectCnt), str(equip.dustCnt),
                       str(equip.returnCnt)]:
                 e.append(l)
             # print(e)
@@ -462,7 +461,6 @@ class WorkReport(models.Model):
                               self.reportChecker.getShort(), self.VIKer.getShort(), note,
                               attestation, dust, planEquipment, nonPlanEquipment)
 
-
     def getRationales(self):
         i = 0
         d = {}
@@ -477,7 +475,6 @@ class WorkReport(models.Model):
         for key, value in d.items():
             rationales.append([str(value), key])
         return rationales
-
 
     def __str__(self):
         # return "sad"
@@ -496,7 +493,6 @@ class WorkReport(models.Model):
         else:
             s += str(self.adate)
         return s
-
 
     def __unicode__(self):
         # return "sad"
