@@ -5,6 +5,10 @@ import os
 import sys
 import urllib
 
+if (str(sys.platform) == "win32") or (str(sys.platform) == "win64"):
+    from win32com import client
+    import pythoncom
+
 from datetime import time
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
@@ -83,6 +87,7 @@ def detailCratedWorkReport(request, workReport_id):
         'login_form': LoginForm(),
         'pk': workReport_id,
         'link_formset': ReportFormset(initial=work_report.generateWorkPartData(), prefix="formset"),
+
     }
 
     return render(request, "workReport/detailCratedWorkReport.html", c)
@@ -110,33 +115,19 @@ def createWorkReport(request):
                                      name='Получение наряда и ТМЦ для выполнения работ'),
                                  )
     w.workPart.add(wp)
-    wp = WorkPart.objects.create(startTime=time(hour=16, minute=45),
-                                 endTime=time(hour=17, minute=00),
-                                 standartWork=Equipment.objects.get(name='Уборка рабочего места'),
-                                 )
-    w.workPart.add(wp)
-    # фактически выполненные работы
-    wp = WorkPart.objects.create(startTime=time(hour=8, minute=30),
-                                 endTime=time(hour=8, minute=45),
-                                 standartWork=Equipment.objects.get(
-                                     name='Получение наряда и ТМЦ для выполнения работ'),
-                                 )
-    w.factWorkPart.add(wp)
     wp = WorkPart.objects.create(startTime=time(hour=16, minute=30),
                                  endTime=time(hour=16, minute=45),
                                  standartWork=Equipment.objects.get(
                                      name='Отчет о выполненных работах перед РП и ознакомление со сменным нарядом на следующий рабочий день, проверка инструмента, сдача ТМЦ'),
                                  )
-    w.factWorkPart.add(wp)
-
+    w.workPart.add(wp)
     wp = WorkPart.objects.create(startTime=time(hour=16, minute=45),
                                  endTime=time(hour=17, minute=00),
-                                 standartWork=Equipment.objects.get(
-                                     name='Уборка рабочего места'),
+                                 standartWork=Equipment.objects.get(name='Уборка рабочего места'),
                                  )
-    w.factWorkPart.add(wp)
-
+    w.workPart.add(wp)
     return HttpResponseRedirect('/workReport/detailCratedWorkReport/' + str(w.pk) + '/')
+
 
 
 # выдача оборудования
@@ -210,6 +201,8 @@ def stockReady(request, workReport_id):
     if wr.flgCalculateEquipment:
         wr.state = WorkReport.STATE_STOCK_READY
         wr.save()
+        # копируем части работы в фактические
+        wr.genfactWorkPart()
 
     return HttpResponseRedirect("/workReport/equipment/")
 
@@ -281,7 +274,7 @@ def archive(request):
 
 def deleteReport(request, workReport_id):
     WorkReport.objects.filter(pk=workReport_id).delete()
-    return HttpResponseRedirect('/workReport/list/0/')
+    return HttpResponseRedirect('/workReport/formReport/')
 
 
 def printReport(request, tp, workReport_id):
@@ -289,41 +282,41 @@ def printReport(request, tp, workReport_id):
     document = wr.generateDoc()
     if int(tp) == 0:
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-        original_filename = str(wr)+u".doc"
+        original_filename = str(wr) + u".doc"
         filename_header = 'filename*=UTF-8\'\'%s' % urllib.parse.quote(original_filename.encode('utf-8'))
-        response['Content-Disposition'] = "attachment; "+filename_header
+        response['Content-Disposition'] = "attachment; " + filename_header
         document.save(response)
         return response
     else:
+        return HttpResponseRedirect('/workReport/')
+
+        '''tempName = "t1"
         tmpPath = str(settings.PROJECT_ROOT) + "\\tempFiles\\"
-        document.save(tmpPath + "t.docx")
-        command = 'unoconv --format pdf ' + tmpPath + 't.docx'
-        print(command)
-        os.system(command)
-        test_file = open(tmpPath + "t.pdf", 'rb')
-        response = HttpResponse(content=test_file)
-        response['Content-Type'] = 'application/pdf'
-        original_filename = str(wr) + u".pdf"
-        filename_header = 'filename*=UTF-8\'\'%s' % urllib.parse.quote(original_filename.encode('utf-8'))
-        response['Content-Disposition'] = "attachment; " + filename_header
-        return response
+        document.save(tmpPath + tempName+".doc")
+        if (str(sys.platform) == "win32") or (str(sys.platform) == "win64"):
+             pythoncom.CoInitialize()
+             word = client.DispatchEx("Word.Application")
+             print(tmpPath + tempName+".doc")
+             worddoc = word.Documents.Open(tmpPath + tempName+".doc")
+             worddoc.SaveAs(tmpPath + tempName+".pdf", FileFormat=17)
+             worddoc.Close()
+             test_file = open(tmpPath + tempName+".pdf", 'rb')
+             response = HttpResponse(content=test_file)
+             response['Content-Type'] = 'application/pdf'
+             original_filename = str(wr) + u".pdf"
+             filename_header = 'filename*=UTF-8\'\'%s' % urllib.parse.quote(original_filename.encode('utf-8'))
+             response['Content-Disposition'] = "attachment; " + filename_header
+             return response
+        else:
+            command = 'unoconv --format pdf ' + tmpPath + tempName+'.docx'
+            print(command)
+            os.system(command)
+            test_file = open(tmpPath +tempName+ ".pdf", 'rb')
+            response = HttpResponse(content=test_file)
+            response['Content-Type'] = 'application/pdf'
+            original_filename = str(wr) + u".pdf"
+            filename_header = 'filename*=UTF-8\'\'%s' % urllib.parse.quote(original_filename.encode('utf-8'))
+            response['Content-Disposition'] = "attachment; " + filename_header
+            return response'''
 
-       # if (str(sys.platform)=="win32") or (str(sys.platform)=="win64"):
-            #pythoncom.CoInitialize()
-            #word = client.DispatchEx("Word.Application")
-            #worddoc = word.Documents.Open(tmpPath+"tmp.docx")
-            #worddoc.SaveAs(tmpPath+"tmp.pdf", FileFormat=17)
-            #worddoc.Close()
-            #test_file = open(tmpPath+"tmp.pdf", 'rb')
-            #response = HttpResponse()
-            #response['Content-Type'] = 'application/pdf'
-            # original_filename = str(wr) + u".pdf"
-            #  filename_header = 'filename*=UTF-8\'\'%s' % urllib.parse.quote(original_filename.encode('utf-8'))
-            # response['Content-Disposition'] = "attachment; " + filename_header
-           # return response
-        #else:
 
-
-        # original_filename = str(wr) + u".pdf"
-        #  filename_header = 'filename*=UTF-8\'\'%s' % urllib.parse.quote(original_filename.encode('utf-8'))
-        # response['Content-Disposition'] = "attachment; " + filename_header

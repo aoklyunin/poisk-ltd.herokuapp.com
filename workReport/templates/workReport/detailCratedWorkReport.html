@@ -137,8 +137,8 @@ padding: 5px;
     </table>
 
     <div align="center">
-        <a href="/constructors/formReport/" class="btn btn-default">Назад</a>
-        <a href='/constructors/delete/{{eq_id}}/' class="btn btn-danger"
+        <a href="/workReport/formReport/" class="btn btn-default">Назад</a>
+        <a href='/workReport/delete/{{pk}}/' class="btn btn-danger"
            onclick="YNconfirm(); return false;">Удалить</a>
         <input align="center" class="btn btn-primary" type="submit" value="Сохранить" class="button"/>
     </div>
@@ -195,6 +195,15 @@ padding: 5px;
 
 </script>
 
+<script>
+
+    function YNconfirm() {
+ if (window.confirm('Вы уверены, что хотите удалить?'))
+ {
+   window.location.href = '/workReport/delete/{{pk}}/';
+ }
+}
+</script>
 
 {% endblock %}
 

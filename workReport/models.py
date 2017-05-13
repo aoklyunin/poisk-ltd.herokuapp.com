@@ -119,6 +119,10 @@ class WorkReport(models.Model):
     STATE_CLOSED = 4
     STATE_OTK_ACCEPTED = 5
 
+    def genfactWorkPart(self):
+        for wp in self.workPart.all():
+            self.factWorkPart.add(wp)
+
     def generateAcceptanceData(self):
         arr = []
         for ph in self.planHardware.all().order_by('equipment'):
