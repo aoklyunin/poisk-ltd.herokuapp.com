@@ -138,6 +138,8 @@ def detailEquipment(request, eq_id):
             eq.save()
         equipment_formset = EquipmentFormset(request.POST, request.FILES, prefix='equipment')
         eq.addFromFormset(equipment_formset, True)
+        gen_formset = EquipmentFormset(request.POST, request.FILES, prefix='gen')
+        eq.addGenEquipmentFromFormset(gen_formset, True)
 
     ef = EquipmentConstructorForm(instance=Equipment.objects.get(pk=eq_id), initial={'scheme': eq.getSchemeChoices()},
                                   prefix="main_form")
@@ -146,6 +148,7 @@ def detailEquipment(request, eq_id):
   #  print(eq.generateDataFromNeedStructs())
   #  print( EquipmentFormset(initial=eq.generateDataFromNeedStructs(), prefix='equipment'))
     c = {'equipment_formset': EquipmentFormset(initial=eq.generateDataFromNeedStructs(), prefix='equipment'),
+         'gen_formset': EquipmentFormset(initial=eq.generateDataFromGenEquipment(), prefix='gen'),
          'login_form': LoginForm(),
          'one': '1',
          'form': ef,

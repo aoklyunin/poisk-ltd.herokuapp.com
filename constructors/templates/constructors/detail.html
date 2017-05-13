@@ -57,10 +57,10 @@
     </table>
 
     {{ equipment_formset.management_form }}
+{{ gen_formset.management_form }}
 
-    <h2 align="center"> Зависит от: </h2>
-
-
+    <table><tr><td  valign ="top">
+          <h2 align="center"> Зависит от: </h2>
     <table cellspacing="3" cellpadding="7" width="90%" align="center">
         <thead>
         <tr>
@@ -78,6 +78,32 @@
         {% endfor %}
         <div class="placeForAddBtn"></div>
     </table>
+    </td>
+    {% ifequal tsw eqType %}
+<td valign ="top">
+
+
+    <h2 align="center"> Производит: </h2>
+    <table cellspacing="3" cellpadding="7" width="90%" align="center">
+        <thead>
+        <tr>
+            <td align="center">Оснастка</td>
+            <td align="center">Количество</td>
+        </tr>
+        </thead>
+        <tr></tr>
+        {% for link_form in gen_formset %}
+        <tr class="gen_formset">
+            <td valign="top">{% bootstrap_field link_form.equipment %}</td>
+            <td valign="top" width="20%">{% bootstrap_field link_form.cnt %}</td>
+        </tr>
+
+        {% endfor %}
+        <div class="placeForAddBtn"></div>
+    </table>
+        </td>
+     {% endifequal %}
+        </tr></table>
     <div align="center">
         <a href="/constructors/tehnology/" class="btn btn-default">Назад</a>
         <a href='/constructors/delete/{{eq_id}}/'  class="btn btn-danger" onclick="YNconfirm(); return false;">Удалить</a>
@@ -101,7 +127,12 @@
 
     });
 
+$('.gen_formset').formset({
+        addText: 'Добавить',
+        deleteText: 'Удалить',
+        prefix:'gen',
 
+    });
 
 </script>
 <script>

@@ -53,6 +53,9 @@ class Equipment(models.Model):
     duration = models.FloatField(default=0, null=True, blank=True)
     # поставщикик
     providers = models.ManyToManyField(Provider)
+    # оборудование, получаемое в ходе работ
+    genEquipment = models.ManyToManyField(NeedStruct, blank=True, default=None,
+                                        related_name="genEquipment12")
 
     def getSchemeChoices(self):
         lst = []
@@ -63,6 +66,14 @@ class Equipment(models.Model):
     def generateDataFromNeedStructs(self):
         arr = []
         for ns in self.needStruct.all():
+            if (ns.equipment != None):
+                arr.append({'equipment': str(ns.equipment.pk),
+                            'cnt': str(ns.cnt)})
+        return arr
+
+    def generateDataFromGenEquipment(self):
+        arr = []
+        for ns in self.genEquipment.all():
             if (ns.equipment != None):
                 arr.append({'equipment': str(ns.equipment.pk),
                             'cnt': str(ns.cnt)})
@@ -88,6 +99,27 @@ class Equipment(models.Model):
     def __unicode__(self):
         return self.name + "(" + self.dimension + ")"
 
+
+    def addGenEquipmentFromFormset(self, formset, doCrear=False):
+        if (doCrear):
+            for ns in self.genEquipment.all():
+                ns.delete()
+            self.genEquipment.clear()
+
+        if formset.is_valid():
+            for form in formset.forms:
+                if form.is_valid:
+                    try:
+                        d = form.cleaned_data
+                        ns = NeedStruct.objects.create(equipment=Equipment.objects.get(pk=int(d["equipment"])),
+                                                       cnt=float(d["cnt"]))
+                        ns.save()
+                        self.genEquipment.add(ns)
+                    except:
+                        print("ошибка работы формы из формсета gen-equipment")
+                else:
+                    print("for is not valid")
+
     def addFromFormset(self, formset, doCrear=False):
         if (doCrear):
             for ns in self.needStruct.all():
@@ -97,15 +129,14 @@ class Equipment(models.Model):
         if formset.is_valid():
             for form in formset.forms:
                 if form.is_valid:
-                    d = form.cleaned_data
-                    if (len(d) > 0) and  ("cnt" in d) and (float(d["cnt"])>0) and\
-                            (("equipment" in d) and (not d["equipment"] is None) and (d["equipment"] != self)):
-
+                    try:
+                        d = form.cleaned_data
                         ns = NeedStruct.objects.create(equipment=Equipment.objects.get(pk=int(d["equipment"])),
-                                                   cnt=float(d["cnt"]))
-                        print(ns)
+                                                        cnt=float(d["cnt"]))
                         ns.save()
                         self.needStruct.add(ns)
+                    except:
+                        print("ошибка работы формы из формсета gen-equipment")
                 else:
                     print("for is not valid")
 
