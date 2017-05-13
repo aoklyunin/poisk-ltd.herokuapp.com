@@ -136,7 +136,7 @@ class Equipment(models.Model):
                         ns.save()
                         self.needStruct.add(ns)
                     except:
-                        print("ошибка работы формы из формсета gen-equipment")
+                        print("ошибка работы формы из формсета need-equipment")
                 else:
                     print("for is not valid")
 
