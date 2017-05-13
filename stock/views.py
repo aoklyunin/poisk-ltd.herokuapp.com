@@ -270,12 +270,54 @@ def deleteProvider(request, provider_id):
 
 
 
-
-# главная страница раздела нарядов
-def equipment(request, area_id):
+# список поставщиков
+def equipment(request):
+    if request.method == "POST":
+        # форма редактирования оборудования
+        eq_form = ProviderSingleForm(request.POST, prefix='eq_form')
+        # если форма заполнена корректно
+        if eq_form.is_valid():
+            pr = Provider.objects.get(pk=int(eq_form.cleaned_data['provider']))
+            return HttpResponseRedirect('/stock/detailProvider/' + str(pr.pk) + '/')
     c = {
         'login_form': LoginForm(),
-        'it': InfoText.objects.get(pageName="stock_index"),
+        'eq_form': ProviderSingleForm(prefix="eq_form"),
+        'form': AddProviderForm(prefix="main_form"),
         'area_id': Area.objects.first().pk,
     }
     return render(request, "stock/equipment.html", c)
+
+# создать поставщика
+def createEquipment(request):
+    if request.method == "POST":
+        # форма редактирования оборудования
+        eq_form = AddProviderForm(request.POST, prefix='main_form')
+        # если форма заполнена корректно
+        if eq_form.is_valid():
+            pr = Provider.objects.create(name = eq_form.cleaned_data['name'])
+            return HttpResponseRedirect('/stock/detailProvider/' + str(pr.pk) + '/')
+
+    return HttpResponseRedirect('/stock/providers/')
+
+
+# детализация поставщика
+def detailEquipment(request, provider_id):
+    provider = Provider.objects.get(pk = provider_id)
+    if request.method == 'POST':
+        provider_form = ProviderForm(request.POST, request.FILES, prefix='equipment')
+        if provider_form.is_valid():
+            Provider.objects.filter(pk=provider_id).update(**provider_form.cleaned_data)
+
+
+    c = {'form': ProviderForm(instance=provider, prefix='equipment'),
+         'login_form': LoginForm(),
+         'provider_id': provider_id,
+         'area_id': Area.objects.first().pk,
+         }
+    return render(request, "stock/detailProvider.html", c)
+
+
+
+def deleteEquipment(request, provider_id):
+    Provider.objects.filter(pk=provider_id).delete()
+    return HttpResponseRedirect('/stock/providers/')
