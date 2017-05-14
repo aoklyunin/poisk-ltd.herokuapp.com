@@ -282,7 +282,7 @@ def printReport(request, tp, workReport_id):
         return response
     else:
         return HttpResponseRedirect('/workReport/')
-
+        # недоделанная часть с ченерацией pdf
         '''tempName = "t1"
         tmpPath = str(settings.PROJECT_ROOT) + "\\tempFiles\\"
         document.save(tmpPath + tempName+".doc")

@@ -16,7 +16,8 @@ def index(request):
     c = {
         'area_id': Area.objects.first().pk,
         'login_form': LoginForm(),
-        'it': InfoText.objects.get(pageName="constructor_index")
+        'it': InfoText.objects.get(pageName="constructor_index"),
+        'pageTitleHeader': 'Конструкторам',
     }
     return render(request, "constructors/index.html", c)
 
@@ -48,18 +49,23 @@ def stockBalance(request, area_id):
             if len(lst) > 0:
                 # формируем страницу со списком
                 c = {
-                    'area_id': int(area_id),  # иначе не сравнить с id площадки при переборе
                     'login_form': LoginForm(),
                     'lst': lst,
-                    'areas': Area.objects.all().order_by('name'),
+                    'area_id': int(area_id),
+                    'pageTitle': 'Конструкторам',
+                    'pageHeader': 'Конструкторам',
                 }
                 return render(request, "constructors/stockList.html", c)
 
     c = {
         'area_id': int(area_id),  # иначе не сравнить с id площадки при переборе
         'areas': Area.objects.all().order_by('name'),
+        'curPageLink': "/constructors/stock_balance/",
         'login_form': LoginForm(),
-        'form': EquipmentListWithoutSWForm(prefix="main_form")
+        'chooseForm': EquipmentListWithoutSWForm(prefix="main_form"),
+        'pageTitleHeader': 'Конструкторам',
+        'chooseHeader': 'Выберите оборудование, баланс которого на сладе надо отобразить',
+        'chooseHints': [{"id": "equipment", "text": "Выберите оборудование"}]
     }
     return render(request, "constructors/stockBalance.html", c)
 
@@ -79,7 +85,9 @@ def tehnology(request):
         'eq_form': EquipmentConstructorSingleForm(prefix="eq_form"),
         'form': AddEquipmentForm(prefix="main_form"),
         'area_id': Area.objects.first().pk,
-
+        'pageTitleHeader': 'Конструкторам',
+        'chooseHeader': 'Выберите оборудование, которое Вы хотите поменять',
+        'chooseHints': [{"id": "equipment", "text": "Выберите оборудование"}]
     }
     return render(request, "constructors/tehnology.html", c)
 
@@ -145,8 +153,8 @@ def detailEquipment(request, eq_id):
                                   prefix="main_form")
     ef.fields["equipmentType"].initial = eq.equipmentType
 
-  #  print(eq.generateDataFromNeedStructs())
-  #  print( EquipmentFormset(initial=eq.generateDataFromNeedStructs(), prefix='equipment'))
+    #  print(eq.generateDataFromNeedStructs())
+    #  print( EquipmentFormset(initial=eq.generateDataFromNeedStructs(), prefix='equipment'))
     c = {'equipment_formset': EquipmentFormset(initial=eq.generateDataFromNeedStructs(), prefix='equipment'),
          'gen_formset': EquipmentFormset(initial=eq.generateDataFromGenEquipment(), prefix='gen'),
          'login_form': LoginForm(),

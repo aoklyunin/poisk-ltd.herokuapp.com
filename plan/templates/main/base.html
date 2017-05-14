@@ -1,0 +1,193 @@
+{# Подгружаем статические файлы #}
+{% load staticfiles %}
+
+{# Подгружаем модули#}
+{% load bootstrap3 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% bootstrap_messages %}
+{% load crispy_forms_tags %}
+
+{% comment %}
+    Список переменных на странице:
+    1) pageTitle  - заголовок страницы
+    2) pageHeader - заголовок на странице
+    3) pageTitleHeader - если есть эта переменная, то задаются оба заголовка
+    4) areas - список площадок производства
+    5) curPageLink - адрес текущей страницы
+    6) area_id - id текущей страницы
+    7) chooseHints - массив словарей с ключами: id и text
+{% endcomment %}
+
+
+<html>
+<head>
+    <title>
+        {% block title %}
+            {% if pageTitleHeader %}
+                {{pageTitleHeader}}
+            {% else %}
+                {{pageTitle|default:"НПО Поиск" }}
+            {%endif%}
+        {% endblock %}
+    </title>
+
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-css/1.4.6/select2-bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
+
+    <style>
+        td {
+            padding: 5px;
+        }
+        {% block style_block %}
+
+        {%  endblock %}
+    </style>
+
+
+</head>
+
+
+<body>
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">НПО Поиск</a>
+        </div>
+
+        <div class="navbar-collapse collapse" id="main-menu">
+            <ul class="nav navbar-nav">
+                 <li><a href="/workReport/" class="btn">Наряды</a></li>
+                 <li><a href="/orders/list/0/" class="btn">Заказы</a></li>
+                 <li><a href="/stock/" class="btn">Склад</a></li>
+                 <li><a href="/constructors/" class="btn">Конструкторам</a></li>
+                 <li><a href="/otk/report/list/0/" class="btn">ОТК</a></li>
+                {% if user.is_authenticated == False %}
+
+                {% else %}
+
+                {% endif %}
+            </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                {% if user.is_authenticated == False %}
+                <li>
+                    <form class="navbar-form" role="form" action="/../../." method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            {% bootstrap_field login_form.username %}
+                        </div>
+                        <div class="form-group">
+                            {% bootstrap_field login_form.password %}
+                        </div>
+                        <button type="submit" class="btn">Вход</button>
+                    </form>
+                </li>
+                <li><a href="../../../register/" class="btn">Регистрация</a></li>
+
+                {% else %}
+                <li><a href="../../../logout/" class="btn">Выйти</a></li>
+                {% endif %}
+            </ul>
+
+        </div><!--/.navbar-collapse -->
+
+    </div>
+</div>
+
+
+<!-- Main jumbotron for a primary marketing message or call to action -->
+<div class="jumbotron">
+    <div class="container">
+        <br>
+        <h1>
+            {% if pageTitleHeader %}
+                {{pageTitleHeader}}
+            {% else %}
+                {{pageHeader|default:"НПО Поиск"}}
+            {%endif%}
+
+        </h1>
+
+        {% if user.is_authenticated == False %}
+            <p>Для доступа к системе Вам надо войти или зарегистрироваться</p>
+        {% else %}
+            {% block content %}
+
+            {% endblock %}
+        {% endif %}
+    </div>
+
+</div>
+
+{% if user.is_authenticated == True %}
+<div class="btn-group btn-group-justified">
+    {% block navigating %}{% endblock %}
+</div>
+<br>
+{% if areas %}
+<div class="btn-group centering" >
+    {% for area in areas %}
+        <a href="{{curPageLink}}{{area.pk}}/" class="btn
+        {% ifnotequal area_id area.pk %}btn-default {%else%}btn-info {%endifnotequal%} ">{{area.name}}</a>
+    {% endfor %}
+</div>
+{% endif %}
+{% block sub_content %}{% endblock %}
+
+{% block error_messages %}
+<div class="container">
+    {% if messages %}
+    <div class="row">
+        <div class="col-sm-6 col-sm-offset-3">
+            {% for message in messages %}
+            <div {% if message.tags %} class="alert {{ message.tags }}" {% endif %}>
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% endif %}
+
+    {% block script_block %}
+
+    {%  endblock %}
+
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"
+        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script src="/templates/bootstrap/js/bootstrap.js"></script>
+    <script src="/templates/bootstrap/js/jquery.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function (){
+            {% for chooseHint in chooseHints %}
+           $("#{{chooseHint.id}}").select2({
+             allowClear:true,
+             placeholder: '{{chooseHint.text}}'
+           });
+           {% endfor%}
+        })
+
+    </script>
+
+  <script type="text/javascript">
+          $(".beautiful-select").select2();
+    </script>
+</body>
+
+
+</html>

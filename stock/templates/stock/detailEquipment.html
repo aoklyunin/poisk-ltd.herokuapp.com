@@ -27,8 +27,8 @@
 <a href="/stock/wrExtradition/{{area_id}}/" class="btn btn-default">Выдача по наряду</a>
 <a href="/stock/wrAcceptance/{{area_id}}/" class="btn btn-default">Приёмка по наряду</a>
 <a href="/stock/acceptance/{{area_id}}/" class="btn btn-default">Поставка</a>
-<a href="/stock/providers/" class="btn btn-info">Поставщики</a>
-<a href="/stock/equipment/" class="btn btn-default">Оборудование</a>
+<a href="/stock/providers/" class="btn btn-default">Поставщики</a>
+<a href="/stock/equipment/" class="btn btn-info">Оборудование</a>
 {% endblock %}
 
 
@@ -42,14 +42,17 @@
     <table width="40%" align="center">
         <tr>
             <td>{% bootstrap_field form.name %} </td>
-            <td>{% bootstrap_field form.mail %} </td>
+            <td>{% bootstrap_field form.equipmentType %} </td>
         </tr>
         <tr>
-            <td>{% bootstrap_field form.contactPerson %} </td>
-            <td>{% bootstrap_field form.tel %} </td>
+            <td>{% bootstrap_field form.dimension %} </td>
+            <td>{% bootstrap_field form.code %} </td>
         </tr>
         <tr>
-            <td colspan="2">{% bootstrap_field form.comment %} </td>
+            <td colspan="2">{% bootstrap_field form.scheme %} </td>
+             </tr>
+        <tr>
+            <td colspan="2">{% bootstrap_field form.providers %} </td>
         </tr>
     </table>
 
@@ -99,9 +102,9 @@ $('.gen_formset').formset({
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
 <script>
         $(document).ready(function (){
-           $("#disease").select2({
+           $("#disease3").select2({
              allowClear:true,
-             placeholder: 'Поиск оборудования'
+             placeholder: 'Поиск поставщиков'
            });
                $("#disease2").select2({
              allowClear:true,

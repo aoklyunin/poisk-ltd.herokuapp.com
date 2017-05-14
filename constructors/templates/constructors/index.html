@@ -1,33 +1,12 @@
-{% extends "plan/base.html" %}
+{% extends "main/index.html" %}
+{# Подгружаем статические файлы #}
 {% load staticfiles %}
-{# Load the tag library #}
+
+{# Подгружаем модули#}
 {% load bootstrap3 %}
-{% load crispy_forms_tags %}
-{% load crispy_forms_tags %}
-{# Load CSS and JavaScript #}
 {% bootstrap_css %}
 {% bootstrap_javascript %}
 {% bootstrap_messages %}
-
-{% block style_block %}
-    .centering{
-        text-align: center;
-    }
-    td {
-    padding: 5px;
-    }
-{% endblock %}
-
-{% block title %}НПО Поиск{% endblock %}
-
-{% block content %}
-<h1>Конструкторам</h1>
-{% if user.is_authenticated == False %}
-<p>Для доступа к системе Вам надо войти или зарегистрироваться</p>
-{% else %}
-
-{% endif %}
-{% endblock %}
 
 {% block navigating %}
 <a href="/constructors/" class="btn btn-info">Главная</a>
@@ -35,24 +14,4 @@
 
 <a href="/constructors/tehnology/" class="btn btn-default">Технология</a>
 <a href="/constructors/shemes/" class="btn btn-default">Чертежи</a>
-{% endblock %}
-
-{% block sub_content %}
-<br><br>
-    <table width="70%" align="center">
-    <tr><td >
-        <div class="panel panel-primary ">
-            <div class="panel-heading">{{it.caption}}</div>
-            <div class="panel-body"  align="justify">
-                <H3>{{ it.text }}</H3>
-                {{ it.subText |linebreaks }}
-            </div>
-        </div>
-    </td></tr>
-    </table>
-
-
-{% endblock %}
-
-{% block error_messages %}
 {% endblock %}

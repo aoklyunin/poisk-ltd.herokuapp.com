@@ -1,0 +1,33 @@
+{% extends "main/base.html" %}
+{# Подгружаем статические файлы #}
+{% load staticfiles %}
+
+{# Подгружаем модули#}
+{% load bootstrap3 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% bootstrap_messages %}
+
+{% comment %}
+    Список переменных на странице:
+    1) it - объект
+{% endcomment %}
+
+
+{% block sub_content %}
+<br><br>
+    <table width="70%" align="center">
+    <tr><td >
+        <div class="panel panel-primary ">
+            <div class="panel-heading">{{it.caption}}</div>
+            <div class="panel-body"  align="justify">
+                <H3>{{ it.text }}</H3>
+                {{ it.subText |linebreaks }}
+            </div>
+        </div>
+    </td></tr>
+    </table>
+{% endblock %}
+
+{% block error_messages %}
+{% endblock %}

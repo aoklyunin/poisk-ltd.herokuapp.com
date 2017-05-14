@@ -11,7 +11,8 @@ from constructors.models import Equipment, StockStruct
 from plan.forms import LoginForm, subdict
 from plan.models import Area, InfoText
 from stock.form import StockReadyReportSingleForm, StockLeaveReportSingleForm, StockLeaveReportForm, \
-    StockEquipmentListForm, StockEquipmentCntForm, ProviderSingleForm, AddProviderForm, ProviderForm
+    StockEquipmentListForm, StockEquipmentCntForm, ProviderSingleForm, AddProviderForm, ProviderForm, \
+    EquipmentStockSingleForm, EquipmentStockForm, AddStockEquipmentForm
 from stock.models import MoveEquipment, Provider
 from plan.forms import RequiredFormSet
 
@@ -234,6 +235,7 @@ def providers(request):
     }
     return render(request, "stock/providers.html", c)
 
+
 # создать поставщика
 def createProvider(request):
     if request.method == "POST":
@@ -241,7 +243,7 @@ def createProvider(request):
         eq_form = AddProviderForm(request.POST, prefix='main_form')
         # если форма заполнена корректно
         if eq_form.is_valid():
-            pr = Provider.objects.create(name = eq_form.cleaned_data['name'])
+            pr = Provider.objects.create(name=eq_form.cleaned_data['name'])
             return HttpResponseRedirect('/stock/detailProvider/' + str(pr.pk) + '/')
 
     return HttpResponseRedirect('/stock/providers/')
@@ -249,12 +251,11 @@ def createProvider(request):
 
 # детализация поставщика
 def detailProvider(request, provider_id):
-    provider = Provider.objects.get(pk = provider_id)
+    provider = Provider.objects.get(pk=provider_id)
     if request.method == 'POST':
         provider_form = ProviderForm(request.POST, request.FILES, prefix='equipment')
         if provider_form.is_valid():
             Provider.objects.filter(pk=provider_id).update(**provider_form.cleaned_data)
-
 
     c = {'form': ProviderForm(instance=provider, prefix='equipment'),
          'login_form': LoginForm(),
@@ -269,55 +270,70 @@ def deleteProvider(request, provider_id):
     return HttpResponseRedirect('/stock/providers/')
 
 
-
 # список поставщиков
 def equipment(request):
     if request.method == "POST":
         # форма редактирования оборудования
-        eq_form = ProviderSingleForm(request.POST, prefix='eq_form')
+        eq_form = EquipmentStockSingleForm(request.POST, prefix='eq_form')
         # если форма заполнена корректно
         if eq_form.is_valid():
-            pr = Provider.objects.get(pk=int(eq_form.cleaned_data['provider']))
-            return HttpResponseRedirect('/stock/detailProvider/' + str(pr.pk) + '/')
+            pr = Equipment.objects.get(pk=int(eq_form.cleaned_data['provider']))
+            return HttpResponseRedirect('/stock/detailEquipment/' + str(pr.pk) + '/')
     c = {
         'login_form': LoginForm(),
-        'eq_form': ProviderSingleForm(prefix="eq_form"),
-        'form': AddProviderForm(prefix="main_form"),
+        'eq_form': EquipmentStockSingleForm(prefix="eq_form"),
+        'form': AddStockEquipmentForm(prefix="main_form"),
         'area_id': Area.objects.first().pk,
     }
     return render(request, "stock/equipment.html", c)
 
+
 # создать поставщика
 def createEquipment(request):
     if request.method == "POST":
-        # форма редактирования оборудования
-        eq_form = AddProviderForm(request.POST, prefix='main_form')
+        # форма добавления оборужования
+        form = AddStockEquipmentForm(request.POST, prefix='main_form')
         # если форма заполнена корректно
-        if eq_form.is_valid():
-            pr = Provider.objects.create(name = eq_form.cleaned_data['name'])
-            return HttpResponseRedirect('/stock/detailProvider/' + str(pr.pk) + '/')
+        if form.is_valid():
+            d = {"name": form.cleaned_data["name"], "equipmentType": form.cleaned_data["tp"],
+                 "dimension":"шт."}
 
-    return HttpResponseRedirect('/stock/providers/')
+            eq = Equipment.objects.create()
+            for area in Area.objects.all():
+                s = StockStruct.objects.create(area=area)
+                eq.stockStruct.add(s)
+            eq.save()
+            Equipment.objects.filter(pk=eq.pk).update(**d)
+            return HttpResponseRedirect('/stock/detailEquipment/' + str(eq.pk) + '/')
+    return HttpResponseRedirect('/stock/equipment/')
 
 
 # детализация поставщика
-def detailEquipment(request, provider_id):
-    provider = Provider.objects.get(pk = provider_id)
+def detailEquipment(request, equipment_id):
+    equipment = Equipment.objects.get(pk=equipment_id)
     if request.method == 'POST':
-        provider_form = ProviderForm(request.POST, request.FILES, prefix='equipment')
-        if provider_form.is_valid():
-            Provider.objects.filter(pk=provider_id).update(**provider_form.cleaned_data)
+        eqipement_form = EquipmentStockForm(request.POST, request.FILES, prefix='equipment')
+        print(eqipement_form)
+        if eqipement_form.is_valid():
+            print("yes")
+            d = eqipement_form.cleaned_data
+            equipment.equipmentType = d['equipmentType']
+            equipment.name = d['name']
+            equipment.dimension = d['dimension']
+            equipment.code = d['code']
+            equipment.save()
+            equipment.saveProvidersAndShemes(eqipement_form)
 
-
-    c = {'form': ProviderForm(instance=provider, prefix='equipment'),
+    ef = EquipmentStockForm(instance=equipment, prefix="equipment")
+    ef.fields["equipmentType"].initial = equipment.equipmentType
+    c = {'form': ef,
          'login_form': LoginForm(),
-         'provider_id': provider_id,
+         'provider_id': equipment_id,
          'area_id': Area.objects.first().pk,
          }
-    return render(request, "stock/detailProvider.html", c)
+    return render(request, "stock/detailEquipment.html", c)
 
 
-
-def deleteEquipment(request, provider_id):
-    Provider.objects.filter(pk=provider_id).delete()
-    return HttpResponseRedirect('/stock/providers/')
+def deleteEquipment(request, equipment_id):
+    Equipment.objects.filter(pk=equipment_id).delete()
+    return HttpResponseRedirect('/stock/equipment/')

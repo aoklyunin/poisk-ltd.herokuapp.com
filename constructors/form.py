@@ -75,7 +75,7 @@ class EquipmentListForm(Form):
     def __init__(self, *args, **kwargs):
         super(EquipmentListForm, self).__init__(*args, **kwargs)
         self.fields['equipment'].choices = getEquipment()
-        self.fields['equipment'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['equipment'].widget.attrs['class'] = 'beautiful-select'
         self.fields['equipment'].widget.attrs['id'] = 'disease'
 
 
@@ -86,8 +86,8 @@ class EquipmentListWithoutSWForm(Form):
     def __init__(self, *args, **kwargs):
         super(EquipmentListWithoutSWForm, self).__init__(*args, **kwargs)
         self.fields['equipment'].choices = getEquipmentWithoutSW()
-        self.fields['equipment'].widget.attrs['class'] = 'js-example-basic-multiple'
-        self.fields['equipment'].widget.attrs['id'] = 'disease'
+        self.fields['equipment'].widget.attrs['class'] = 'beautiful-select'
+        self.fields['equipment'].widget.attrs['id'] = 'equipment'
 
 
 # форма для выбора нескольких объектов оборудования без стандартных работ
@@ -98,7 +98,7 @@ class EquipmentCntWithoutSWForm(Form):
     def __init__(self, *args, **kwargs):
         super(EquipmentCntWithoutSWForm, self).__init__(*args, **kwargs)
         self.fields['equipment'].choices = getEquipmentWithoutSW()
-        self.fields['equipment'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['equipment'].widget.attrs['class'] = 'beautiful-select'
         self.fields['equipment'].widget.attrs['id'] = 'disease'
         self.fields['equipment'].initial = None
         self.fields['cnt'].initial = 0
@@ -112,7 +112,7 @@ class EquipmentSingleForm(Form):
     def __init__(self, *args, **kwargs):
         super(EquipmentSingleForm, self).__init__(*args, **kwargs)
         self.fields['equipment'].choices = getEquipment()
-        self.fields['equipment'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['equipment'].widget.attrs['class'] = 'beautiful-select'
         self.fields['equipment'].widget.attrs['id'] = 'disease'
 
 
@@ -124,7 +124,7 @@ class EquipmentSingleWithCtnForm(Form):
     def __init__(self, *args, **kwargs):
         super(EquipmentSingleWithCtnForm, self).__init__(*args, **kwargs)
         self.fields['equipment'].choices = getEquipment()
-        self.fields['equipment'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['equipment'].widget.attrs['class'] = 'beautiful-select'
         self.fields['equipment'].widget.attrs['id'] = 'disease'
 
         self.fields['equipment'].initial = None
@@ -140,7 +140,7 @@ class EquipmentConstructorSingleForm(Form):
     def __init__(self, *args, **kwargs):
         super(EquipmentConstructorSingleForm, self).__init__(*args, **kwargs)
         self.fields['equipment'].choices = getConstructorEquipment()
-        self.fields['equipment'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['equipment'].widget.attrs['class'] = 'beautiful-select'
         self.fields['equipment'].widget.attrs['id'] = 'disease'
 
 
@@ -199,7 +199,7 @@ class EquipmentConstructorForm(ModelForm):
             Field('needVIK', wrapper_class='i-checks'),
         )
         self.fields['scheme'].choices = getShemes()
-        self.fields['scheme'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['scheme'].widget.attrs['class'] = 'beautiful-select'
         self.fields['scheme'].widget.attrs['id'] = 'disease2'
 
 
@@ -236,7 +236,7 @@ class SchemeForm(ModelForm):
             Field('link', css_class='col-sm-2'),
         )
         #   self.fields['author'].choices = getWorkers()
-        self.fields['author'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['author'].widget.attrs['class'] = 'beautiful-select'
         self.fields['author'].widget.attrs['id'] = 'disease2'
         self.fields['code'].widget.attrs['placeholder'] = 'Шифр'
         self.fields['link'].widget.attrs['placeholder'] = 'Ссылка'
@@ -249,5 +249,5 @@ class SchemeSingleForm(Form):
     def __init__(self, *args, **kwargs):
         super(SchemeSingleForm, self).__init__(*args, **kwargs)
         self.fields['scheme'].choices = getShemes()
-        self.fields['scheme'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['scheme'].widget.attrs['class'] = 'beautiful-select'
         self.fields['scheme'].widget.attrs['id'] = 'disease'

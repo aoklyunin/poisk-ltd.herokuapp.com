@@ -90,7 +90,8 @@
 <div class="jumbotron">
     <div class="container">
 
-        {% block content %}{% endblock %}
+        {% block content %}
+        {% endblock %}
     </div>
 
 </div>
@@ -98,6 +99,8 @@
 <div class="btn-group btn-group-justified">
     {% block navigating %}{% endblock %}
 </div>
+
+{% block sub_content %}{% endblock %}
 
 {% block error_messages %}
 <div class="container">
@@ -116,7 +119,7 @@
 {% endblock %}
 
 
-{% block sub_content %}{% endblock %}
+
 
 </body>
 

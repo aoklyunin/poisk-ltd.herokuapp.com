@@ -41,7 +41,7 @@ class Equipment(models.Model):
     # тип
     equipmentType = models.IntegerField(default=0)
     # чертёж
-    scheme = models.ManyToManyField(Scheme, blank=True)
+    scheme = models.ManyToManyField(Scheme, blank=True, null=True)
     # склад
     stockStruct = models.ManyToManyField(StockStruct, blank=True, default=None)
     # нужно ли ОТК
@@ -52,7 +52,7 @@ class Equipment(models.Model):
     # длительность
     duration = models.FloatField(default=0, null=True, blank=True)
     # поставщикик
-    providers = models.ManyToManyField(Provider)
+    providers = models.ManyToManyField(Provider, blank=True, null=True, default=None,)
     # оборудование, получаемое в ходе работ
     genEquipment = models.ManyToManyField(NeedStruct, blank=True, default=None,
                                         related_name="genEquipment12")
@@ -99,6 +99,19 @@ class Equipment(models.Model):
     def __unicode__(self):
         return self.name + "(" + self.dimension + ")"
 
+
+    def saveProvidersAndShemes(self, form):
+        if form.is_valid():
+
+            self.scheme.clear()
+            for scheme in form.cleaned_data["scheme"]:
+                self.scheme.add(scheme)
+
+            self.providers.clear()
+            for provider in form.cleaned_data["providers"]:
+                self.providers.add(provider)
+
+            self.save()
 
     def addGenEquipmentFromFormset(self, formset, doCrear=False):
         if (doCrear):
@@ -160,6 +173,9 @@ class Equipment(models.Model):
     CONSTRUCTOR_ENABLED = [
         2, 3, 4
     ]
+    STOCK_ENABLED = [
+        0, 1
+    ]
     # формируем список для конструкторов
     CONSTRUCTOR_CHOICES = []
     for i in CONSTRUCTOR_ENABLED:
@@ -168,6 +184,9 @@ class Equipment(models.Model):
     CHOICES = []
     for i in range(EQUIPMENT_TYPE_COUNT):
         CHOICES.append((str(i), EQUIPMENT_LABELS[i]))
-
+    # формируем список для склада
+    STOCK_CHOICES = []
+    for i in STOCK_ENABLED:
+        STOCK_CHOICES.append((str(i), EQUIPMENT_LABELS[i]))
     class Meta:
         ordering = ['name']

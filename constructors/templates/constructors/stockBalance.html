@@ -1,33 +1,13 @@
-{% extends "plan/base.html" %}
+{% extends "main/choosePage.html" %}
+{# Подгружаем статические файлы #}
 {% load staticfiles %}
-{# Load the tag library #}
+
+{# Подгружаем модули#}
 {% load bootstrap3 %}
-{% load crispy_forms_tags %}
-{% load crispy_forms_tags %}
-{# Load CSS and JavaScript #}
 {% bootstrap_css %}
 {% bootstrap_javascript %}
 {% bootstrap_messages %}
 
-{% block style_block %}
-    .centering{
-        text-align: center;
-    }
-    td {
-    padding: 5px;
-    }
-{% endblock %}
-
-{% block title %}НПО Поиск{% endblock %}
-
-{% block content %}
-<h1>Конструкторам</h1>
-{% if user.is_authenticated == False %}
-<p>Для доступа к системе Вам надо войти или зарегистрироваться</p>
-{% else %}
-
-{% endif %}
-{% endblock %}
 
 {% block navigating %}
 <a href="/constructors/" class="btn btn-default">Главная</a>
@@ -37,61 +17,3 @@
 <a href="/constructors/shemes/" class="btn btn-default">Чертежи</a>
 {% endblock %}
 
-{% block sub_content %}
-<br>
-
-
-<div class="btn-group centering" >
-    {% for area in areas %}
-        <a href="/constructors/stock_balance/{{area.pk}}/" class="btn
-        {% ifnotequal area_id area.pk %}btn-default {%else%}btn-info {%endifnotequal%} ">{{area.name}}</a>
-    {% endfor %}
-</div>
-
-<br>
-<H3 align="center"> Выберите оборудование, баланс которого на сладе надо отобразить</H3>
-<br>
-
- <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
-    <link rel="stylesheet" type="text/css"
-          href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-css/1.4.6/select2-bootstrap.css">
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
-    <style>
-        .js-example-basic-multiple{
-            width: 70%;  position: relative;top: 220px; left: 182px;
-         }
-
-    </style>
-
-<script type="text/javascript">
-          $(".js-example-basic-multiple").select2();
-</script>
-
-
-<br>
-
-<form method="post" align="center">
-    {% csrf_token %}
-    {{ form.management_form }}
-    {{ form}}
-     <input align="center" class="btn btn-primary" type="submit" value="Показать" class="button"/>
-</form>
-
-
-<script src="https://code.jquery.com/jquery-3.1.1.min.js"
-        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
-<script>
-        $(document).ready(function (){
-           $("#disease").select2({
-             allowClear:true,
-             placeholder: 'Поиск оборудования'
-           });
-        })
-
-</script>
-
-{% endblock %}
-
-{% block error_messages %}
-{% endblock %}

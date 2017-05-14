@@ -35,25 +35,75 @@
 <a href="/stock/wrExtradition/{{area_id}}/" class="btn btn-default">Выдача по наряду</a>
 <a href="/stock/wrAcceptance/{{area_id}}/" class="btn btn-default">Приёмка по наряду</a>
 <a href="/stock/acceptance/{{area_id}}/" class="btn btn-default">Поставка</a>
-<a href="/stock/providers/" class="btn btn-info">Поставщики</a>
-<a href="/stock/equipment/" class="btn btn-default">Оборудование</a>
-
+<a href="/stock/providers/" class="btn btn-default">Поставщики</a>
+<a href="/stock/equipment/" class="btn btn-info">Оборудование</a>
 {% endblock %}
 
 {% block sub_content %}
-<br><br>
-    <table width="70%" align="center">
-    <tr><td >
-        <div class="panel panel-primary ">
-            <div class="panel-heading">{{it.caption}}</div>
-            <div class="panel-body"  align="justify">
-                <H3>{{ it.text }}</H3>
-                {{ it.subText |linebreaks }}
-            </div>
-        </div>
-    </td></tr>
-    </table>
+<br>
 
+{# блок площадок #}
+<div class="btn-group centering" >
+    {% for area in areas %}
+        <a href="/constructors/stock_balance/{{area.pk}}/" class="btn
+        {% ifnotequal area_id area.pk %}btn-default {%else%}btn-info {%endifnotequal%} ">{{area.name}}</a>
+    {% endfor %}
+</div>
+
+<form method="post" align="center" width="90%" action="/stock/createEquipment/">
+     {% csrf_token %}
+    {{ form.management_form }}
+<table align="center" width="40%">
+    <tr>
+        <td> {%  bootstrap_field form.name %}</td>
+        <td> {%  bootstrap_field form.tp %}</td>
+        <td width="30%" align="center" valign="top">
+            <input class="btn btn-primary" type="submit" value="Создать" class="button"/>
+        </td>
+    </tr>
+</table>
+</form>
+
+<br>
+<H3 align="center"> Выберите оборудование для редактирования</H3>
+ <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-css/1.4.6/select2-bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
+    <style>
+        .js-example-basic-multiple{
+            width: 50%;  position: relative;top: 220px; left: 182px;
+         }
+    </style>
+
+<script type="text/javascript">
+          $(".js-example-basic-multiple").select2();
+</script>
+
+
+<br>
+
+<form method="post" align="center" action="">
+    {% csrf_token %}
+
+    {{ eq_form.management_form }}
+    {{ eq_form}}
+     <input align="center" class="btn btn-primary" type="submit" value="Редактировать" class="button"/>
+</form>
+
+
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"
+        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+<script>
+        $(document).ready(function (){
+           $("#disease").select2({
+             allowClear:true,
+             placeholder: 'Поиск оборудования'
+           });
+        })
+
+</script>
 
 {% endblock %}
 

@@ -1,33 +1,13 @@
-{% extends "plan/base.html" %}
+{% extends "main/base.html" %}
+{# Подгружаем статические файлы #}
 {% load staticfiles %}
-{# Load the tag library #}
+
+{# Подгружаем модули#}
 {% load bootstrap3 %}
-{% load crispy_forms_tags %}
-{% load crispy_forms_tags %}
-{# Load CSS and JavaScript #}
 {% bootstrap_css %}
 {% bootstrap_javascript %}
 {% bootstrap_messages %}
 
-{% block style_block %}
-    .centering{
-        text-align: center;
-    }
-    td {
-    padding: 5px;
-    }
-{% endblock %}
-
-{% block title %}НПО Поиск{% endblock %}
-
-{% block content %}
-<h1>Конструкторам</h1>
-{% if user.is_authenticated == False %}
-<p>Для доступа к системе Вам надо войти или зарегистрироваться</p>
-{% else %}
-
-{% endif %}
-{% endblock %}
 
 {% block navigating %}
 <a href="/constructors/" class="btn btn-default">Главная</a>
@@ -38,33 +18,20 @@
 {% endblock %}
 
 {% block sub_content %}
-<br>
 
-
-<div class="btn-group centering" >
-    {% for area in areas %}
-        <a href="/constructors/stock_balance/{{area.pk}}/" class="btn
-        {% ifnotequal area_id area.pk %}btn-default {%else%}btn-info {%endifnotequal%} ">{{area.name}}</a>
-    {% endfor %}
-</div>
-<br><br>
-<table width="60%" align="center">
-    <thead>
-        <td><b>Оборудование</b></td>
-        <td><b>Кол-во</b></td>
-    </thead>
-{%for l in lst %}
-    <tr>
-
-        <td>{{l|first}}</td>
-        <td>{{l|last}}</td>
-
-    </tr>
-{%endfor%}
+    <br><br>
+    <table width="60%" align="center">
+        <thead>
+            <td><b>Оборудование</b></td>
+            <td><b>Кол-во</b></td>
+        </thead>
+        {%for l in lst %}
+            <tr>
+                <td>{{l|first}}</td>
+                <td>{{l|last}}</td>
+            </tr>
+        {%endfor%}
     </table>
-<br>
-<a align="center" href="/constructors/stock_balance/{{area_id}}/" class="btn btn-default">Назад</a>
-{% endblock %}
-
-{% block error_messages %}
+    <br>
+    <a align="center" href="/constructors/stock_balance/{{area_id}}/" class="btn btn-default">Назад</a>
 {% endblock %}

@@ -165,6 +165,15 @@ class AddProviderForm(Form):
         super(AddProviderForm, self).__init__(*args, **kwargs)
 
 
+# форма для добавления новых изделий
+class AddEquipmentForm(Form):
+    name = CharField(max_length=10000, label="",
+                     widget=TextInput(attrs={'placeholder': 'Название оборудования'}))
+
+    def __init__(self, *args, **kwargs):
+        super(AddEquipmentForm, self).__init__(*args, **kwargs)
+
+
 # олучить список чертежей
 def getProviders():
     providers = []
@@ -221,3 +230,65 @@ class ProviderForm(ModelForm):
         self.fields['contactPerson'].required = False
         self.fields['tel'].required = False
         self.fields['comment'].required = False
+
+
+# форма для выбора изделия для редактирования  конструктором
+class EquipmentStockSingleForm(Form):
+    equipment = ChoiceField(label="")
+
+    def __init__(self, *args, **kwargs):
+        super(EquipmentStockSingleForm, self).__init__(*args, **kwargs)
+        self.fields['equipment'].choices = getStockEquipment()
+        self.fields['equipment'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['equipment'].widget.attrs['id'] = 'disease'
+
+
+# форма оборудования
+class EquipmentStockForm(ModelForm):
+    equipmentType = ChoiceField(label='Тип')
+
+    class Meta:
+        model = Equipment
+        fields = {'name', 'dimension', 'code', 'scheme', 'providers'}
+        widgets = {
+            'name': TextInput(attrs={'placeholder': 'Изделие'}),
+            'dimension': TextInput(attrs={'placeholder': 'шт.'}),
+        }
+
+        labels = {
+            'name': 'Название',
+            'dimension': 'Ед. измерения',
+            'code': 'Шифр',
+            'scheme': 'Чертежи',
+            'providers': 'Поставщики',
+        }
+
+        error_messages = {
+            'name': {'invalid': '', 'invalid_choice': ''},
+            'duration': {'required': ''},
+        }
+
+    def __init__(self, *args, **kwargs):
+        # first call parent's constructor
+        super(EquipmentStockForm, self).__init__(*args, **kwargs)
+        # there's a `fields` property now
+        self.fields['scheme'].required = False
+        self.fields['providers'].required = False
+        self.fields['code'].required = False
+        self.fields['equipmentType'].choices = Equipment.STOCK_CHOICES
+        self.fields['scheme'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['scheme'].widget.attrs['id'] = 'disease2'
+
+        self.fields['providers'].widget.attrs['class'] = 'js-example-basic-multiple'
+        self.fields['providers'].widget.attrs['id'] = 'disease3'
+
+
+# форма для добавления новых изделий
+class AddStockEquipmentForm(Form):
+    name = CharField(max_length=10000, label="",
+                     widget=TextInput(attrs={'placeholder': 'Изделие'}))
+    tp = ChoiceField(label="")
+
+    def __init__(self, *args, **kwargs):
+        super(AddStockEquipmentForm, self).__init__(*args, **kwargs)
+        self.fields['tp'].choices = Equipment.STOCK_CHOICES
