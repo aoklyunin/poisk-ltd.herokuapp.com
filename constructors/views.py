@@ -52,8 +52,7 @@ def stockBalance(request, area_id):
                     'login_form': LoginForm(),
                     'lst': lst,
                     'area_id': int(area_id),
-                    'pageTitle': 'Конструкторам',
-                    'pageHeader': 'Конструкторам',
+                    'pageTitleHeader': 'Конструкторам',
                 }
                 return render(request, "constructors/stockList.html", c)
 
@@ -65,7 +64,6 @@ def stockBalance(request, area_id):
         'chooseForm': EquipmentListWithoutSWForm(prefix="main_form"),
         'pageTitleHeader': 'Конструкторам',
         'chooseHeader': 'Выберите оборудование, баланс которого на сладе надо отобразить',
-        'chooseHints': [{"id": "equipment", "text": "Выберите оборудование"}]
     }
     return render(request, "constructors/stockBalance.html", c)
 
@@ -82,12 +80,12 @@ def tehnology(request):
             return HttpResponseRedirect('/constructors/detail/' + str(eq.pk) + '/')
     c = {
         'login_form': LoginForm(),
-        'eq_form': EquipmentConstructorSingleForm(prefix="eq_form"),
-        'form': AddEquipmentForm(prefix="main_form"),
+        'chooseForm': EquipmentConstructorSingleForm(prefix="eq_form"),
+        'creationForm': AddEquipmentForm(prefix="main_form"),
         'area_id': Area.objects.first().pk,
         'pageTitleHeader': 'Конструкторам',
         'chooseHeader': 'Выберите оборудование, которое Вы хотите поменять',
-        'chooseHints': [{"id": "equipment", "text": "Выберите оборудование"}]
+        'creationUrl': '/constructors/addEquipment/'
     }
     return render(request, "constructors/tehnology.html", c)
 
@@ -164,6 +162,8 @@ def detailEquipment(request, eq_id):
          'tsw': Equipment.TYPE_STANDART_WORK,
          'eq_id': eq_id,
          'area_id': Area.objects.first().pk,
+         'formsetNames': ['equipment', 'gen'],
+         'pageTitleHeader': 'Конструкторам',
          }
     return render(request, "constructors/detail.html", c)
 
@@ -190,8 +190,10 @@ def shemes(request):
         'schs': Scheme.objects.all(),
         'one': '1',
         'addForm': SchemeForm(prefix="add-scheme"),
-        'singleForm': SchemeSingleForm(prefix="single-scheme"),
+        'chooseForm': SchemeSingleForm(prefix="single-scheme"),
         'area_id': Area.objects.first().pk,
+        'pageTitleHeader': 'Конструкторам',
+        'chooseHeader': 'Выберите чертёж, который Вы хотите редактировать',
     })
 
 
@@ -231,4 +233,5 @@ def shemeDetail(request, sh_id):
         'login_form': LoginForm(),
         'form': SchemeForm(instance=Scheme.objects.get(pk=sh_id)),
         'area_id': Area.objects.first().pk,
+        'pageTitleHeader': 'Конструкторам',
     })

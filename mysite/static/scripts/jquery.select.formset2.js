@@ -216,13 +216,13 @@
                 if (options.added) options.added(row);
 
                 $(document).ready(function (){
-                    $("#disease").select2({
+                    $("#equipment").select2({
                         allowClear:true,
                         placeholder: 'Поиск оборудования'
                     });
                 })
-                $(".js-example-basic-multiple").select2();
-
+                $(".beautiful-select").select2();
+                aler('asd');
                 return false;
             });
         }

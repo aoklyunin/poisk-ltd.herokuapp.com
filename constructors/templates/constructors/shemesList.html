@@ -1,25 +1,13 @@
-{% extends "plan/base.html" %}
+{% extends "main/choosePage.html" %}
+{# Подгружаем статические файлы #}
 {% load staticfiles %}
-{# Load the tag library #}
+
+{# Подгружаем модули#}
 {% load bootstrap3 %}
-{% load crispy_forms_tags %}
-{% load crispy_forms_tags %}
-{# Load CSS and JavaScript #}
 {% bootstrap_css %}
 {% bootstrap_javascript %}
 {% bootstrap_messages %}
-
-
-{% block title %}НПО Поиск{% endblock %}
-
-{% block content %}
-<h1>Конструкторам</h1>
-{% if user.is_authenticated == False %}
-<p>Для доступа к системе Вам надо войти или зарегистрироваться</p>
-{% else %}
-
-{% endif %}
-{% endblock %}
+Z
 
 {% block navigating %}
 <a href="/constructors/" class="btn btn-default">Главная</a>
@@ -29,10 +17,9 @@
 <a href="/constructors/shemes/" class="btn btn-info">Чертежи</a>
 {% endblock %}
 
+{% block creationForm %}
+    <br>
 
-{% block sub_content %}
-
-<br>
 <form method="post" action="/constructors/addSheme/">
      {% csrf_token %}
       {{  addForm.management_form }}
@@ -45,62 +32,11 @@
         <td valign= "top"> <input  align="center" class="btn btn-primary" type="submit" value="Добавить Чертёж" class="button"/></td>
     </tr>
 </table>
-
-
-</form>
-
-<br>
-<br>
-
-<H3 align="center"> Выберите, что нужно редактировать</H3>
- <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
-    <link rel="stylesheet" type="text/css"
-          href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-css/1.4.6/select2-bootstrap.css">
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
-    <style>
-        #disease{
-            width: 50%;  position: relative;top: 220px; left: 182px;
-         }
-
-    </style>
-
-<script type="text/javascript">
-          $(".js-example-basic-multiple").select2();
-</script>
-
-
-<br>
-
-<form method="post" align="center" action="/constructors/shemes/">
-    {% csrf_token %}
-    {{ singleForm.management_form }}
-    {{ singleForm}}
-     <input align="center" class="btn btn-primary" type="submit" value="Редактировать" class="button"/>
 </form>
 
 
-<script src="https://code.jquery.com/jquery-3.1.1.min.js"
-        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
-<script>
-        $(document).ready(function (){
-           $("#disease").select2({
-             allowClear:true,
-             placeholder: 'Поиск чертежа'
-           });
-        })
-$(document).ready(function (){
-           $("#disease2").select2({
-             allowClear:true,
-             placeholder: 'Поиск сотрудника'
-           });
-        })
-
-</script>
+    {% endblock %}
 
 
-{% endblock %}
 
 
-{% block error_messages %}
-{% endblock %}

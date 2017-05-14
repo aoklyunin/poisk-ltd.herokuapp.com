@@ -1,4 +1,4 @@
-{% extends "plan/base.html" %}
+{% extends "main/base.html" %}
 {% load staticfiles %}
 {# Load the tag library #}
 {% load bootstrap3 %}
@@ -9,18 +9,6 @@
 {% bootstrap_javascript %}
 {% bootstrap_messages %}
 
-
-{% block title %}НПО Поиск{% endblock %}
-
-{% block content %}
-<h1>Конструкторам</h1>
-{% if user.is_authenticated == False %}
-<p>Для доступа к системе Вам надо войти или зарегистрироваться</p>
-{% else %}
-
-{% endif %}
-{% endblock %}
-
 {% block navigating %}
 <a href="/constructors/" class="btn btn-default">Главная</a>
 <a href="/constructors/stock_balance/{{area_id}}/" class="btn btn-default">Баланс на складе</a>
@@ -29,16 +17,15 @@
 <a href="/constructors/shemes/" class="btn btn-info">Чертежи</a>
 {% endblock %}
 
-
 {% block sub_content %}
 
 <br>
 <br>
 <br>
-<form method="post">
+<form method="post" >
      {% csrf_token %}
 
-<table align="center" width="80%">
+<table align="center" width="80%" >
       <tr>
         <td align="center">Составил</td>
         <td align="center">Шифр</td>
@@ -55,43 +42,6 @@
 
 </form>
 
-<br>
-<br>
-<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
-    <link rel="stylesheet" type="text/css"
-          href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-css/1.4.6/select2-bootstrap.css">
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
-    <style>
-        #disease{
-            width: 50%;  position: relative;top: 220px; left: 182px;
-         }
-
-    </style>
-
-<script type="text/javascript">
-          $(".js-example-basic-multiple").select2();
-</script>
-
-
-
-
-<script src="https://code.jquery.com/jquery-3.1.1.min.js"
-        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
-<script>
-        $(document).ready(function (){
-           $("#disease2").select2({
-             allowClear:true,
-             placeholder: 'Поиск чертежа'
-           });
-        })
-
-</script>
-
-
 
 {% endblock %}
 
-
-{% block error_messages %}
-{% endblock %}

@@ -17,6 +17,7 @@
     5) curPageLink - адрес текущей страницы
     6) area_id - id текущей страницы
     7) chooseHints - массив словарей с ключами: id и text
+    8) formsetData - массив словарей с ключами: className и prefix
 {% endcomment %}
 
 
@@ -36,6 +37,9 @@
     <link rel="stylesheet" type="text/css"
           href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-css/1.4.6/select2-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
+    <link rel="stylesheet" type="text/css" href="bootstrap.min.css">
+
+
 
     <style>
         td {
@@ -171,22 +175,40 @@
     <script src="/templates/bootstrap/js/jquery.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
     <script>
         $(document).ready(function (){
-            {% for chooseHint in chooseHints %}
-           $("#{{chooseHint.id}}").select2({
-             allowClear:true,
-             placeholder: '{{chooseHint.text}}'
-           });
-           {% endfor%}
+            $(".beautiful-select").select2();
+            {% if chooseHint %}
+                {% for chooseHint in chooseHints %}
+                    $("#{{chooseHint.id}}").select2({
+                    allowClear:true,
+                    placeholder: '{{chooseHint.text}}'
+                });
+                {% endfor%}
+            {%else%}
+                 $("#equipment").select2({
+                    allowClear:true,
+                    placeholder: 'Поиск'
+                 });
+            {%endif %}
         })
-
     </script>
 
-  <script type="text/javascript">
-          $(".beautiful-select").select2();
-    </script>
+
+
+<script src="{% static '/scripts/jquery.select.formset2.js' %}"></script>
+<script>
+
+    {% for name in formsetNames%}
+        $('.{{name}}-formset').formset({
+            addText: 'Добавить',
+            deleteText: 'Удалить',
+            prefix:'{{name}}',
+        });
+    {%endfor%}
+
+</script>
+
 </body>
 
 

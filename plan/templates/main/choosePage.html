@@ -15,7 +15,7 @@
     1) chooseForm  - форма выбора объекта/объектов из списка
     2) chooseLabel - текст на кнопке выбора
     3) chooseHeader - заголовок выбора
-
+    4) creationForm - форма для создания
 {% endcomment %}
 
 
@@ -28,19 +28,26 @@
 {%  endblock %}
 
 {% block sub_content %}
+
+    {% block creationForm %}
+
+    {% endblock %}
+
+    {% block chooseForm %}
     <br>
     <H3 align="center">{{chooseHeader}}</H3>
     <br>
     <br>
 
-    <form method="post" align="center">
+    <form method="post" align="center" action=".">
         {% csrf_token %}
         {{ chooseForm.management_form }}
+        <div align="center">
         {{ chooseForm}}
         <input align="center" class="btn btn-primary" type="submit" value="{{chooseLabel|default:"Выбрать"}}" class="button"/>
+            </div>
     </form>
-
-
+    {% endblock %}
 {% endblock %}
 
 

@@ -1,4 +1,4 @@
-{% extends "main/choosePage.html" %}
+{% extends "main/choosePageNameTp.html" %}
 {# Подгружаем статические файлы #}
 {% load staticfiles %}
 {# Подгружаем модули#}
@@ -14,69 +14,4 @@
 
 <a href="/constructors/tehnology/" class="btn btn-info">Технология</a>
 <a href="/constructors/shemes/" class="btn btn-default">Чертежи</a>
-{% endblock %}
-
-{% block sub_content %}
-<br>
-
-<form method="post" align="center" width="90%" action="/constructors/addEquipment/">
-     {% csrf_token %}
-    {{ form.management_form }}
-<table align="center" width="90%">
-    <tr>
-        <td> {%  bootstrap_field form.name %}</td>
-        <td>{%  bootstrap_field form.tp %}</td>
-        <td width="10%" align="center" valign="top">
-            <input class="btn btn-primary" type="submit" value="Создать" class="button"/>
-        </td>
-        <td width="40%"> </td>
-    </tr>
-</table>
-</form>
-
-<br>
-<H3 align="center"> </H3>
-
-
- <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
-    <link rel="stylesheet" type="text/css"
-          href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-css/1.4.6/select2-bootstrap.css">
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
-    <style>
-        .js-example-basic-multiple{
-            width: 50%;  position: relative;top: 220px; left: 182px;
-         }
-    </style>
-
-<script type="text/javascript">
-          $(".js-example-basic-multiple").select2();
-</script>
-
-
-<br>
-
-<form method="post" align="center" action="/constructors/tehnology/">
-    {% csrf_token %}
-    {{ eq_form.management_form }}
-    {{ eq_form}}
-     <input align="center" class="btn btn-primary" type="submit" value="Редактировать" class="button"/>
-</form>
-
-
-<script src="https://code.jquery.com/jquery-3.1.1.min.js"
-        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
-<script>
-        $(document).ready(function (){
-           $("#disease").select2({
-             allowClear:true,
-             placeholder: 'Поиск оборудования'
-           });
-        })
-
-</script>
-
-{% endblock %}
-
-{% block error_messages %}
 {% endblock %}

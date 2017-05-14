@@ -125,7 +125,7 @@ class EquipmentSingleWithCtnForm(Form):
         super(EquipmentSingleWithCtnForm, self).__init__(*args, **kwargs)
         self.fields['equipment'].choices = getEquipment()
         self.fields['equipment'].widget.attrs['class'] = 'beautiful-select'
-        self.fields['equipment'].widget.attrs['id'] = 'disease'
+        self.fields['equipment'].widget.attrs['id'] = 'equipment'
 
         self.fields['equipment'].initial = None
         self.fields['cnt'].initial = 0
@@ -141,7 +141,7 @@ class EquipmentConstructorSingleForm(Form):
         super(EquipmentConstructorSingleForm, self).__init__(*args, **kwargs)
         self.fields['equipment'].choices = getConstructorEquipment()
         self.fields['equipment'].widget.attrs['class'] = 'beautiful-select'
-        self.fields['equipment'].widget.attrs['id'] = 'disease'
+        self.fields['equipment'].widget.attrs['id'] = 'equipment'
 
 
 # форма для добавления новых изделий
@@ -237,7 +237,7 @@ class SchemeForm(ModelForm):
         )
         #   self.fields['author'].choices = getWorkers()
         self.fields['author'].widget.attrs['class'] = 'beautiful-select'
-        self.fields['author'].widget.attrs['id'] = 'disease2'
+        self.fields['author'].widget.attrs['id'] = 'equipment'
         self.fields['code'].widget.attrs['placeholder'] = 'Шифр'
         self.fields['link'].widget.attrs['placeholder'] = 'Ссылка'
 
@@ -250,4 +250,4 @@ class SchemeSingleForm(Form):
         super(SchemeSingleForm, self).__init__(*args, **kwargs)
         self.fields['scheme'].choices = getShemes()
         self.fields['scheme'].widget.attrs['class'] = 'beautiful-select'
-        self.fields['scheme'].widget.attrs['id'] = 'disease'
+        self.fields['scheme'].widget.attrs['id'] = 'equipment'

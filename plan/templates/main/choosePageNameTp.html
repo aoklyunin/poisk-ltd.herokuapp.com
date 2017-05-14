@@ -1,0 +1,36 @@
+{% extends "main/choosePage.html" %}
+{# Подгружаем статические файлы #}
+{% load staticfiles %}
+
+{# Подгружаем модули#}
+{% load bootstrap3 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% bootstrap_messages %}
+{% load crispy_forms_tags %}
+
+{% comment %}
+    Список переменных на странице:
+    1) creationUrl - адрес создания элемента
+{% endcomment %}
+
+
+{% block creationForm %}
+    <br>
+    <form method="post" align="center" width="90%" action="{{creationUrl}}">
+        {% csrf_token %}
+        {{ creationForm.management_form }}
+        <table align="center" width="90%">
+            <tr>
+                <td> {% bootstrap_field creationForm.name %}</td>
+                <td> {% bootstrap_field creationForm.tp %}</td>
+                <td width="10%" align="center" valign="top">
+                <input class="btn btn-primary" type="submit" value="Создать" class="button"/>
+                </td>
+                <td width="40%"> </td>
+            </tr>
+        </table>
+    </form>
+    {% endblock %}
+
+
