@@ -3,9 +3,12 @@ import datetime
 import time
 from django.db import models
 
-from constructors.models import NeedStruct, Equipment
+from constructors.models import NeedStruct, Equipment, Scheme
+#from nop.models import WorkPlace
+from nop.models import WorkPlace, Area, Worker
 from orders.models import Order
-from plan.models import Agreement, Scheme, WorkerPosition, WorkPlace, Rationale, Worker, Area
+from plan.models import Agreement, WorkerPosition, Rationale
+
 from plan.models import Customer
 from stock.models import MoveEquipment
 from workReport.workReportGenerator import generateReport

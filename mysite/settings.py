@@ -105,6 +105,8 @@ INSTALLED_APPS = (
     'constructors',
     'myTest',
     'otk',
+    'zgi',
+    'nop',
 )
 
 from django.contrib.messages import constants as messages

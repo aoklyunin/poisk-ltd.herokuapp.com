@@ -1,12 +1,7 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import models
 
-# Create your models here.
-from constructors.models import NeedStruct
-from plan.models import Agreement, Customer
-
+from plan.models import Customer, Agreement
 
 
 class Order(models.Model):
@@ -31,11 +26,10 @@ class Order(models.Model):
     # дата по плану
     planDate = models.DateField('date plan')
     # необходимые объекты для данной работы
-    needStruct = models.ManyToManyField(NeedStruct, blank=True, default=None)
+    needStruct = models.ManyToManyField('constructors.NeedStruct', blank=True, default=None)
 
     def __str__(self):
         return self.name
 
     def __unicode__(self):
         return self.name
-

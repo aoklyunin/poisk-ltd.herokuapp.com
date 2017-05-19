@@ -4,11 +4,23 @@ from __future__ import unicode_literals
 from django.db import models
 
 # Create your models here.
-from plan.models import WorkerPosition, Scheme, Area
-
-
-# Что хранится на складе
+#from nop.models import WorkPlace
+from nop.models import WorkPlace, Worker, Area
 from stock.models import Provider
+
+class Scheme(models.Model):
+    # автор
+    author = models.ForeignKey(Worker)
+    # шифр
+    code = models.CharField(max_length=1000)
+    # ссылка
+    link = models.CharField(max_length=100)
+
+    def __unicode__(self):
+        return self.code+" : "+str(self.author)
+
+    def __str__(self):
+        return self.code + " : " + str(self.author)
 
 
 class StockStruct(models.Model):
@@ -56,6 +68,7 @@ class Equipment(models.Model):
     # оборудование, получаемое в ходе работ
     genEquipment = models.ManyToManyField(NeedStruct, blank=True, default=None,
                                         related_name="genEquipment12")
+    workPlaces = models.ManyToManyField(WorkPlace, blank=True, default=None)
 
     def getSchemeChoices(self):
         lst = []

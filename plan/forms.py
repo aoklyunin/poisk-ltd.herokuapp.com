@@ -58,12 +58,6 @@ class RegisterForm(forms.Form):
     patronymic = forms.CharField(widget=forms.Textarea(attrs={'rows': 1, 'cols': 20, 'placeholder': 'Иванович'}),
                                  label="Отчество")
 
-    # должность
-    position = forms.ModelMultipleChoiceField(queryset=WorkerPosition.objects.all())
-
-    # аттестации
-    attestation = forms.ModelMultipleChoiceField(queryset=Attestation.objects.all(), required=False)
-
     # фамилия
     tnumber = forms.IntegerField(widget=forms.Textarea(attrs={'rows': 1, 'cols': 20, 'placeholder': '112'}),
                                  label="Табельный номер")

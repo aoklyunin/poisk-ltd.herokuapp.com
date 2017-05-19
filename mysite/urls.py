@@ -21,7 +21,6 @@ urlpatterns = [
     url(r'^register/$', plan.auth.register),
     url(r'^register/$', plan.auth.register),
     url(r'^otk/$', include('otk.urls')),
-    url(r'^orders/list/$', plan.views.orderList),
     url(r'^test/', include('myTest.urls')),
     url(r'^', plan.auth.index, name='index'),
 

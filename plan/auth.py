@@ -21,8 +21,6 @@ def register(request):
         if form.is_valid():
             data = {'username': form.cleaned_data["username"],
                     'patronymic': form.cleaned_data["patronymic"],
-                    'position': form.cleaned_data["position"],
-                    'attestation': form.cleaned_data["attestation"],
                     'mail': form.cleaned_data["mail"],
                     'name': form.cleaned_data["name"],
                     'second_name': form.cleaned_data["second_name"],
@@ -59,10 +57,6 @@ def register(request):
                 # создаём студента
                 w = Worker.objects.create(user=user, patronymic=form.cleaned_data["patronymic"],
                                           tnumber=form.cleaned_data["tnumber"])
-                for pos in form.cleaned_data["position"]:
-                    w.position.add(pos)
-                for at in form.cleaned_data["attestation"]:
-                    w.attestation.add(at)
                 # сохраняем студента
                 w.save()
                 return HttpResponseRedirect("/")
@@ -73,7 +67,8 @@ def register(request):
         # возвращаем простое окно регистрации
         return render(request, "plan/register.html", {
             'form': RegisterForm(),
-            'login_form': LoginForm()
+            'login_form': LoginForm(),
+            'pageTitleHeader': 'Регистрация',
         })
 
 

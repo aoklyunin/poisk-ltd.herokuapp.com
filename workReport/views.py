@@ -14,7 +14,7 @@ from django.forms import formset_factory, BaseFormSet
 from constructors.form import EquipmentCntWithoutSWForm
 from constructors.models import Equipment
 from plan.forms import LoginForm
-from plan.models import Area, InfoText
+from plan.models import InfoText
 from workReport.forms import ReportForm, WorkPartForm, CreatedReportSingleForm, \
     CloseReportSingleForm
 from workReport.models import WorkReport, WorkPart,  Worker, \

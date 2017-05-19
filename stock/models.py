@@ -6,7 +6,7 @@ import datetime
 
 from django.db import models
 
-from plan.models import Area
+from nop.models import Area
 
 
 class MoveEquipment(models.Model):

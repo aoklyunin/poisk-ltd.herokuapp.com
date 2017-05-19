@@ -6,9 +6,10 @@ from django.shortcuts import render
 
 from constructors.form import SchemeForm, EquipmentListForm, EquipmentConstructorSingleForm, AddEquipmentForm, \
     EquipmentSingleWithCtnForm, SchemeSingleForm, EquipmentListWithoutSWForm, EquipmentConstructorForm
+from nop.models import Area
 from plan.forms import LoginForm, subdict
-from plan.models import Area, Scheme, InfoText
-from .models import StockStruct, Equipment
+from plan.models import InfoText
+from .models import StockStruct, Equipment, Scheme
 
 
 # главная страница конструкторского отдела
@@ -75,7 +76,6 @@ def tehnology(request):
         eq_form = EquipmentConstructorSingleForm(request.POST, prefix='eq_form')
         # если форма заполнена корректно
         if eq_form.is_valid():
-            print(eq_form.cleaned_data)
             eq = Equipment.objects.get(pk=int(eq_form.cleaned_data['equipment']))
             return HttpResponseRedirect('/constructors/detail/' + str(eq.pk) + '/')
     c = {
@@ -101,10 +101,13 @@ def addEquipment(request):
             d["name"] = form.cleaned_data["name"]
             d["equipmentType"] = form.cleaned_data["tp"]
             eq = Equipment.objects.create()
-            if d["equipmentType"] == Equipment.TYPE_STANDART_WORK:
+
+            if int(form.cleaned_data["tp"]) == Equipment.TYPE_STANDART_WORK:
                 d["dimension"] = "час"
+                d["duration"] = 1
             else:
                 d["dimension"] = "шт."
+
             for area in Area.objects.all():
                 s = StockStruct.objects.create(area=area)
                 eq.stockStruct.add(s)

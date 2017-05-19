@@ -4,8 +4,7 @@ from crispy_forms.layout import Layout, Field
 from django.forms import ModelForm, Form, MultipleChoiceField, ModelMultipleChoiceField, ChoiceField, ModelChoiceField, \
     TextInput, Textarea, CharField, IntegerField, FloatField
 
-from constructors.models import Equipment
-from plan.models import Scheme
+from constructors.models import Equipment, Scheme
 
 from django.db.models.fields import BLANK_CHOICE_DASH
 

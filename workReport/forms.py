@@ -8,7 +8,9 @@ from django import forms
 from django.forms import ModelForm, BaseFormSet, Form, ChoiceField, FloatField, CharField, TimeField
 
 from constructors.models import Equipment
-from plan.models import Rationale, WorkPlace, Area
+#rom nop.models import WorkPlace
+from nop.models import WorkPlace, Area
+from plan.models import Rationale
 from .models import WorkerPosition, Worker, WorkPart, Reject, NeedStruct, WorkReport
 
 from django.db.models.fields import BLANK_CHOICE_DASH
@@ -46,7 +48,6 @@ def getWorkPlaces():
         reports.append([wr.id, str(wr)])
 
     return reports + BLANK_CHOICE_DASH
-
 
 
 

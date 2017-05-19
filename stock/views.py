@@ -9,7 +9,7 @@ from constructors.form import EquipmentListWithoutSWForm, EquipmentListForm, Equ
     EquipmentSingleWithCtnForm, EquipmentConstructorForm, EquipmentConstructorSingleForm, AddEquipmentForm
 from constructors.models import Equipment, StockStruct
 from plan.forms import LoginForm, subdict
-from plan.models import Area, InfoText
+from plan.models import InfoText
 from stock.form import StockReadyReportSingleForm, StockLeaveReportSingleForm, StockLeaveReportForm, \
     StockEquipmentListForm, StockEquipmentCntForm, ProviderSingleForm, AddProviderForm, ProviderForm, \
     EquipmentStockSingleForm, EquipmentStockForm, AddStockEquipmentForm
