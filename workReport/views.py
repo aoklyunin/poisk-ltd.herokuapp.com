@@ -13,6 +13,7 @@ from django.forms import formset_factory, BaseFormSet
 
 from constructors.form import EquipmentCntWithoutSWForm
 from constructors.models import Equipment
+from nop.models import Area
 from plan.forms import LoginForm
 from plan.models import InfoText
 from workReport.forms import ReportForm, WorkPartForm, CreatedReportSingleForm, \
